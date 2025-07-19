@@ -40,6 +40,6 @@ function SessionsPage() {
   )
 }
 
-export const Route = createFileRoute('/sessions/index')({
+export const Route = createFileRoute('/sessions/')({
   component: SessionsPage,
 })

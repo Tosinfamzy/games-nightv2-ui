@@ -13,6 +13,17 @@ export interface Session extends BaseEntity {
   location?: string
   status: SessionStatus
   gamesMasterId: string
+  joinCode: string
+}
+
+export interface JoinSessionRequest {
+  joinCode: string
+  playerName: string
+}
+
+export interface JoinSessionResponse {
+  session: Session
+  message: string
 }
 
 export enum SessionStatus {

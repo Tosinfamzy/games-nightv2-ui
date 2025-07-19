@@ -1,5 +1,5 @@
 // Get the API URL from environment variables
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 // Custom error class for API errors
 export class APIError extends Error {
@@ -24,8 +24,13 @@ export async function fetchAPI<T>(
 ): Promise<T> {
   const { params, ...init } = config || {}
 
+  // Automatically prepend /v1 if not already present
+  const versionedEndpoint = endpoint.startsWith('/v1/')
+    ? endpoint
+    : `/v1${endpoint}`
+
   // Build URL with query parameters
-  const url = new URL(endpoint, API_URL)
+  const url = new URL(versionedEndpoint, API_URL)
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value)

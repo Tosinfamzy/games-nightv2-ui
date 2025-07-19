@@ -69,6 +69,6 @@ function GamesPage() {
   )
 }
 
-export const Route = createFileRoute('/games/index')({
+export const Route = createFileRoute('/games/')({
   component: GamesPage,
 })

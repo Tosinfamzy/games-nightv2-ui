@@ -1,5 +1,5 @@
 import { fetchAPI } from '../lib/api/client'
-import type { Session } from '../types'
+import type { JoinSessionRequest, JoinSessionResponse, Session } from '../types'
 
 export interface CreateSessionDTO {
   name: string
@@ -11,16 +11,66 @@ export interface CreateSessionDTO {
 
 export interface UpdateSessionDTO extends Partial<CreateSessionDTO> {}
 
+// Demo mode for testing without backend
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false' // Default to true for demo
+
+const demoSessions: Record<string, Session> = {
+  '123456': {
+    id: 'demo-session-1',
+    name: 'Demo Game Night',
+    description: 'A demo session for testing',
+    date: new Date().toISOString(),
+    location: 'Demo Location',
+    status: 'SCHEDULED' as any,
+    gamesMasterId: 'demo-host',
+    joinCode: '123456',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  '999999': {
+    id: 'demo-session-2',
+    name: 'Another Demo Session',
+    description: 'Another demo session for testing',
+    date: new Date().toISOString(),
+    location: 'Demo Location 2',
+    status: 'SCHEDULED' as any,
+    gamesMasterId: 'demo-host-2',
+    joinCode: '999999',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+}
+
 export const sessionService = {
   getAll: () => fetchAPI<Array<Session>>('/sessions'),
 
   getById: (id: string) => fetchAPI<Session>(`/sessions/${id}`),
 
-  create: (data: CreateSessionDTO) =>
-    fetchAPI<Session>('/sessions', {
+  create: (data: CreateSessionDTO) => {
+    if (DEMO_MODE) {
+      // Generate a random join code for demo
+      const joinCode = Math.floor(100000 + Math.random() * 900000).toString()
+      const newSession: Session = {
+        id: crypto.randomUUID(),
+        name: data.name,
+        description: data.description,
+        date: data.date,
+        location: data.location,
+        status: 'SCHEDULED' as any,
+        gamesMasterId: data.gamesMasterId,
+        joinCode,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      // Add to demo sessions for future joins
+      demoSessions[joinCode] = newSession
+      return Promise.resolve(newSession)
+    }
+    return fetchAPI<Session>('/sessions', {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    })
+  },
 
   update: (id: string, data: UpdateSessionDTO) =>
     fetchAPI<Session>(`/sessions/${id}`, {
@@ -47,4 +97,32 @@ export const sessionService = {
     fetchAPI<Session>(`/sessions/${id}/cancel`, {
       method: 'POST',
     }),
+
+  findByJoinCode: (joinCode: string) => {
+    if (DEMO_MODE) {
+      const session = demoSessions[joinCode]
+      if (!session) {
+        return Promise.reject(new Error('Session not found'))
+      }
+      return Promise.resolve(session)
+    }
+    return fetchAPI<Session>(`/sessions/join/${joinCode}`)
+  },
+
+  joinSession: (data: JoinSessionRequest) => {
+    if (DEMO_MODE) {
+      const session = demoSessions[data.joinCode]
+      if (!session) {
+        return Promise.reject(new Error('Session not found'))
+      }
+      return Promise.resolve({
+        session,
+        message: `Welcome ${data.playerName}! You've joined the demo session.`,
+      } as JoinSessionResponse)
+    }
+    return fetchAPI<JoinSessionResponse>('/sessions/join', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
 }
