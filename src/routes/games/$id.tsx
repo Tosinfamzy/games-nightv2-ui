@@ -1,6 +1,6 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useGame, useUpdateGame } from '../../hooks/useGames'
-import { GameStatus } from '../../types'
+import { GameStatus } from '../../lib/api/types'
 
 function GameDetailsPage() {
   const { id } = Route.useParams()
@@ -63,7 +63,7 @@ function GameDetailsPage() {
 
   const getActionButton = () => {
     switch (game.status) {
-      case GameStatus.PENDING:
+      case GameStatus.NOT_STARTED:
         return (
           <button
             onClick={() => handleGameAction(GameStatus.IN_PROGRESS)}
@@ -139,16 +139,10 @@ function GameDetailsPage() {
             <h2 className="font-semibold text-gray-900 mb-2">Game Details</h2>
             <div className="space-y-2 text-sm text-gray-600">
               <p>
-                Players: {game.minPlayers}-{game.maxPlayers} players
-              </p>
-              <p>
                 Round: {game.currentRound} of {game.maxRounds}
               </p>
               <p>Session ID: {game.sessionId}</p>
-              <p>Created: {new Date(game.createdAt).toLocaleDateString()}</p>
-              <p>
-                Last Updated: {new Date(game.updatedAt).toLocaleDateString()}
-              </p>
+              <p>Teams: {game.teams.length}</p>
             </div>
           </div>
 

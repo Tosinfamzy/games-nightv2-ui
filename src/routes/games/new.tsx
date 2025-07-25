@@ -21,9 +21,9 @@ function NewGamePage() {
                 name: formData.get('name') as string,
                 description: formData.get('description') as string,
                 sessionId: formData.get('sessionId') as string,
-                maxPlayers: parseInt(formData.get('maxPlayers') as string, 10),
-                minPlayers: parseInt(formData.get('minPlayers') as string, 10),
                 maxRounds: parseInt(formData.get('maxRounds') as string, 10),
+                scores: [],
+                teams: [],
               })
             }}
             className="space-y-4"

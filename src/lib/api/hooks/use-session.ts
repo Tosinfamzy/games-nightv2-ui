@@ -9,6 +9,7 @@ export interface CreateSessionDTO {
   description?: string
   gamesMasterId: string
   date: string
+  location?: string
 }
 
 export interface UpdateSessionDTO extends Partial<CreateSessionDTO> {

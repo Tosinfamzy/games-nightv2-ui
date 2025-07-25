@@ -37,8 +37,15 @@ class GameService {
     })
   }
 
-  async start(id: UUID): Promise<Game> {
+  async start(id: UUID, teamIds?: Array<string>): Promise<Game> {
     return fetchAPI<Game>(`${this.basePath}/${id}/start`, {
+      method: 'POST',
+      body: teamIds ? JSON.stringify({ teamIds }) : undefined,
+    })
+  }
+
+  async startFirstRound(id: UUID): Promise<Game> {
+    return fetchAPI<Game>(`${this.basePath}/${id}/start-first-round`, {
       method: 'POST',
     })
   }

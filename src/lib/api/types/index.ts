@@ -5,8 +5,17 @@ export type UUID = string
 export interface Session {
   id: UUID
   name: string
+  description?: string
   date: string
+  location?: string
   status: SessionStatus
+  joinCode: string
+  host: {
+    id: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
   createdAt: string
   updatedAt: string
   gamesMasterId: UUID
@@ -14,7 +23,7 @@ export interface Session {
 }
 
 export enum SessionStatus {
-  PLANNED = 'PLANNED',
+  SCHEDULED = 'SCHEDULED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',

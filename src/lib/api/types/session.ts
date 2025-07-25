@@ -3,13 +3,22 @@ import type { BaseEntity } from './common'
 export interface Session extends BaseEntity {
   name: string
   description?: string
+  date: string
+  location?: string
   status: SessionStatus
-  gamesMasterId: string
+  joinCode: string
+  host: {
+    id: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  gamesMasterId?: string
 }
 
 export enum SessionStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
+  SCHEDULED = 'SCHEDULED',
+  IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }

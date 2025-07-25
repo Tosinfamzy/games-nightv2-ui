@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { Game } from '@/types'
+import type { Game } from '../lib/api/types'
 
 interface GameCardProps {
   game: Game
@@ -64,9 +64,7 @@ export function GameCard({ game }: GameCardProps) {
               d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
             ></path>
           </svg>
-          <span>
-            {game.minPlayers}-{game.maxPlayers} players
-          </span>
+          <span>{game.teams.length} teams</span>
         </div>
 
         <div className="flex items-center text-sm text-gray-500">
@@ -85,7 +83,7 @@ export function GameCard({ game }: GameCardProps) {
             ></path>
           </svg>
           <span>
-            Last updated {new Date(game.updatedAt).toLocaleDateString()}
+            Round {game.currentRound} of {game.maxRounds}
           </span>
         </div>
       </div>

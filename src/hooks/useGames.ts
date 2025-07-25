@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { gameService } from '../services/games'
-import type { CreateGameDTO, UpdateGameDTO } from '../services/games'
-import type { Game } from '../types'
+import { gameService } from '../lib/api/services/game.service'
 
 const GAMES_KEY = 'games'
 
@@ -20,28 +18,13 @@ export const useGame = (id: string) => {
   })
 }
 
-export const useGamesBySession = (sessionId: string) => {
-  return useQuery({
-    queryKey: [GAMES_KEY, 'session', sessionId],
-    queryFn: () => gameService.getBySession(sessionId),
-    enabled: Boolean(sessionId),
-  })
-}
-
 export const useCreateGame = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateGameDTO) => gameService.create(data),
-    onSuccess: (newGame) => {
-      queryClient.setQueryData<Array<Game>>([GAMES_KEY], (old = []) => [
-        ...old,
-        newGame,
-      ])
-      queryClient.setQueryData<Array<Game>>(
-        [GAMES_KEY, 'session', newGame.sessionId],
-        (old = []) => [...old, newGame],
-      )
+    mutationFn: gameService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
     },
   })
 }
@@ -50,16 +33,10 @@ export const useUpdateGame = (id: string) => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: UpdateGameDTO) => gameService.update(id, data),
-    onSuccess: (updatedGame) => {
-      queryClient.setQueryData<Game>([GAMES_KEY, id], updatedGame)
-      queryClient.setQueryData<Array<Game>>([GAMES_KEY], (old = []) =>
-        old.map((game) => (game.id === id ? updatedGame : game)),
-      )
-      queryClient.setQueryData<Array<Game>>(
-        [GAMES_KEY, 'session', updatedGame.sessionId],
-        (old = []) => old.map((game) => (game.id === id ? updatedGame : game)),
-      )
+    mutationFn: (data: any) => gameService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY, id] })
     },
   })
 }
@@ -68,31 +45,63 @@ export const useDeleteGame = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => gameService.delete(id),
-    onSuccess: (_, id) => {
-      queryClient.removeQueries({ queryKey: [GAMES_KEY, id] })
-      queryClient.setQueryData<Array<Game>>([GAMES_KEY], (old = []) =>
-        old.filter((game) => game.id !== id),
-      )
+    mutationFn: gameService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
     },
   })
 }
 
-export const useGameAction = (action: 'start' | 'nextRound' | 'complete') => {
+export const useStartGame = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => gameService[action](id),
-    onSuccess: (updatedGame) => {
-      queryClient.setQueryData<Game>([GAMES_KEY, updatedGame.id], updatedGame)
-      queryClient.setQueryData<Array<Game>>([GAMES_KEY], (old = []) =>
-        old.map((game) => (game.id === updatedGame.id ? updatedGame : game)),
-      )
-      queryClient.setQueryData<Array<Game>>(
-        [GAMES_KEY, 'session', updatedGame.sessionId],
-        (old = []) =>
-          old.map((game) => (game.id === updatedGame.id ? updatedGame : game)),
-      )
+    mutationFn: ({
+      gameId,
+      teamIds,
+    }: {
+      gameId: string
+      teamIds?: Array<string>
+    }) => gameService.start(gameId, teamIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
+      queryClient.invalidateQueries({ queryKey: ['teams'] })
+    },
+  })
+}
+
+export const useStartFirstRound = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (gameId: string) => gameService.startFirstRound(gameId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
+      queryClient.invalidateQueries({ queryKey: ['teams'] })
+    },
+  })
+}
+
+export const useNextRound = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (gameId: string) => gameService.nextRound(gameId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
+      queryClient.invalidateQueries({ queryKey: ['teams'] })
+    },
+  })
+}
+
+export const useCompleteGame = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (gameId: string) => gameService.complete(gameId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GAMES_KEY] })
+      queryClient.invalidateQueries({ queryKey: ['teams'] })
     },
   })
 }
