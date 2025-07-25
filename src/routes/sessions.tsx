@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService } from '../services/sessions'
@@ -346,27 +346,74 @@ function SessionsPage() {
         )}
 
         {/* Sessions Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredSessions.map((session) => (
-            <SessionCard
-              key={session.id}
-              session={session}
-              onEdit={setEditingSession}
-              onDelete={(id) => {
-                if (confirm('Are you sure you want to delete this session?')) {
-                  deleteSessionMutation.mutate(id)
-                }
-              }}
-              onStart={(id) => startSessionMutation.mutate(id)}
-              onComplete={(id) => completeSessionMutation.mutate(id)}
-              onCancel={(id) => {
-                if (confirm('Are you sure you want to cancel this session?')) {
-                  cancelSessionMutation.mutate(id)
-                }
-              }}
-              getStatusColor={getStatusColor}
-            />
-          ))}
+        <div className="space-y-6">
+          {/* Session Flow Guide */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4">
+              📋 Session Management Guide
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+              <div className="bg-white p-3 rounded-lg border">
+                <div className="font-medium text-blue-900 mb-1">
+                  1. Create Session
+                </div>
+                <div className="text-blue-700">
+                  Set up basic session details and get join code
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border">
+                <div className="font-medium text-blue-900 mb-1">
+                  2. Players Join
+                </div>
+                <div className="text-blue-700">
+                  Players use join code to enter session
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border">
+                <div className="font-medium text-blue-900 mb-1">
+                  3. Setup Games/Teams
+                </div>
+                <div className="text-blue-700">
+                  Add games and organize teams (optional)
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border">
+                <div className="font-medium text-blue-900 mb-1">
+                  4. Start & Play
+                </div>
+                <div className="text-blue-700">
+                  Begin session and track scores
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredSessions.map((session) => (
+              <SessionCard
+                key={session.id}
+                session={session}
+                onEdit={setEditingSession}
+                onDelete={(id) => {
+                  if (
+                    confirm('Are you sure you want to delete this session?')
+                  ) {
+                    deleteSessionMutation.mutate(id)
+                  }
+                }}
+                onStart={(id) => startSessionMutation.mutate(id)}
+                onComplete={(id) => completeSessionMutation.mutate(id)}
+                onCancel={(id) => {
+                  if (
+                    confirm('Are you sure you want to cancel this session?')
+                  ) {
+                    cancelSessionMutation.mutate(id)
+                  }
+                }}
+                getStatusColor={getStatusColor}
+              />
+            ))}
+          </div>
         </div>
 
         {filteredSessions.length === 0 && (
@@ -568,6 +615,13 @@ function SessionCard({
 
         {/* Edit/Delete Actions */}
         <div className="flex space-x-2">
+          <Link
+            to="/sessions/$id"
+            params={{ id: session.id }}
+            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 no-underline"
+          >
+            View Details
+          </Link>
           <button
             onClick={() => onEdit(session)}
             disabled={session.status === 'COMPLETED'}
