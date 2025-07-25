@@ -22,7 +22,12 @@ const demoSessions: Record<string, Session> = {
     date: new Date().toISOString(),
     location: 'Demo Location',
     status: 'SCHEDULED' as any,
-    gamesMasterId: 'demo-host',
+    host: {
+      id: 'demo-host',
+      name: 'Demo Host',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
     joinCode: '123456',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -34,7 +39,12 @@ const demoSessions: Record<string, Session> = {
     date: new Date().toISOString(),
     location: 'Demo Location 2',
     status: 'SCHEDULED' as any,
-    gamesMasterId: 'demo-host-2',
+    host: {
+      id: 'demo-host-2',
+      name: 'Demo Host 2',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
     joinCode: '999999',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -57,7 +67,12 @@ export const sessionService = {
         date: data.date,
         location: data.location,
         status: 'SCHEDULED' as any,
-        gamesMasterId: data.gamesMasterId,
+        host: {
+          id: data.gamesMasterId,
+          name: 'Demo Host',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
         joinCode,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -100,25 +115,24 @@ export const sessionService = {
 
   findByJoinCode: (joinCode: string) => {
     if (DEMO_MODE) {
-      const session = demoSessions[joinCode]
-      if (!session) {
-        return Promise.reject(new Error('Session not found'))
+      if (joinCode in demoSessions) {
+        return Promise.resolve(demoSessions[joinCode])
       }
-      return Promise.resolve(session)
+      return Promise.reject(new Error('Session not found'))
     }
     return fetchAPI<Session>(`/sessions/join/${joinCode}`)
   },
 
   joinSession: (data: JoinSessionRequest) => {
     if (DEMO_MODE) {
-      const session = demoSessions[data.joinCode]
-      if (!session) {
-        return Promise.reject(new Error('Session not found'))
+      if (data.joinCode in demoSessions) {
+        const session = demoSessions[data.joinCode]
+        return Promise.resolve({
+          session,
+          message: `Welcome ${data.playerName}! You've joined the demo session.`,
+        } as JoinSessionResponse)
       }
-      return Promise.resolve({
-        session,
-        message: `Welcome ${data.playerName}! You've joined the demo session.`,
-      } as JoinSessionResponse)
+      return Promise.reject(new Error('Session not found'))
     }
     return fetchAPI<JoinSessionResponse>('/sessions/join', {
       method: 'POST',

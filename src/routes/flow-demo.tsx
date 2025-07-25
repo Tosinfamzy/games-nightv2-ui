@@ -12,7 +12,7 @@ export const Route = createFileRoute('/flow-demo')({
 function FlowDemoPage() {
   const [createdSession, setCreatedSession] = useState<Session | null>(null)
   const [joinedSession, setJoinedSession] = useState<Session | null>(null)
-  const [activeTab, setActiveTab] = useState<'create' | 'join'>('create')
+  // const [activeTab, setActiveTab] = useState<'create' | 'join'>('create')
 
   const handleCreateSuccess = (session: Session) => {
     setCreatedSession(session)
@@ -25,7 +25,7 @@ function FlowDemoPage() {
   const resetDemo = () => {
     setCreatedSession(null)
     setJoinedSession(null)
-    setActiveTab('create')
+    // setActiveTab('create')
   }
 
   return (

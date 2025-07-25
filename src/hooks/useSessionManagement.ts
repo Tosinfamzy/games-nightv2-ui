@@ -71,8 +71,8 @@ export function useSessionManagement(sessionId: string) {
 
   // Game management mutations
   const addGamesToSession = useMutation({
-    mutationFn: (gameIds: Array<string>) =>
-      sessionManagementService.addGamesToSession(sessionId, { gameIds }),
+    mutationFn: (gameLibraryIds: Array<string>) =>
+      sessionManagementService.addGamesToSession(sessionId, { gameLibraryIds }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['games', 'session', sessionId],
@@ -81,8 +81,8 @@ export function useSessionManagement(sessionId: string) {
   })
 
   const removeGamesFromSession = useMutation({
-    mutationFn: (gameIds: Array<string>) =>
-      sessionManagementService.removeGamesFromSession(sessionId, { gameIds }),
+    mutationFn: (gameId: string) =>
+      sessionManagementService.removeGamesFromSession(sessionId, { gameId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['games', 'session', sessionId],
@@ -92,11 +92,12 @@ export function useSessionManagement(sessionId: string) {
 
   // Team management mutations
   const createTeam = useMutation({
-    mutationFn: (data: { name: string; playerIds?: Array<string> }) =>
-      sessionManagementService.createTeam({
-        ...data,
-        sessionId,
-      }),
+    mutationFn: (data: {
+      name: string
+      gameId?: string
+      color?: string
+      playerIds?: Array<string>
+    }) => sessionManagementService.createTeam(sessionId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['teams', 'session', sessionId],
@@ -104,9 +105,17 @@ export function useSessionManagement(sessionId: string) {
     },
   })
 
-  const assignPlayerToTeam = useMutation({
-    mutationFn: ({ teamId, playerId }: { teamId: string; playerId: string }) =>
-      sessionManagementService.assignPlayerToTeam(teamId, playerId),
+  const assignPlayersToTeam = useMutation({
+    mutationFn: ({
+      teamId,
+      playerIds,
+    }: {
+      teamId: string
+      playerIds: Array<string>
+    }) =>
+      sessionManagementService.assignPlayersToTeam(sessionId, teamId, {
+        playerIds,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['teams', 'session', sessionId],
@@ -143,7 +152,7 @@ export function useSessionManagement(sessionId: string) {
 
     // Teams
     createTeam,
-    assignPlayerToTeam,
+    assignPlayersToTeam,
 
     // Readiness
     setPlayerReady,

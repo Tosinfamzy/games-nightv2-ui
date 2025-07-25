@@ -1,17 +1,22 @@
 import { fetchAPI } from '../client'
 
 export interface AddGamesToSessionDTO {
-  gameIds: Array<string>
+  gameLibraryIds: Array<string>
 }
 
 export interface RemoveGamesFromSessionDTO {
-  gameIds: Array<string>
+  gameId: string
 }
 
 export interface CreateTeamDTO {
   name: string
-  sessionId: string
+  gameId?: string
+  color?: string
   playerIds?: Array<string>
+}
+
+export interface AssignPlayersToTeamDTO {
+  playerIds: Array<string>
 }
 
 export interface SessionReadiness {
@@ -48,8 +53,8 @@ export const sessionManagementService = {
     fetchAPI(`/sessions/${sessionId}/games`),
 
   // Team management
-  createTeam: (data: CreateTeamDTO) =>
-    fetchAPI('/teams', {
+  createTeam: (sessionId: string, data: CreateTeamDTO) =>
+    fetchAPI(`/sessions/${sessionId}/teams`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -57,10 +62,14 @@ export const sessionManagementService = {
   getSessionTeams: (sessionId: string) =>
     fetchAPI(`/sessions/${sessionId}/teams`),
 
-  assignPlayerToTeam: (teamId: string, playerId: string) =>
-    fetchAPI(`/teams/${teamId}/players`, {
-      method: 'POST',
-      body: JSON.stringify({ playerId }),
+  assignPlayersToTeam: (
+    sessionId: string,
+    teamId: string,
+    data: AssignPlayersToTeamDTO,
+  ) =>
+    fetchAPI(`/sessions/${sessionId}/teams/${teamId}/players`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
     }),
 
   // Session readiness
