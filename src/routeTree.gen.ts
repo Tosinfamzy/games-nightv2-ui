@@ -18,6 +18,7 @@ import { Route as GamesMasterRouteImport } from './routes/games-master'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as FlowDemoRouteImport } from './routes/flow-demo'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as DebugRouteImport } from './routes/debug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SessionsIndexRouteImport } from './routes/sessions/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
@@ -71,6 +72,11 @@ const DemoRoute = DemoRouteImport.update({
   path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DebugRoute = DebugRouteImport.update({
+  id: '/debug',
+  path: '/debug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -109,6 +115,7 @@ const GamesIdRoute = GamesIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/debug': typeof DebugRoute
   '/demo': typeof DemoRoute
   '/flow-demo': typeof FlowDemoRoute
   '/games': typeof GamesRouteWithChildren
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/debug': typeof DebugRoute
   '/demo': typeof DemoRoute
   '/flow-demo': typeof FlowDemoRoute
   '/games-master': typeof GamesMasterRoute
@@ -144,6 +152,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/debug': typeof DebugRoute
   '/demo': typeof DemoRoute
   '/flow-demo': typeof FlowDemoRoute
   '/games': typeof GamesRouteWithChildren
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/debug'
     | '/demo'
     | '/flow-demo'
     | '/games'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/debug'
     | '/demo'
     | '/flow-demo'
     | '/games-master'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/debug'
     | '/demo'
     | '/flow-demo'
     | '/games'
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DebugRoute: typeof DebugRoute
   DemoRoute: typeof DemoRoute
   FlowDemoRoute: typeof FlowDemoRoute
   GamesRoute: typeof GamesRouteWithChildren
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/debug': {
+      id: '/debug'
+      path: '/debug'
+      fullPath: '/debug'
+      preLoaderRoute: typeof DebugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -377,6 +397,7 @@ const SessionsRouteWithChildren = SessionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DebugRoute: DebugRoute,
   DemoRoute: DemoRoute,
   FlowDemoRoute: FlowDemoRoute,
   GamesRoute: GamesRouteWithChildren,

@@ -18,8 +18,9 @@ export interface Session {
   }
   createdAt: string
   updatedAt: string
-  gamesMasterId: UUID
-  games: Array<Game>
+  games?: Array<Game>
+  teams?: Array<Team>
+  players?: Array<Player>
 }
 
 export enum SessionStatus {

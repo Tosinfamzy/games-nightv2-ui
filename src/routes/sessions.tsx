@@ -1,14 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { sessionService } from '../lib/api/services/session.service'
+import { sessionService } from '../services/sessions'
 import { gamesMasterService } from '../lib/api/services/games-master.service'
 import { playerService } from '../lib/api/services/player.service'
-import type { Session } from '../lib/api/types'
-import type {
-  CreateSessionDTO,
-  UpdateSessionDTO,
-} from '../lib/api/hooks/use-session'
+import type { Session } from '../types'
+import type { CreateSessionDTO, UpdateSessionDTO } from '../services/sessions'
 
 function SessionsPage() {
   const queryClient = useQueryClient()
@@ -17,7 +14,11 @@ function SessionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('')
 
   // Fetch sessions
-  const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
+  const {
+    data: sessions = [],
+    isLoading: sessionsLoading,
+    error: sessionsError,
+  } = useQuery({
     queryKey: ['sessions'],
     queryFn: sessionService.getAll,
   })
@@ -129,6 +130,16 @@ function SessionsPage() {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">Loading sessions...</div>
+      </div>
+    )
+  }
+
+  if (sessionsError) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center text-red-500">
+          Error loading sessions: {sessionsError.message}
+        </div>
       </div>
     )
   }

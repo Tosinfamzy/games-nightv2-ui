@@ -31,6 +31,7 @@ export async function fetchAPI<T>(
 
   // Build URL with query parameters
   const url = new URL(versionedEndpoint, API_URL)
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value)

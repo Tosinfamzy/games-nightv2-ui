@@ -2,10 +2,26 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useSessions } from '../../hooks/useSessions'
 
 function SessionsPage() {
-  const { data: sessions, isLoading } = useSessions()
+  const { data: sessions, isLoading, error } = useSessions()
+
+  console.log('Sessions data:', sessions)
+  console.log('Loading:', isLoading)
+  console.log('Error:', error)
 
   if (isLoading) {
     return <div className="p-4">Loading sessions...</div>
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">
+        Error loading sessions: {error.message}
+      </div>
+    )
+  }
+
+  if (!sessions || sessions.length === 0) {
+    return <div className="p-4">No sessions found.</div>
   }
 
   return (
@@ -18,7 +34,7 @@ function SessionsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {sessions?.map((session) => (
+        {sessions.map((session) => (
           <div
             key={session.id}
             className="border rounded-lg p-4 hover:shadow-lg transition-shadow"

@@ -12,8 +12,16 @@ export interface Session extends BaseEntity {
   date: string
   location?: string
   status: SessionStatus
-  gamesMasterId: string
+  host: {
+    id: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
   joinCode: string
+  games?: Array<Game>
+  teams?: Array<Team>
+  players?: Array<Player>
 }
 
 export interface JoinSessionRequest {
@@ -27,7 +35,7 @@ export interface JoinSessionResponse {
 }
 
 export enum SessionStatus {
-  PLANNED = 'PLANNED',
+  SCHEDULED = 'SCHEDULED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
