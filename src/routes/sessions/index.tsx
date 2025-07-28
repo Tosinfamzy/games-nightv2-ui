@@ -66,7 +66,12 @@ function SessionsPage() {
             <p className="text-gray-600 mb-2">{session.description}</p>
             <div className="text-sm text-gray-500 mb-4">
               <div>Host: {session.host.name}</div>
-              <div>Date: {new Date(session.date || session.createdAt).toLocaleDateString()}</div>
+              <div>
+                Date:{' '}
+                {new Date(
+                  session.date || session.createdAt,
+                ).toLocaleDateString()}
+              </div>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">

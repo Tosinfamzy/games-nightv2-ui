@@ -8,6 +8,7 @@ import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { TeamDisplay } from '../../components/TeamDisplay'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
 import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
+import { ManualTeamCreator } from '../../components/ManualTeamCreator'
 
 export const Route = createFileRoute('/sessions/$id')({
   component: SessionDetailsPage,
@@ -19,9 +20,14 @@ function SessionDetailsPage() {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'players' | 'games' | 'teams'
   >('overview')
+  const [showManualTeamCreator, setShowManualTeamCreator] = useState(false)
 
   // Fetch session details
-  const { data: session, isLoading, error } = useQuery({
+  const {
+    data: session,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['sessions', id],
     queryFn: () => sessionService.getById(id),
   })
@@ -77,7 +83,9 @@ function SessionDetailsPage() {
       <div className="container mx-auto p-6">
         <div className="text-center text-red-500">
           <h2 className="text-xl font-semibold mb-2">Error Loading Session</h2>
-          <p>{error instanceof Error ? error.message : 'Failed to load session'}</p>
+          <p>
+            {error instanceof Error ? error.message : 'Failed to load session'}
+          </p>
           <Link
             to="/sessions"
             className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -338,6 +346,71 @@ function SessionDetailsPage() {
                 sessionStatus={session.status}
               />
 
+              {/* Manual Team Creation Section */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Manual Team Creation
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Create teams manually and assign players
+                    </p>
+                  </div>
+                  {!showManualTeamCreator &&
+                    session.status !== 'COMPLETED' &&
+                    session.status !== 'CANCELLED' && (
+                      <button
+                        onClick={() => setShowManualTeamCreator(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        + Create Team
+                      </button>
+                    )}
+                  {(session.status === 'COMPLETED' ||
+                    session.status === 'CANCELLED') && (
+                    <div className="text-sm text-gray-500 italic">
+                      Team creation disabled - session{' '}
+                      {session.status.toLowerCase()}
+                    </div>
+                  )}
+                </div>
+
+                {showManualTeamCreator && (
+                  <ManualTeamCreator
+                    sessionId={id}
+                    players={players.map((p) => ({
+                      ...p,
+                      status:
+                        p.status === 'joined'
+                          ? ('not_ready' as const)
+                          : (p.status as 'ready' | 'not_ready' | 'playing'),
+                    }))}
+                    onTeamCreated={() => {
+                      setShowManualTeamCreator(false)
+                      // Invalidate and refetch teams data
+                      queryClient.invalidateQueries({
+                        queryKey: ['teams', 'session', id],
+                      })
+                    }}
+                    onCancel={() => setShowManualTeamCreator(false)}
+                  />
+                )}
+
+                {!showManualTeamCreator && teams.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <div className="text-4xl mb-2">🏆</div>
+                    <p className="text-lg font-medium mb-2">
+                      No teams created yet
+                    </p>
+                    <p className="text-sm">
+                      Create teams manually or use automated team formation
+                      below
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Enhanced Team Formation Interface */}
               <TeamFormationInterface
                 sessionId={id}
@@ -474,6 +547,9 @@ function OverviewTab({ session, players, justJoined }: any) {
 
 function PlayersTab({ session, players }: any) {
   const queryClient = useQueryClient()
+  const [showAddPlayerForm, setShowAddPlayerForm] = useState(false)
+  const [editingPlayer, setEditingPlayer] = useState<any>(null)
+  const [newPlayerName, setNewPlayerName] = useState('')
 
   // Fetch session readiness status
   const { data: readiness } = useQuery({
@@ -494,6 +570,53 @@ function PlayersTab({ session, players }: any) {
       queryClient.invalidateQueries({
         queryKey: ['players', 'session', session.id],
       })
+    },
+  })
+
+  // Add player mutation
+  const addPlayerMutation = useMutation({
+    mutationFn: async (playerData: { name: string }) => {
+      // Create player and add to session
+      const newPlayer = await playerService.create({
+        name: playerData.name,
+        sessionId: session.id,
+      })
+      return newPlayer
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['players', 'session', session.id],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['session-readiness', session.id],
+      })
+      setShowAddPlayerForm(false)
+      setNewPlayerName('')
+    },
+  })
+
+  // Remove player mutation
+  const removePlayerMutation = useMutation({
+    mutationFn: (playerId: string) => playerService.delete(playerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['players', 'session', session.id],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['session-readiness', session.id],
+      })
+    },
+  })
+
+  // Update player mutation
+  const updatePlayerMutation = useMutation({
+    mutationFn: ({ playerId, data }: { playerId: string; data: any }) =>
+      playerService.update(playerId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['players', 'session', session.id],
+      })
+      setEditingPlayer(null)
     },
   })
 
@@ -524,14 +647,92 @@ function PlayersTab({ session, players }: any) {
     })
   }
 
+  const handleAddPlayer = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newPlayerName.trim()) {
+      addPlayerMutation.mutate({ name: newPlayerName.trim() })
+    }
+  }
+
+  const handleRemovePlayer = (playerId: string) => {
+    if (
+      confirm('Are you sure you want to remove this player from the session?')
+    ) {
+      removePlayerMutation.mutate(playerId)
+    }
+  }
+
+  const handleEditPlayer = (player: any) => {
+    setEditingPlayer(player)
+  }
+
+  const handleSavePlayerEdit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (editingPlayer) {
+      updatePlayerMutation.mutate({
+        playerId: editingPlayer.id,
+        data: { name: editingPlayer.name },
+      })
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Session Players</h3>
-        <div className="text-sm text-gray-600">
-          {players.length} player{players.length !== 1 ? 's' : ''} joined
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-600">
+            {players.length} player{players.length !== 1 ? 's' : ''} joined
+          </div>
+          {session.status !== 'COMPLETED' && session.status !== 'CANCELLED' && (
+            <button
+              onClick={() => setShowAddPlayerForm(!showAddPlayerForm)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+            >
+              {showAddPlayerForm ? 'Cancel' : '+ Add Player'}
+            </button>
+          )}
+          {(session.status === 'COMPLETED' ||
+            session.status === 'CANCELLED') && (
+            <div className="text-sm text-gray-500 italic">
+              Player management disabled - session{' '}
+              {session.status.toLowerCase()}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Add Player Form */}
+      {showAddPlayerForm && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h4 className="font-medium text-gray-900 mb-3">Add New Player</h4>
+          <form onSubmit={handleAddPlayer} className="flex space-x-3">
+            <input
+              type="text"
+              placeholder="Player name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <button
+              type="submit"
+              disabled={addPlayerMutation.isPending || !newPlayerName.trim()}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {addPlayerMutation.isPending ? 'Adding...' : 'Add'}
+            </button>
+          </form>
+          {addPlayerMutation.error && (
+            <div className="mt-2 text-red-600 text-sm">
+              Error:{' '}
+              {addPlayerMutation.error instanceof Error
+                ? addPlayerMutation.error.message
+                : 'Failed to add player'}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Session Readiness Status */}
       {readiness && (
@@ -594,7 +795,9 @@ function PlayersTab({ session, players }: any) {
           {players.map((player: any) => {
             const isReady = player.status === 'ready'
             const canToggleReady =
-              session.status === 'SCHEDULED' && player.status !== 'disconnected'
+              (session.status === 'SCHEDULED' ||
+                session.status === 'IN_PROGRESS') &&
+              player.status !== 'disconnected'
 
             return (
               <div
@@ -602,20 +805,90 @@ function PlayersTab({ session, players }: any) {
                 className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900">{player.name}</h4>
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      player.status === 'ready'
-                        ? 'bg-green-100 text-green-700'
-                        : player.status === 'playing'
-                          ? 'bg-blue-100 text-blue-700'
-                          : player.status === 'joined'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {player.status}
-                  </span>
+                  {editingPlayer?.id === player.id ? (
+                    <form
+                      onSubmit={handleSavePlayerEdit}
+                      className="flex-1 mr-2"
+                    >
+                      <input
+                        type="text"
+                        value={editingPlayer.name}
+                        onChange={(e) =>
+                          setEditingPlayer({
+                            ...editingPlayer,
+                            name: e.target.value,
+                          })
+                        }
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                        autoFocus
+                      />
+                    </form>
+                  ) : (
+                    <h4 className="font-medium text-gray-900">{player.name}</h4>
+                  )}
+
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${
+                        player.status === 'ready'
+                          ? 'bg-green-100 text-green-700'
+                          : player.status === 'playing'
+                            ? 'bg-blue-100 text-blue-700'
+                            : player.status === 'joined'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {player.status}
+                    </span>
+
+                    {/* Player Management Buttons */}
+                    <div className="flex space-x-1">
+                      {editingPlayer?.id === player.id ? (
+                        <>
+                          <button
+                            type="submit"
+                            onClick={handleSavePlayerEdit}
+                            disabled={updatePlayerMutation.isPending}
+                            className="p-1 text-green-600 hover:text-green-700"
+                            title="Save"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => setEditingPlayer(null)}
+                            className="p-1 text-gray-600 hover:text-gray-700"
+                            title="Cancel"
+                          >
+                            ✕
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {session.status !== 'COMPLETED' &&
+                            session.status !== 'CANCELLED' && (
+                              <>
+                                <button
+                                  onClick={() => handleEditPlayer(player)}
+                                  className="p-1 text-blue-600 hover:text-blue-700"
+                                  title="Edit player"
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={() => handleRemovePlayer(player.id)}
+                                  disabled={removePlayerMutation.isPending}
+                                  className="p-1 text-red-600 hover:text-red-700"
+                                  title="Remove player"
+                                >
+                                  🗑️
+                                </button>
+                              </>
+                            )}
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="text-sm text-gray-600 mb-3">
@@ -626,7 +899,7 @@ function PlayersTab({ session, players }: any) {
                 </div>
 
                 {/* Ready Toggle Button */}
-                {canToggleReady && (
+                {canToggleReady && editingPlayer?.id !== player.id && (
                   <button
                     onClick={() => handleToggleReady(player.id, isReady)}
                     disabled={setPlayerReadyMutation.isPending}
@@ -642,6 +915,18 @@ function PlayersTab({ session, players }: any) {
                         ? '✓ Ready'
                         : 'Mark Ready'}
                   </button>
+                )}
+
+                {/* Loading States */}
+                {removePlayerMutation.isPending && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Removing player...
+                  </div>
+                )}
+                {updatePlayerMutation.isPending && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Updating player...
+                  </div>
                 )}
               </div>
             )

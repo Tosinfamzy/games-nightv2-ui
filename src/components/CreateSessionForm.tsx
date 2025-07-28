@@ -30,7 +30,7 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const sessionData: CreateSessionDTO = {
       name,
       description,
@@ -44,11 +44,16 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Create New Session</h2>
-      
+      <h2 className="text-2xl font-bold mb-6 text-center">
+        Create New Session
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Session Name *
           </label>
           <input
@@ -63,7 +68,10 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Description
           </label>
           <textarea
@@ -77,7 +85,10 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
         </div>
 
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="date"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Date & Time *
           </label>
           <input
@@ -91,7 +102,10 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
         </div>
 
         <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="location"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Location
           </label>
           <input
@@ -114,7 +128,10 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
         {createSessionMutation.error && (
           <div className="text-red-500 text-sm mt-2">
-            Error: {createSessionMutation.error instanceof Error ? createSessionMutation.error.message : 'Failed to create session'}
+            Error:{' '}
+            {createSessionMutation.error instanceof Error
+              ? createSessionMutation.error.message
+              : 'Failed to create session'}
           </div>
         )}
       </form>
