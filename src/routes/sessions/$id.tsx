@@ -380,6 +380,57 @@ function OverviewTab({ session, players, justJoined }: any) {
 }
 
 function PlayersTab({ session, players }: any) {
+  const queryClient = useQueryClient()
+
+  // Fetch session readiness status
+  const { data: readiness } = useQuery({
+    queryKey: ['session-readiness', session.id],
+    queryFn: () => sessionManagementService.getSessionReadiness(session.id),
+    refetchInterval: 3000, // Poll every 3 seconds
+  })
+
+  // Player ready mutation
+  const setPlayerReadyMutation = useMutation({
+    mutationFn: ({ playerId, ready }: { playerId: string; ready: boolean }) =>
+      sessionManagementService.setPlayerReady(session.id, playerId, ready),
+    onSuccess: () => {
+      // Invalidate both queries to refresh data
+      queryClient.invalidateQueries({
+        queryKey: ['session-readiness', session.id],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['players', 'session', session.id],
+      })
+    },
+  })
+
+  // Check if session can start
+  const { data: canStart } = useQuery({
+    queryKey: ['session-can-start', session.id],
+    queryFn: () => sessionManagementService.checkSessionCanStart(session.id),
+    refetchInterval: 3000,
+  }) as {
+    data:
+      | {
+          canStart: boolean
+          reasons: Array<string>
+          checks: {
+            hasGames: boolean
+            playersReady: boolean
+            playerCountValid: boolean
+            sessionScheduled: boolean
+          }
+        }
+      | undefined
+  }
+
+  const handleToggleReady = (playerId: string, currentReady: boolean) => {
+    setPlayerReadyMutation.mutate({
+      playerId,
+      ready: !currentReady,
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -388,6 +439,43 @@ function PlayersTab({ session, players }: any) {
           {players.length} player{players.length !== 1 ? 's' : ''} joined
         </div>
       </div>
+
+      {/* Session Readiness Status */}
+      {readiness && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-blue-900">Session Readiness</h4>
+            <div className="flex items-center space-x-2">
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  readiness.allReady ? 'bg-green-500' : 'bg-yellow-500'
+                }`}
+              />
+              <span className="text-sm font-medium text-blue-900">
+                {readiness.readyPlayers}/{readiness.totalPlayers} Ready
+              </span>
+            </div>
+          </div>
+
+          {canStart && (
+            <div className="mt-3 p-3 bg-white rounded border">
+              <div className="text-sm">
+                <div className="font-medium text-gray-900 mb-2">
+                  Session Status:{' '}
+                  {canStart.canStart ? '✅ Ready to Start' : '⏳ Not Ready'}
+                </div>
+                {!canStart.canStart && canStart.reasons.length > 0 && (
+                  <ul className="text-red-600 text-xs space-y-1">
+                    {canStart.reasons.map((reason: string, index: number) => (
+                      <li key={index}>• {reason}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {players.length === 0 ? (
         <div className="text-center py-8">
@@ -410,35 +498,61 @@ function PlayersTab({ session, players }: any) {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {players.map((player: any) => (
-            <div
-              key={player.id}
-              className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-gray-900">{player.name}</h4>
-                <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
-                    player.status === 'ready'
-                      ? 'bg-green-100 text-green-700'
-                      : player.status === 'playing'
-                        ? 'bg-blue-100 text-blue-700'
-                        : player.status === 'joined'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {player.status}
-                </span>
-              </div>
-              <div className="text-sm text-gray-600">
-                <div>
-                  Joined: {new Date(player.createdAt).toLocaleDateString()}
+          {players.map((player: any) => {
+            const isReady = player.status === 'ready'
+            const canToggleReady =
+              session.status === 'SCHEDULED' && player.status !== 'disconnected'
+
+            return (
+              <div
+                key={player.id}
+                className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-gray-900">{player.name}</h4>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      player.status === 'ready'
+                        ? 'bg-green-100 text-green-700'
+                        : player.status === 'playing'
+                          ? 'bg-blue-100 text-blue-700'
+                          : player.status === 'joined'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {player.status}
+                  </span>
                 </div>
-                {player.team && <div>Team: {player.team.name}</div>}
+
+                <div className="text-sm text-gray-600 mb-3">
+                  <div>
+                    Joined: {new Date(player.createdAt).toLocaleDateString()}
+                  </div>
+                  {player.team && <div>Team: {player.team.name}</div>}
+                </div>
+
+                {/* Ready Toggle Button */}
+                {canToggleReady && (
+                  <button
+                    onClick={() => handleToggleReady(player.id, isReady)}
+                    disabled={setPlayerReadyMutation.isPending}
+                    className={`w-full px-3 py-2 rounded text-sm font-medium transition-colors ${
+                      isReady
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    } disabled:opacity-50`}
+                  >
+                    {setPlayerReadyMutation.isPending
+                      ? 'Updating...'
+                      : isReady
+                        ? '✓ Ready'
+                        : 'Mark Ready'}
+                  </button>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
