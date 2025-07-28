@@ -3,9 +3,11 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService } from '../../services/sessions'
 import { playerService } from '../../lib/api/services/player.service'
-import { gameLibraryService } from '../../lib/api/services/game-library.service'
 import { sessionManagementService } from '../../lib/api/services/session-management.service'
-import { useSessionManagement } from '../../hooks/useSessionManagement'
+import { TeamFormationInterface } from '../../components/TeamFormationInterface'
+import { TeamDisplay } from '../../components/TeamDisplay'
+import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
+import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
 
 export const Route = createFileRoute('/sessions/$id')({
   component: SessionDetailsPage,
@@ -17,7 +19,6 @@ function SessionDetailsPage() {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'players' | 'games' | 'teams'
   >('overview')
-  const [showAddGames, setShowAddGames] = useState(false)
 
   // Fetch session details
   const { data: session, isLoading } = useQuery({
@@ -36,16 +37,6 @@ function SessionDetailsPage() {
     queryKey: ['teams', 'session', id],
     queryFn: () => sessionManagementService.getSessionTeams(id),
   }) as { data: Array<any> }
-
-  // Team management hooks
-  const { createTeam, assignPlayersToTeam } = useSessionManagement(id)
-
-  // Fetch available games for adding
-  const { data: availableGames = [] } = useQuery({
-    queryKey: ['game-library'],
-    queryFn: gameLibraryService.getAll,
-    enabled: showAddGames,
-  })
 
   // Session mutations
   const startSessionMutation = useMutation({
@@ -278,22 +269,99 @@ function SessionDetailsPage() {
           )}
 
           {activeTab === 'games' && (
-            <GamesTab
-              availableGames={availableGames}
-              showAddGames={showAddGames}
-              setShowAddGames={setShowAddGames}
-            />
-          )}
-          {activeTab === 'players' && (
-            <PlayersTab session={session} players={players} />
-          )}
-          {activeTab === 'teams' && (
-            <TeamsTab
-              players={players}
+            <EnhancedGamesTab
+              sessionId={id}
+              sessionGames={(session.games || []).map((g) => ({
+                ...g,
+                status: g.status.toLowerCase() as
+                  | 'scheduled'
+                  | 'in_progress'
+                  | 'completed',
+              }))}
+              players={players.map((p) => ({
+                ...p,
+                status:
+                  p.status === 'joined'
+                    ? ('not_ready' as const)
+                    : (p.status as 'ready' | 'not_ready' | 'playing'),
+              }))}
               teams={teams}
-              onCreateTeam={createTeam}
-              onAssignPlayers={assignPlayersToTeam}
+              sessionStatus={session.status}
             />
+          )}
+
+          {activeTab === 'teams' && (
+            <div className="space-y-6">
+              {/* Session Readiness Dashboard */}
+              <SessionReadinessDashboard
+                sessionId={id}
+                players={players.map((p) => ({
+                  ...p,
+                  status:
+                    p.status === 'joined'
+                      ? ('not_ready' as const)
+                      : (p.status as 'ready' | 'not_ready' | 'playing'),
+                }))}
+                teams={teams}
+                games={(session.games || []).map((g) => ({
+                  ...g,
+                  status: g.status.toLowerCase() as
+                    | 'scheduled'
+                    | 'in_progress'
+                    | 'completed',
+                }))}
+                sessionStatus={session.status}
+              />
+
+              {/* Enhanced Team Formation Interface */}
+              <TeamFormationInterface
+                sessionId={id}
+                players={players.map((p) => ({
+                  ...p,
+                  status:
+                    p.status === 'joined'
+                      ? ('not_ready' as const)
+                      : (p.status as 'ready' | 'not_ready' | 'playing'),
+                }))}
+                teams={teams}
+                games={
+                  session.games?.map((g) => ({
+                    ...g,
+                    recommendedTeamSize: g.maxPlayers
+                      ? Math.floor(g.maxPlayers / 2)
+                      : 2,
+                  })) || []
+                }
+                onTeamsCreated={() => {
+                  // Invalidate and refetch teams data
+                  queryClient.invalidateQueries({
+                    queryKey: ['teams', 'session', id],
+                  })
+                }}
+              />
+
+              {/* Team Display */}
+              {teams.length > 0 && (
+                <TeamDisplay
+                  teams={teams}
+                  sessionId={id}
+                  unassignedPlayers={players
+                    .filter(
+                      (p) =>
+                        !teams.some((team) =>
+                          team.players.some((tp: any) => tp.id === p.id),
+                        ),
+                    )
+                    .map((p) => ({
+                      ...p,
+                      status:
+                        p.status === 'joined'
+                          ? ('not_ready' as const)
+                          : (p.status as 'ready' | 'not_ready' | 'playing'),
+                    }))}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -553,377 +621,6 @@ function PlayersTab({ session, players }: any) {
               </div>
             )
           })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function GamesTab({ availableGames, showAddGames, setShowAddGames }: any) {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Session Games</h3>
-        <button
-          onClick={() => setShowAddGames(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          + Add Games
-        </button>
-      </div>
-
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div className="flex items-center">
-          <span className="text-yellow-400 text-xl mr-3">🚧</span>
-          <div>
-            <h4 className="font-medium text-yellow-800">
-              Games Management Coming Soon
-            </h4>
-            <p className="text-sm text-yellow-700 mt-1">
-              This feature will allow you to select and manage games for your
-              session.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {showAddGames && (
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium mb-4">Available Games</h4>
-          <div className="grid gap-3 md:grid-cols-2">
-            {availableGames.map((game: any) => (
-              <div
-                key={game.id}
-                className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-medium">{game.name}</h5>
-                    <p className="text-sm text-gray-600">{game.description}</p>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {game.minPlayers}-{game.maxPlayers} players
-                    </div>
-                  </div>
-                  <button className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
-                    Add
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => setShowAddGames(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function TeamsTab({
-  players,
-  teams,
-  onCreateTeam,
-  onAssignPlayers,
-}: {
-  players: Array<any>
-  teams: Array<any>
-  onCreateTeam: any
-  onAssignPlayers: any
-}) {
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
-  const [selectedPlayers, setSelectedPlayers] = useState<Array<string>>([])
-
-  const handleCreateTeam = (formData: FormData) => {
-    const name = formData.get('name') as string
-    const color = formData.get('color') as string
-
-    onCreateTeam.mutate(
-      {
-        name,
-        color: color || undefined,
-        playerIds: selectedPlayers,
-      },
-      {
-        onSuccess: () => {
-          setShowCreateForm(false)
-          setSelectedPlayers([])
-        },
-      },
-    )
-  }
-
-  const handleAssignPlayers = (teamId: string, playerIds: Array<string>) => {
-    onAssignPlayers.mutate(
-      { teamId, playerIds },
-      {
-        onSuccess: () => {
-          setSelectedTeam(null)
-          setSelectedPlayers([])
-        },
-      },
-    )
-  }
-
-  const getUnassignedPlayers = () => {
-    const assignedPlayerIds = teams.flatMap((team) =>
-      team.players.map((p: any) => p.id),
-    )
-    return players.filter((player) => !assignedPlayerIds.includes(player.id))
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Team Management</h3>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-        >
-          + Create Team
-        </button>
-      </div>
-
-      {/* Create Team Form */}
-      {showCreateForm && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h4 className="text-lg font-medium mb-4">Create New Team</h4>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleCreateTeam(new FormData(e.currentTarget))
-            }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Team Name
-                </label>
-                <input
-                  name="name"
-                  type="text"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter team name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Team Color (optional)
-                </label>
-                <input
-                  name="color"
-                  type="color"
-                  className="w-full h-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
-
-            {/* Player Selection */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Players (optional)
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
-                {getUnassignedPlayers().map((player) => (
-                  <label
-                    key={player.id}
-                    className="flex items-center space-x-2 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedPlayers.includes(player.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedPlayers([...selectedPlayers, player.id])
-                        } else {
-                          setSelectedPlayers(
-                            selectedPlayers.filter((id) => id !== player.id),
-                          )
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-sm">{player.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex space-x-2">
-              <button
-                type="submit"
-                disabled={onCreateTeam.isPending}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
-              >
-                {onCreateTeam.isPending ? 'Creating...' : 'Create Team'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateForm(false)
-                  setSelectedPlayers([])
-                }}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Teams List */}
-      {teams.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {teams.map((team: any) => (
-            <div
-              key={team.id}
-              className="border border-gray-200 rounded-lg p-4 bg-white"
-            >
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center space-x-2">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: team.color || '#6B7280' }}
-                  />
-                  <h4 className="font-medium">{team.name}</h4>
-                </div>
-                <button
-                  onClick={() =>
-                    setSelectedTeam(selectedTeam === team.id ? null : team.id)
-                  }
-                  className="text-sm text-purple-600 hover:text-purple-800"
-                >
-                  {selectedTeam === team.id ? 'Cancel' : 'Manage'}
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">
-                  Players: {team.players?.length || 0}
-                </p>
-                {team.players?.map((player: any) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between bg-gray-50 rounded px-3 py-2"
-                  >
-                    <span className="text-sm">{player.name}</span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        player.status === 'ready'
-                          ? 'bg-green-100 text-green-800'
-                          : player.status === 'playing'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {player.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Player Assignment Form */}
-              {selectedTeam === team.id && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h5 className="text-sm font-medium mb-2">
-                    Assign Players to Team
-                  </h5>
-                  <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto mb-3">
-                    {getUnassignedPlayers().map((player) => (
-                      <label
-                        key={player.id}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedPlayers.includes(player.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedPlayers([
-                                ...selectedPlayers,
-                                player.id,
-                              ])
-                            } else {
-                              setSelectedPlayers(
-                                selectedPlayers.filter(
-                                  (id) => id !== player.id,
-                                ),
-                              )
-                            }
-                          }}
-                          className="rounded"
-                        />
-                        <span className="text-xs">{player.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() =>
-                      handleAssignPlayers(team.id, selectedPlayers)
-                    }
-                    disabled={
-                      selectedPlayers.length === 0 || onAssignPlayers.isPending
-                    }
-                    className="w-full px-3 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:opacity-50"
-                  >
-                    {onAssignPlayers.isPending
-                      ? 'Assigning...'
-                      : `Assign ${selectedPlayers.length} Players`}
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🏆</span>
-          </div>
-          <h4 className="text-lg font-medium text-gray-900 mb-2">
-            No teams yet
-          </h4>
-          <p className="text-gray-600 mb-4">
-            Create teams to organize your players for games!
-          </p>
-        </div>
-      )}
-
-      {/* Unassigned Players */}
-      {getUnassignedPlayers().length > 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium mb-3">
-            Unassigned Players ({getUnassignedPlayers().length})
-          </h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {getUnassignedPlayers().map((player) => (
-              <div
-                key={player.id}
-                className="bg-white rounded-lg px-3 py-2 border border-gray-200"
-              >
-                <div className="font-medium text-sm">{player.name}</div>
-                <div
-                  className={`text-xs mt-1 px-2 py-1 rounded-full inline-block ${
-                    player.status === 'ready'
-                      ? 'bg-green-100 text-green-800'
-                      : player.status === 'playing'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                  }`}
-                >
-                  {player.status}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>
