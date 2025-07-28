@@ -21,7 +21,7 @@ function SessionDetailsPage() {
   >('overview')
 
   // Fetch session details
-  const { data: session, isLoading } = useQuery({
+  const { data: session, isLoading, error } = useQuery({
     queryKey: ['sessions', id],
     queryFn: () => sessionService.getById(id),
   })
@@ -68,6 +68,23 @@ function SessionDetailsPage() {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">Loading session...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center text-red-500">
+          <h2 className="text-xl font-semibold mb-2">Error Loading Session</h2>
+          <p>{error instanceof Error ? error.message : 'Failed to load session'}</p>
+          <Link
+            to="/sessions"
+            className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Back to Sessions
+          </Link>
+        </div>
       </div>
     )
   }
@@ -131,6 +148,14 @@ function SessionDetailsPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="max-w-6xl mx-auto">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+          <Link to="/sessions" className="hover:text-gray-700">
+            Sessions
+          </Link>
+          <span>›</span>
+          <span className="text-gray-900 font-medium">{session.name}</span>
+        </nav>
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-start mb-4">

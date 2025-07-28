@@ -49,12 +49,46 @@ const demoSessions: Record<string, Session> = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
+  // Add the specific session from your URL for testing
+  '09750b80-7b45-48bf-9dc4-f53f75406867': {
+    id: '09750b80-7b45-48bf-9dc4-f53f75406867',
+    name: 'Test Game Night Session',
+    description: 'A test session for development',
+    date: new Date().toISOString(),
+    location: 'Test Location',
+    status: 'SCHEDULED' as any,
+    host: {
+      id: 'test-host',
+      name: 'Test Host',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    joinCode: 'TEST123',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
 }
 
 export const sessionService = {
   getAll: () => fetchAPI<Array<Session>>('/sessions'),
 
-  getById: (id: string) => fetchAPI<Session>(`/sessions/${id}`),
+  getById: (id: string) => {
+    if (DEMO_MODE) {
+      // Check if the ID matches any demo session ID
+      const demoSession = Object.values(demoSessions).find(
+        (session) => session.id === id,
+      )
+      if (demoSession) {
+        return Promise.resolve(demoSession)
+      }
+      // If not found by ID, maybe it's a join code (for backward compatibility)
+      if (id in demoSessions) {
+        return Promise.resolve(demoSessions[id])
+      }
+      return Promise.reject(new Error('Session not found'))
+    }
+    return fetchAPI<Session>(`/sessions/${id}`)
+  },
 
   create: (data: CreateSessionDTO) => {
     if (DEMO_MODE) {
