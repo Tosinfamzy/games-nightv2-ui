@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService, playerService, sessionManagementService } from '../../lib/api/services'
+import { useSessionSocket } from '../../lib/socket'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { TeamDisplay } from '../../components/TeamDisplay'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
@@ -19,6 +20,9 @@ function SessionDetailsPage() {
     'overview' | 'players' | 'games' | 'teams'
   >('overview')
   const [showManualTeamCreator, setShowManualTeamCreator] = useState(false)
+
+  // Connect to session WebSocket for real-time updates
+  useSessionSocket(id)
 
   // Fetch session details
   const {
@@ -549,11 +553,10 @@ function PlayersTab({ session, players }: any) {
   const [editingPlayer, setEditingPlayer] = useState<any>(null)
   const [newPlayerName, setNewPlayerName] = useState('')
 
-  // Fetch session readiness status
+  // Fetch session readiness status (now updates via WebSocket)
   const { data: readiness } = useQuery({
     queryKey: ['session-readiness', session.id],
     queryFn: () => sessionManagementService.getSessionReadiness(session.id),
-    refetchInterval: 3000, // Poll every 3 seconds
   })
 
   // Player ready mutation
@@ -618,11 +621,10 @@ function PlayersTab({ session, players }: any) {
     },
   })
 
-  // Check if session can start
+  // Check if session can start (now updates via WebSocket)
   const { data: canStart } = useQuery({
     queryKey: ['session-can-start', session.id],
     queryFn: () => sessionManagementService.checkSessionCanStart(session.id),
-    refetchInterval: 3000,
   }) as {
     data:
       | {
