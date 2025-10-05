@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { sessionService } from '../services/sessions'
-import type { JoinSessionRequest, Session } from '../types'
+import { sessionService } from '../lib/api/services'
+import type { JoinSessionRequest, Session } from '../lib/api/types'
 
 interface JoinSessionFormProps {
   onJoinSuccess?: (session: Session) => void

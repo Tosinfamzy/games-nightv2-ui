@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { JoinSessionForm } from '../components/JoinSessionForm'
-import type { Session } from '../types'
+import type { Session } from '../lib/api/types'
 
 function JoinSessionPage() {
   const navigate = useNavigate()

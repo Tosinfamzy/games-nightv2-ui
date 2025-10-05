@@ -21,6 +21,8 @@ function NewGamePage() {
                 name: formData.get('name') as string,
                 description: formData.get('description') as string,
                 sessionId: formData.get('sessionId') as string,
+                minPlayers: parseInt(formData.get('minPlayers') as string, 10),
+                maxPlayers: parseInt(formData.get('maxPlayers') as string, 10),
                 maxRounds: parseInt(formData.get('maxRounds') as string, 10),
                 scores: [],
                 teams: [],

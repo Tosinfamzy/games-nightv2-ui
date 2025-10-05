@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CreateSessionForm } from '../../components/CreateSessionForm'
 import { SessionDisplay } from '../../components/SessionDisplay'
-import type { Session } from '../../types'
+import type { Session } from '../../lib/api/types'
 
 export const Route = createFileRoute('/sessions/new')({
   component: NewSessionPage,

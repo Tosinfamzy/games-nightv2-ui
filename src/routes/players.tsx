@@ -353,12 +353,12 @@ function PlayerManagementPage() {
                       Session
                     </h4>
                     <p className="text-sm text-gray-600">
-                      {player.session.name}
+                      {player.session?.name ?? 'Unnamed Session'}
                     </p>
                     <p className="text-xs text-gray-500">
                       Join Code:{' '}
                       <span className="font-mono bg-gray-200 px-1 rounded">
-                        {player.session.joinCode}
+                        {player.session?.joinCode ?? 'N/A'}
                       </span>
                     </p>
                   </div>
@@ -368,7 +368,7 @@ function PlayerManagementPage() {
                 {player.team && (
                   <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                     <h4 className="font-semibold text-blue-900 mb-1">Team</h4>
-                    <p className="text-sm text-blue-700">{player.team.name}</p>
+                    <p className="text-sm text-blue-700">{player.team?.name ?? 'Unknown Team'}</p>
                   </div>
                 )}
 

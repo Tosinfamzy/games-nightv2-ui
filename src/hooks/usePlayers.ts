@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { playerService } from '../services/players'
-import type { CreatePlayerDTO, UpdatePlayerDTO } from '../services/players'
-import type { Player } from '../types'
+import { playerService } from '../lib/api/services'
+import type { CreatePlayerDTO, UpdatePlayerDTO, Player } from '../lib/api/types'
 
 const PLAYERS_KEY = 'players'
 
@@ -20,30 +19,25 @@ export const usePlayer = (id: string) => {
   })
 }
 
-export const usePlayersByTeam = (teamId: string) => {
-  return useQuery({
-    queryKey: [PLAYERS_KEY, 'team', teamId],
-    queryFn: () => playerService.getByTeam(teamId),
-    enabled: Boolean(teamId),
-  })
-}
+// Disabled - use playerService.getBySession instead
+// export const usePlayersByTeam = (teamId: string) => {
+//   return useQuery({
+//     queryKey: [PLAYERS_KEY, 'team', teamId],
+//     queryFn: () => playerService.getByTeam(teamId),
+//     enabled: Boolean(teamId),
+//   })
+// }
 
 export const useCreatePlayer = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreatePlayerDTO) => playerService.create(data),
+    mutationFn: (data: CreatePlayerDTO) => playerService.create(data as any),
     onSuccess: (newPlayer) => {
-      queryClient.setQueryData<Array<Player>>([PLAYERS_KEY], (old = []) => [
+      queryClient.setQueryData<Array<any>>([PLAYERS_KEY], (old = []) => [
         ...old,
         newPlayer,
       ])
-      if (newPlayer.teamId) {
-        queryClient.setQueryData<Array<Player>>(
-          [PLAYERS_KEY, 'team', newPlayer.teamId],
-          (old = []) => [...old, newPlayer],
-        )
-      }
     },
   })
 }
@@ -52,19 +46,12 @@ export const useUpdatePlayer = (id: string) => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: UpdatePlayerDTO) => playerService.update(id, data),
+    mutationFn: (data: UpdatePlayerDTO) => playerService.update(id, data as any),
     onSuccess: (updatedPlayer) => {
-      queryClient.setQueryData<Player>([PLAYERS_KEY, id], updatedPlayer)
-      queryClient.setQueryData<Array<Player>>([PLAYERS_KEY], (old = []) =>
-        old.map((player) => (player.id === id ? updatedPlayer : player)),
+      queryClient.setQueryData<any>([PLAYERS_KEY, id], updatedPlayer)
+      queryClient.setQueryData<Array<any>>([PLAYERS_KEY], (old = []) =>
+        old.map((player: any) => (player.id === id ? updatedPlayer : player)),
       )
-      if (updatedPlayer.teamId) {
-        queryClient.setQueryData<Array<Player>>(
-          [PLAYERS_KEY, 'team', updatedPlayer.teamId],
-          (old = []) =>
-            old.map((player) => (player.id === id ? updatedPlayer : player)),
-        )
-      }
     },
   })
 }

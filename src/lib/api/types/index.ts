@@ -1,6 +1,8 @@
 // Common types
 export type UUID = string
 
+export * from './common'
+
 // Session types
 export interface Session {
   id: UUID
@@ -38,6 +40,8 @@ export interface Game {
   status: GameStatus
   currentRound: number
   maxRounds: number
+  minPlayers: number
+  maxPlayers: number
   startTime?: string
   endTime?: string
   sessionId: UUID
@@ -67,6 +71,7 @@ export interface Player {
   name: string
   email: string
   teams: Array<Team>
+  teamId?: string // Legacy compatibility
 }
 
 // Score types
@@ -89,3 +94,36 @@ export interface TeamScore {
     points: number
   }>
 }
+
+// Join session types
+export interface JoinSessionRequest {
+  joinCode: string
+  playerName: string
+}
+
+export interface JoinSessionResponse {
+  session: Session
+  message: string
+}
+
+// Session DTOs
+export interface CreateSessionDTO {
+  name: string
+  description?: string
+  gamesMasterId: string
+  date: string
+  location?: string
+}
+
+export interface UpdateSessionDTO extends Partial<CreateSessionDTO> {
+  status?: Session['status']
+}
+
+// Player DTOs
+export interface CreatePlayerDTO {
+  name: string
+  email?: string
+  sessionId?: string // Optional for compatibility
+}
+
+export interface UpdatePlayerDTO extends Partial<CreatePlayerDTO> {}

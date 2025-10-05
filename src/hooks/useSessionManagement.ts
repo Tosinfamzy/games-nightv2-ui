@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { sessionService } from '../services/sessions'
-import { sessionManagementService } from '../lib/api/services/session-management.service'
-import { playerService } from '../lib/api/services/player.service'
+import { sessionService, sessionManagementService, playerService } from '../lib/api/services'
 
 export function useSessionDetails(sessionId: string) {
   return useQuery({

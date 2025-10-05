@@ -65,7 +65,7 @@ function SessionsPage() {
             </div>
             <p className="text-gray-600 mb-2">{session.description}</p>
             <div className="text-sm text-gray-500 mb-4">
-              <div>Host: {session.host.name}</div>
+              <div>Host: {session.host?.name ?? 'Unknown Host'}</div>
               <div>
                 Date:{' '}
                 {new Date(

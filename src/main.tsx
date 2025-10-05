@@ -8,7 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { routeTree } from './routeTree.gen'
 
 import './styles.css'
-import reportWebVitals from './reportWebVitals.ts'
+import reportWebVitals from './reportWebVitals'
 
 // Create a client
 const queryClient = new QueryClient({

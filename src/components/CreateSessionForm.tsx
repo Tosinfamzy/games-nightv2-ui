@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { sessionService } from '../services/sessions'
-import type { CreateSessionDTO } from '../services/sessions'
-import type { Session } from '../types'
+import { sessionService } from '../lib/api/services'
+import type { CreateSessionDTO, Session } from '../lib/api/types'
 
 interface CreateSessionFormProps {
   onCreateSuccess?: (session: Session) => void

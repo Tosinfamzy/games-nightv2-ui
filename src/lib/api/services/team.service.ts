@@ -1,5 +1,5 @@
 import { fetchAPI } from '../client'
-import type { Player } from './player.service'
+import type { TeamResponseDto } from '../types/team.dto'
 
 export interface Team {
   id: string
@@ -7,30 +7,10 @@ export interface Team {
   color?: string
   position: number
   isActive: boolean
-  game: {
-    id: string
-    name: string
-    status: string
-    currentRound: number
-    maxRounds: number
-    session: {
-      id: string
-      name: string
-      status: string
-      joinCode: string
-    }
-  }
-  session: {
-    id: string
-    name: string
-    status: string
-    joinCode: string
-    host: {
-      id: string
-      name: string
-    }
-  }
-  players: Array<Player>
+  sessionId?: string | null
+  gameId?: string | null
+  playerIds: Array<string>
+  scoreIds: Array<string>
   createdAt: string
   updatedAt: string
 }
@@ -52,63 +32,76 @@ export interface UpdateTeamDTO {
   isActive?: boolean
 }
 
+const mapDto = (dto: TeamResponseDto): Team => ({
+  id: dto.id,
+  name: dto.name,
+  color: dto.color ?? undefined,
+  position: dto.position,
+  isActive: dto.isActive,
+  sessionId: dto.sessionId ?? undefined,
+  gameId: dto.gameId ?? undefined,
+  playerIds: dto.playerIds ?? [],
+  scoreIds: dto.scoreIds ?? [],
+  createdAt: dto.createdAt,
+  updatedAt: dto.updatedAt,
+})
+
 export const teamService = {
-  // Get all teams
-  getAll: (): Promise<Array<Team>> => {
-    return fetchAPI<Array<Team>>('/teams')
+  async getAll(): Promise<Array<Team>> {
+    const data = await fetchAPI<Array<TeamResponseDto>>('/teams')
+    return data.map(mapDto)
   },
 
-  // Get teams by session
-  getBySession: (sessionId: string): Promise<Array<Team>> => {
-    return fetchAPI<Array<Team>>(`/teams/session/${sessionId}`)
+  async getBySession(sessionId: string): Promise<Array<Team>> {
+    const data = await fetchAPI<Array<TeamResponseDto>>(
+      `/teams/session/${sessionId}`,
+    )
+    return data.map(mapDto)
   },
 
-  // Get teams by game
-  getByGame: (gameId: string): Promise<Array<Team>> => {
-    return fetchAPI<Array<Team>>(`/teams/game/${gameId}`)
+  async getByGame(gameId: string): Promise<Array<Team>> {
+    const data = await fetchAPI<Array<TeamResponseDto>>(`/teams/game/${gameId}`)
+    return data.map(mapDto)
   },
 
-  // Get a specific team
-  getById: (id: string): Promise<Team> => {
-    return fetchAPI<Team>(`/teams/${id}`)
+  async getById(id: string): Promise<Team> {
+    const data = await fetchAPI<TeamResponseDto>(`/teams/${id}`)
+    return mapDto(data)
   },
 
-  // Create a new team
-  create: (data: CreateTeamDTO): Promise<Team> => {
-    return fetchAPI<Team>('/teams', {
+  create(data: CreateTeamDTO): Promise<Team> {
+    return fetchAPI<TeamResponseDto>('/teams', {
       method: 'POST',
       body: JSON.stringify(data),
-    })
+    }).then(mapDto)
   },
 
-  // Update a team
-  update: (id: string, data: UpdateTeamDTO): Promise<Team> => {
-    return fetchAPI<Team>(`/teams/${id}`, {
+  update(id: string, data: UpdateTeamDTO): Promise<Team> {
+    return fetchAPI<TeamResponseDto>(`/teams/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
-    })
+    }).then(mapDto)
   },
 
-  // Add players to team
-  addPlayers: (teamId: string, playerIds: Array<string>): Promise<Team> => {
-    return fetchAPI<Team>(`/teams/${teamId}/players`, {
+  addPlayers(teamId: string, playerIds: Array<string>): Promise<Team> {
+    return fetchAPI<TeamResponseDto>(`/teams/${teamId}/players`, {
       method: 'POST',
       body: JSON.stringify({ playerIds }),
-    })
+    }).then(mapDto)
   },
 
-  // Remove players from team
-  removePlayers: (teamId: string, playerIds: Array<string>): Promise<Team> => {
-    return fetchAPI<Team>(`/teams/${teamId}/players`, {
+  removePlayers(teamId: string, playerIds: Array<string>): Promise<Team> {
+    return fetchAPI<TeamResponseDto>(`/teams/${teamId}/players`, {
       method: 'DELETE',
       body: JSON.stringify({ playerIds }),
-    })
+    }).then(mapDto)
   },
 
-  // Delete a team
-  delete: (id: string): Promise<void> => {
+  delete(id: string): Promise<void> {
     return fetchAPI<void>(`/teams/${id}`, {
       method: 'DELETE',
     })
   },
 }
+
+export { mapDto as mapTeamDto }

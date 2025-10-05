@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "vite build && tsc",
+    "build": "tsc --noEmit && vite build",
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
