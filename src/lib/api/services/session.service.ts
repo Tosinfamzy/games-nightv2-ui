@@ -32,103 +32,101 @@ export interface RemoveGameFromSessionDTO {
   gameId: string
 }
 
-class SessionService {
-  private readonly basePath = '/sessions'
+const BASE_PATH = '/sessions'
 
-  async getAll(): Promise<Array<Session>> {
-    return fetchAPI<Array<Session>>(this.basePath)
-  }
+export const sessionService = {
+  getAll: async (): Promise<Array<Session>> => {
+    return fetchAPI<Array<Session>>(BASE_PATH)
+  },
 
-  async getById(id: UUID): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}`)
-  }
+  getById: async (id: UUID): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}`)
+  },
 
-  async create(session: CreateSessionDTO): Promise<Session> {
-    return fetchAPI<Session>(this.basePath, {
+  create: async (session: CreateSessionDTO): Promise<Session> => {
+    return fetchAPI<Session>(BASE_PATH, {
       method: 'POST',
       body: JSON.stringify(session),
     })
-  }
+  },
 
-  async update(id: UUID, session: UpdateSessionDTO): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}`, {
+  update: async (id: UUID, session: UpdateSessionDTO): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(session),
     })
-  }
+  },
 
-  async delete(id: UUID): Promise<void> {
-    return fetchAPI(`${this.basePath}/${id}`, {
+  delete: async (id: UUID): Promise<void> => {
+    return fetchAPI(`${BASE_PATH}/${id}`, {
       method: 'DELETE',
     })
-  }
+  },
 
-  async start(id: UUID): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}/start`, {
+  start: async (id: UUID): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}/start`, {
       method: 'POST',
     })
-  }
+  },
 
-  async complete(id: UUID): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}/complete`, {
+  complete: async (id: UUID): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}/complete`, {
       method: 'POST',
     })
-  }
+  },
 
-  async cancel(id: UUID): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}/cancel`, {
+  cancel: async (id: UUID): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}/cancel`, {
       method: 'POST',
     })
-  }
+  },
 
-  // Join session by code
-  async getByJoinCode(joinCode: string): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/join/${joinCode}`)
-  }
+  getByJoinCode: async (joinCode: string): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/join/${joinCode}`)
+  },
 
-  async joinSession(
+  joinSession: async (
     data: JoinSessionDTO,
-  ): Promise<{ session: Session; player: any }> {
-    return fetchAPI<{ session: Session; player: any }>(
-      `${this.basePath}/join`,
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
-      },
-    )
-  }
-
-  // Game management
-  async addGames(id: UUID, data: AddGamesToSessionDTO): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}/games`, {
+  ): Promise<{ session: Session; player: any }> => {
+    return fetchAPI<{ session: Session; player: any }>(`${BASE_PATH}/join`, {
       method: 'POST',
       body: JSON.stringify(data),
     })
-  }
+  },
 
-  async removeGame(id: UUID, data: RemoveGameFromSessionDTO): Promise<Session> {
-    return fetchAPI<Session>(`${this.basePath}/${id}/games`, {
+  addGames: async (
+    id: UUID,
+    data: AddGamesToSessionDTO,
+  ): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}/games`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  removeGame: async (
+    id: UUID,
+    data: RemoveGameFromSessionDTO,
+  ): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/${id}/games`, {
       method: 'DELETE',
       body: JSON.stringify(data),
     })
-  }
+  },
 
-  // Validation and readiness
-  async validateSession(id: UUID): Promise<SessionValidation> {
-    return fetchAPI<SessionValidation>(`${this.basePath}/${id}/validation`)
-  }
+  validateSession: async (id: UUID): Promise<SessionValidation> => {
+    return fetchAPI<SessionValidation>(`${BASE_PATH}/${id}/validation`)
+  },
 
-  async checkCanStart(
+  checkCanStart: async (
     id: UUID,
-  ): Promise<{ canStart: boolean; reasons: Array<string> }> {
+  ): Promise<{ canStart: boolean; reasons: Array<string> }> => {
     return fetchAPI<{ canStart: boolean; reasons: Array<string> }>(
-      `${this.basePath}/${id}/can-start`,
+      `${BASE_PATH}/${id}/can-start`,
     )
-  }
+  },
 
-  async getReadiness(id: UUID): Promise<SessionReadiness> {
-    return fetchAPI<SessionReadiness>(`${this.basePath}/${id}/readiness`)
-  }
+  getReadiness: async (id: UUID): Promise<SessionReadiness> => {
+    return fetchAPI<SessionReadiness>(`${BASE_PATH}/${id}/readiness`)
+  },
 }
-
-export const sessionService = new SessionService()

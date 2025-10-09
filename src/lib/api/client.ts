@@ -22,6 +22,15 @@ export async function fetchAPI<T>(
   endpoint: string,
   config?: RequestConfig,
 ): Promise<T> {
+  if (!endpoint || typeof endpoint !== 'string') {
+    throw new APIError(
+      0,
+      'INVALID_ENDPOINT',
+      'Invalid endpoint provided to fetchAPI',
+      { endpoint },
+    )
+  }
+
   const { params, ...init } = config || {}
 
   // Automatically prepend /v1 if not already present

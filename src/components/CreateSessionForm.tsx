@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { sessionService } from '../lib/api/services'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { gamesMasterService, sessionService } from '../lib/api/services'
 import type { CreateSessionDTO, Session } from '../lib/api/types'
 
 interface CreateSessionFormProps {
@@ -13,6 +13,23 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
   const [location, setLocation] = useState('')
+  const [gamesMasterId, setGamesMasterId] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+
+  const {
+    data: gamesMasters = [],
+    isLoading: gamesMastersLoading,
+    isError: gamesMastersError,
+  } = useQuery({
+    queryKey: ['gamesMasters'],
+    queryFn: gamesMasterService.getAll,
+  })
+
+  useEffect(() => {
+    if (!gamesMasterId && gamesMasters.length > 0) {
+      setGamesMasterId(gamesMasters[0].id)
+    }
+  }, [gamesMasterId, gamesMasters])
 
   const createSessionMutation = useMutation({
     mutationFn: sessionService.create,
@@ -24,18 +41,29 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
       setDescription('')
       setDate('')
       setLocation('')
+      setGamesMasterId(gamesMasters[0]?.id ?? '')
+      setFormError(null)
     },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!gamesMasterId) {
+      setFormError(
+        gamesMasters.length === 0
+          ? 'Please create a games master before scheduling a session.'
+          : 'Select a games master for this session.',
+      )
+      return
+    }
+
     const sessionData: CreateSessionDTO = {
       name,
       description,
       date: new Date(date).toISOString(),
       location: location || undefined,
-      gamesMasterId: '1', // TODO: Get from auth context
+      gamesMasterId,
     }
 
     createSessionMutation.mutate(sessionData)
@@ -48,6 +76,54 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="gamesMasterId"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Games Master *
+          </label>
+          <select
+            id="gamesMasterId"
+            value={gamesMasterId}
+            onChange={(e) => {
+              setGamesMasterId(e.target.value)
+              setFormError(null)
+            }}
+            disabled={
+              gamesMastersLoading ||
+              gamesMastersError ||
+              gamesMasters.length === 0
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {gamesMasters.length === 0 ? (
+              <option value="">
+                {gamesMastersLoading
+                  ? 'Loading games masters...'
+                  : 'No games masters available'}
+              </option>
+            ) : (
+              gamesMasters.map((master) => (
+                <option key={master.id} value={master.id}>
+                  {master.name}
+                </option>
+              ))
+            )}
+          </select>
+          {gamesMastersError && (
+            <p className="text-red-500 text-sm mt-1">
+              Unable to load games masters. Please try again.
+            </p>
+          )}
+          {!gamesMastersLoading && gamesMasters.length === 0 && (
+            <p className="text-sm text-gray-500 mt-1">
+              Create a games master first so you can assign them to this
+              session.
+            </p>
+          )}
+        </div>
+
         <div>
           <label
             htmlFor="name"
@@ -119,11 +195,19 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
         <button
           type="submit"
-          disabled={createSessionMutation.isPending}
+          disabled={
+            createSessionMutation.isPending ||
+            gamesMastersLoading ||
+            gamesMasters.length === 0
+          }
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         >
           {createSessionMutation.isPending ? 'Creating...' : 'Create Session'}
         </button>
+
+        {formError && (
+          <div className="text-red-500 text-sm mt-2">{formError}</div>
+        )}
 
         {createSessionMutation.error && (
           <div className="text-red-500 text-sm mt-2">
