@@ -126,7 +126,7 @@ export function TeamFormationInterface({
 
   const getUnassignedPlayers = () => {
     const assignedPlayerIds = teams.flatMap((team) =>
-      team.players.map((p) => p.id),
+      (team.players || []).map((p) => p.id),
     )
     return players.filter((player) => !assignedPlayerIds.includes(player.id))
   }

@@ -449,7 +449,7 @@ function SessionDetailsPage() {
                     .filter(
                       (p) =>
                         !teams.some((team) =>
-                          team.players.some((tp: any) => tp.id === p.id),
+                          team.players?.some((tp: any) => tp.id === p.id),
                         ),
                     )
                     .map((p) => ({

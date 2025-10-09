@@ -228,7 +228,7 @@ export function SessionReadinessDashboard({
                   >
                     <span className="truncate">{team.name}</span>
                     <span className="text-xs text-gray-600">
-                      {team.players.length} players
+                      {team.players?.length || 0} players
                     </span>
                   </div>
                 ))}

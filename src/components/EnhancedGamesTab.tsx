@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionManagementService } from '../lib/api/services/session-management.service'
 import { gameLibraryService } from '../lib/api/services/game-library.service'
@@ -48,6 +49,7 @@ export function EnhancedGamesTab({
   const [categoryFilter, setCategoryFilter] = useState('')
 
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   // Fetch available games for adding
   const { data: availableGames = [] } = useQuery({
@@ -62,7 +64,7 @@ export function EnhancedGamesTab({
       sessionManagementService.addGamesToSession(sessionId, { gameLibraryIds }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['sessions', sessionId, 'games'],
+        queryKey: ['sessions', sessionId],
       })
       setShowAddGames(false)
       setSelectedGames([])
@@ -75,7 +77,7 @@ export function EnhancedGamesTab({
       sessionManagementService.removeGamesFromSession(sessionId, { gameId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['sessions', sessionId, 'games'],
+        queryKey: ['sessions', sessionId],
       })
     },
   })
@@ -346,6 +348,35 @@ export function EnhancedGamesTab({
                     <span>{teamCompatibility.message}</span>
                   </div>
                 </div>
+
+                {/* Play Game Button - Show when session is IN_PROGRESS */}
+                {sessionStatus === 'IN_PROGRESS' && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        navigate({
+                          to: '/sessions/$id/game',
+                          params: { id: sessionId },
+                          search: { gameId: game.id },
+                        } as any)
+                      }}
+                      disabled={game.status === 'completed'}
+                      className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                        game.status === 'completed'
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : game.status === 'in_progress'
+                            ? 'bg-green-600 text-white hover:bg-green-700'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {game.status === 'completed'
+                        ? '✓ Completed'
+                        : game.status === 'in_progress'
+                          ? '▶ Resume Game'
+                          : '🎮 Play Game'}
+                    </button>
+                  </div>
+                )}
 
                 {/* Game Description */}
                 {game.description && (

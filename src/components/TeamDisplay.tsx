@@ -177,7 +177,7 @@ export function TeamDisplay({
   }
 
   const getTeamBalance = (team: Team) => {
-    if (!team.players.length)
+    if (!team.players?.length)
       return { label: 'No players', color: 'text-gray-600' }
 
     const totalSkill = team.players.reduce(
@@ -324,7 +324,7 @@ export function TeamDisplay({
                 <div className="flex justify-between items-center text-sm">
                   <div className="flex items-center space-x-4">
                     <span className="text-gray-600">
-                      👥 {team.players.length} players
+                      👥 {team.players?.length || 0} players
                     </span>
                     <span className={`font-medium ${balance.color}`}>
                       {balance.label}
@@ -340,9 +340,9 @@ export function TeamDisplay({
 
               {/* Players List */}
               <div className="p-4">
-                {team.players.length > 0 ? (
+                {(team.players?.length || 0) > 0 ? (
                   <div className="space-y-2">
-                    {team.players.map((player) => (
+                    {(team.players || []).map((player) => (
                       <div
                         key={player.id}
                         draggable
@@ -437,9 +437,9 @@ export function TeamDisplay({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {teams.map((team) => {
             const balance = getTeamBalance(team)
-            const avgSkill = team.players.length
-              ? team.players.reduce((sum, p) => sum + (p.skillLevel || 0), 0) /
-                team.players.length
+            const avgSkill = (team.players?.length || 0) > 0
+              ? (team.players || []).reduce((sum, p) => sum + (p.skillLevel || 0), 0) /
+                (team.players?.length || 1)
               : 0
 
             return (
