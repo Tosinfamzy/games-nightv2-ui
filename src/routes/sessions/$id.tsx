@@ -1,13 +1,23 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { sessionService, playerService, sessionManagementService } from '../../lib/api/services'
+import {
+  playerService,
+  sessionManagementService,
+  sessionService,
+} from '../../lib/api/services'
+import { useSessionFull } from '../../lib/api/hooks/use-session'
 import { useSessionSocket } from '../../lib/socket'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { TeamDisplay } from '../../components/TeamDisplay'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
 import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
 import { ManualTeamCreator } from '../../components/ManualTeamCreator'
+import {
+  enrichTeamsWithPlayers,
+  transformGames,
+  transformPlayers,
+} from '../../lib/utils/data-transforms'
 
 export const Route = createFileRoute('/sessions/$id')({
   component: SessionDetailsPage,
@@ -24,27 +34,15 @@ function SessionDetailsPage() {
   // Connect to session WebSocket for real-time updates
   useSessionSocket(id)
 
-  // Fetch session details
-  const {
-    data: session,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['sessions', id],
-    queryFn: () => sessionService.getById(id),
-  })
+  // Fetch session with all nested resources (games, teams, players) in parallel
+  const { session, games, teams, players, isLoading, isError, error } =
+    useSessionFull(id)
 
-  // Fetch session players
-  const { data: players = [] } = useQuery({
-    queryKey: ['players', 'session', id],
-    queryFn: () => playerService.getBySession(id),
-  })
-
-  // Fetch session teams
-  const { data: teams = [] } = useQuery({
-    queryKey: ['teams', 'session', id],
-    queryFn: () => sessionManagementService.getSessionTeams(id),
-  }) as { data: Array<any> }
+  // Transform API data to UI-friendly format for components
+  const uiPlayers = transformPlayers(players)
+  const uiGames = transformGames(games)
+  const uiGamesWithTeamSize = transformGames(games, true) // Include recommended team size
+  const uiTeams = enrichTeamsWithPlayers(teams, players)
 
   // Session mutations
   const startSessionMutation = useMutation({
@@ -80,7 +78,7 @@ function SessionDetailsPage() {
     )
   }
 
-  if (error) {
+  if (isError || !session) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center text-red-500">
@@ -94,47 +92,6 @@ function SessionDetailsPage() {
           >
             Back to Sessions
           </Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🎮</span>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome to the Session!
-              </h1>
-              <p className="text-gray-600 mb-6">
-                You've successfully joined session{' '}
-                <code className="bg-gray-100 px-2 py-1 rounded">{id}</code>
-              </p>
-
-              <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                <h3 className="font-semibold text-blue-900 mb-2">
-                  🎯 What's Next?
-                </h3>
-                <ul className="text-blue-800 text-sm space-y-1">
-                  <li>• Wait for the host to start the games</li>
-                  <li>• You'll see live scores and updates here</li>
-                  <li>• Team assignments will appear below</li>
-                </ul>
-              </div>
-
-              <Link
-                to="/join"
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                ← Join Another Session
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     )
@@ -300,27 +257,15 @@ function SessionDetailsPage() {
           )}
 
           {activeTab === 'players' && (
-            <PlayersTab session={session} players={players} />
+            <PlayersTab session={session} players={uiPlayers} />
           )}
 
           {activeTab === 'games' && (
             <EnhancedGamesTab
               sessionId={id}
-              sessionGames={(session.games || []).map((g) => ({
-                ...g,
-                status: g.status.toLowerCase() as
-                  | 'scheduled'
-                  | 'in_progress'
-                  | 'completed',
-              }))}
-              players={players.map((p) => ({
-                ...p,
-                status:
-                  p.status === 'joined'
-                    ? ('not_ready' as const)
-                    : (p.status as 'ready' | 'not_ready' | 'playing'),
-              }))}
-              teams={teams}
+              sessionGames={uiGames}
+              players={uiPlayers}
+              teams={uiTeams}
               sessionStatus={session.status}
             />
           )}
@@ -330,21 +275,9 @@ function SessionDetailsPage() {
               {/* Session Readiness Dashboard */}
               <SessionReadinessDashboard
                 sessionId={id}
-                players={players.map((p) => ({
-                  ...p,
-                  status:
-                    p.status === 'joined'
-                      ? ('not_ready' as const)
-                      : (p.status as 'ready' | 'not_ready' | 'playing'),
-                }))}
-                teams={teams}
-                games={(session.games || []).map((g) => ({
-                  ...g,
-                  status: g.status.toLowerCase() as
-                    | 'scheduled'
-                    | 'in_progress'
-                    | 'completed',
-                }))}
+                players={uiPlayers}
+                teams={uiTeams}
+                games={uiGames}
                 sessionStatus={session.status}
               />
 
@@ -381,13 +314,7 @@ function SessionDetailsPage() {
                 {showManualTeamCreator && (
                   <ManualTeamCreator
                     sessionId={id}
-                    players={players.map((p) => ({
-                      ...p,
-                      status:
-                        p.status === 'joined'
-                          ? ('not_ready' as const)
-                          : (p.status as 'ready' | 'not_ready' | 'playing'),
-                    }))}
+                    players={uiPlayers}
                     onTeamCreated={() => {
                       setShowManualTeamCreator(false)
                       // Invalidate and refetch teams data
@@ -416,22 +343,9 @@ function SessionDetailsPage() {
               {/* Enhanced Team Formation Interface */}
               <TeamFormationInterface
                 sessionId={id}
-                players={players.map((p) => ({
-                  ...p,
-                  status:
-                    p.status === 'joined'
-                      ? ('not_ready' as const)
-                      : (p.status as 'ready' | 'not_ready' | 'playing'),
-                }))}
-                teams={teams}
-                games={
-                  session.games?.map((g) => ({
-                    ...g,
-                    recommendedTeamSize: g.maxPlayers
-                      ? Math.floor(g.maxPlayers / 2)
-                      : 2,
-                  })) || []
-                }
+                players={uiPlayers}
+                teams={uiTeams}
+                games={uiGamesWithTeamSize as any}
                 onTeamsCreated={() => {
                   // Invalidate and refetch teams data
                   queryClient.invalidateQueries({
@@ -443,22 +357,14 @@ function SessionDetailsPage() {
               {/* Team Display */}
               {teams.length > 0 && (
                 <TeamDisplay
-                  teams={teams}
+                  teams={uiTeams}
                   sessionId={id}
-                  unassignedPlayers={players
-                    .filter(
-                      (p) =>
-                        !teams.some((team) =>
-                          team.players?.some((tp: any) => tp.id === p.id),
-                        ),
-                    )
-                    .map((p) => ({
-                      ...p,
-                      status:
-                        p.status === 'joined'
-                          ? ('not_ready' as const)
-                          : (p.status as 'ready' | 'not_ready' | 'playing'),
-                    }))}
+                  unassignedPlayers={uiPlayers.filter(
+                    (p) =>
+                      !uiTeams.some((team) =>
+                        team.players.some((tp) => tp.id === p.id),
+                      ),
+                  )}
                 />
               )}
             </div>

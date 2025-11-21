@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService } from '../services/session.service'
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
-import type { Session } from '../types'
+import type {
+  Game,
+  Player,
+  Session,
+  SessionLeaderboard,
+  Team,
+} from '../types'
 import type { PaginationParams } from '../types/common'
 
 export interface CreateSessionDTO {
@@ -23,6 +29,11 @@ export const sessionKeys = {
   list: (params: PaginationParams) => [...sessionKeys.lists(), params] as const,
   details: () => [...sessionKeys.all, 'detail'] as const,
   detail: (id: string) => [...sessionKeys.details(), id] as const,
+  games: (id: string) => [...sessionKeys.detail(id), 'games'] as const,
+  teams: (id: string) => [...sessionKeys.detail(id), 'teams'] as const,
+  players: (id: string) => [...sessionKeys.detail(id), 'players'] as const,
+  leaderboard: (id: string) =>
+    [...sessionKeys.detail(id), 'leaderboard'] as const,
 }
 
 // Queries
@@ -89,4 +100,74 @@ export const useDeleteSession = (): UseMutationResult<void, Error, string> => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() })
     },
   })
+}
+
+// Nested resource queries
+export const useSessionGames = (
+  sessionId: string,
+): UseQueryResult<Array<Game>, Error> => {
+  return useQuery({
+    queryKey: sessionKeys.games(sessionId),
+    queryFn: () => sessionService.getGames(sessionId),
+    enabled: Boolean(sessionId),
+  })
+}
+
+export const useSessionTeams = (
+  sessionId: string,
+): UseQueryResult<Array<Team>, Error> => {
+  return useQuery({
+    queryKey: sessionKeys.teams(sessionId),
+    queryFn: () => sessionService.getTeams(sessionId),
+    enabled: Boolean(sessionId),
+  })
+}
+
+export const useSessionPlayers = (
+  sessionId: string,
+): UseQueryResult<Array<Player>, Error> => {
+  return useQuery({
+    queryKey: sessionKeys.players(sessionId),
+    queryFn: () => sessionService.getPlayers(sessionId),
+    enabled: Boolean(sessionId),
+  })
+}
+
+export const useSessionLeaderboard = (
+  sessionId: string,
+): UseQueryResult<SessionLeaderboard, Error> => {
+  return useQuery({
+    queryKey: sessionKeys.leaderboard(sessionId),
+    queryFn: () => sessionService.getLeaderboard(sessionId),
+    enabled: Boolean(sessionId),
+  })
+}
+
+// Convenience hook to fetch session with all nested resources
+export const useSessionFull = (sessionId: string) => {
+  const session = useSession(sessionId)
+  const games = useSessionGames(sessionId)
+  const teams = useSessionTeams(sessionId)
+  const players = useSessionPlayers(sessionId)
+
+  return {
+    session: session.data,
+    games: games.data ?? [],
+    teams: teams.data ?? [],
+    players: players.data ?? [],
+    isLoading:
+      session.isLoading ||
+      games.isLoading ||
+      teams.isLoading ||
+      players.isLoading,
+    isError:
+      session.isError || games.isError || teams.isError || players.isError,
+    error: session.error || games.error || teams.error || players.error,
+    refetch: () => {
+      session.refetch()
+      games.refetch()
+      teams.refetch()
+      players.refetch()
+    },
+  }
 }

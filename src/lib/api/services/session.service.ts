@@ -1,5 +1,12 @@
 import { fetchAPI } from '../client'
-import type { Session, UUID } from '../types'
+import type {
+  Game,
+  Player,
+  Session,
+  SessionLeaderboard,
+  Team,
+  UUID,
+} from '../types'
 import type { CreateSessionDTO, UpdateSessionDTO } from '../hooks/use-session'
 
 // Additional types for session functionality
@@ -94,10 +101,7 @@ export const sessionService = {
     })
   },
 
-  addGames: async (
-    id: UUID,
-    data: AddGamesToSessionDTO,
-  ): Promise<Session> => {
+  addGames: async (id: UUID, data: AddGamesToSessionDTO): Promise<Session> => {
     return fetchAPI<Session>(`${BASE_PATH}/${id}/games`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -128,5 +132,22 @@ export const sessionService = {
 
   getReadiness: async (id: UUID): Promise<SessionReadiness> => {
     return fetchAPI<SessionReadiness>(`${BASE_PATH}/${id}/readiness`)
+  },
+
+  // Fetch nested resources for a session
+  getGames: async (id: UUID): Promise<Array<Game>> => {
+    return fetchAPI<Array<Game>>(`${BASE_PATH}/${id}/games`)
+  },
+
+  getTeams: async (id: UUID): Promise<Array<Team>> => {
+    return fetchAPI<Array<Team>>(`${BASE_PATH}/${id}/teams`)
+  },
+
+  getPlayers: async (id: UUID): Promise<Array<Player>> => {
+    return fetchAPI<Array<Player>>(`${BASE_PATH}/${id}/players`)
+  },
+
+  getLeaderboard: async (id: UUID): Promise<SessionLeaderboard> => {
+    return fetchAPI<SessionLeaderboard>(`${BASE_PATH}/${id}/leaderboard`)
   },
 }

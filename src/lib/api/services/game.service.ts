@@ -1,5 +1,5 @@
 import { fetchAPI } from '../client'
-import type { Game, UUID } from '../types'
+import type { Game, GameResults, UUID } from '../types'
 
 class GameService {
   private readonly basePath = '/games'
@@ -60,6 +60,10 @@ class GameService {
     return fetchAPI<Game>(`${this.basePath}/${id}/complete`, {
       method: 'POST',
     })
+  }
+
+  async getResults(id: UUID): Promise<GameResults> {
+    return fetchAPI<GameResults>(`${this.basePath}/${id}/results`)
   }
 }
 

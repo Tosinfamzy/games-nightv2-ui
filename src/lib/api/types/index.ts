@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/array-type */
 // Common types
 export type UUID = string
 
@@ -20,9 +21,14 @@ export interface Session {
   }
   createdAt: string
   updatedAt: string
-  games?: Array<Game>
-  teams?: Array<Team>
-  players?: Array<Player>
+  // Resource IDs (use dedicated endpoints to fetch full objects)
+  gameIds: string[]
+  teamIds: string[]
+  playerIds: string[]
+  // Counts for quick reference
+  gamesCount: number
+  teamsCount: number
+  playersCount: number
 }
 
 export enum SessionStatus {
@@ -60,9 +66,15 @@ export enum GameStatus {
 export interface Team {
   id: UUID
   name: string
-  players: Array<Player>
-  scores: Array<Score>
-  gameId: UUID
+  color?: string
+  position: number
+  isActive: boolean
+  sessionId?: string | null
+  gameId?: string | null
+  playerIds: string[]
+  scoreIds: string[]
+  createdAt: string
+  updatedAt: string
 }
 
 // Player types
@@ -70,6 +82,7 @@ export interface Player {
   id: UUID
   name: string
   email: string
+  status: 'joined' | 'ready' | 'playing' | 'disconnected'
   teams: Array<Team>
   teamId?: string // Legacy compatibility
 }
@@ -127,3 +140,50 @@ export interface CreatePlayerDTO {
 }
 
 export interface UpdatePlayerDTO extends Partial<CreatePlayerDTO> {}
+
+// Results and Leaderboard types
+export interface TeamStanding {
+  teamId: UUID
+  teamName: string
+  rank: number
+  totalPoints: number
+  bonusPointsCount: number
+  roundPoints: Record<number, number>
+  isTied?: boolean
+}
+
+export interface GameResults {
+  gameId: UUID
+  gameName: string
+  status: string
+  winnerId: UUID | null
+  winnerName: string | null
+  winningScore: number | null
+  completedAt: string | null
+  standings: Array<TeamStanding>
+  roundsCompleted: number
+  isTied: boolean
+}
+
+export interface SessionTeamStanding {
+  teamId: UUID
+  teamName: string
+  rank: number
+  totalPoints: number
+  gamesWon: number
+  gamesPlayed: number
+  gamePoints: Record<string, number>
+  averagePoints: number
+}
+
+export interface SessionLeaderboard {
+  sessionId: UUID
+  sessionName: string
+  status: string
+  championId: UUID | null
+  championName: string | null
+  standings: Array<SessionTeamStanding>
+  gamesCompleted: number
+  teamsCount: number
+  completedAt: string | null
+}

@@ -21,4 +21,12 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      treeshake: {
+        // Workaround for Rollup bug with ConditionalExpression.getLiteralValueAtPath
+        propertyReadSideEffects: false,
+      },
+    },
+  },
 })
