@@ -94,8 +94,8 @@ export const sessionService = {
 
   joinSession: async (
     data: JoinSessionDTO,
-  ): Promise<{ session: Session; player: any }> => {
-    return fetchAPI<{ session: Session; player: any }>(`${BASE_PATH}/join`, {
+  ): Promise<{ session: Session; player: Player }> => {
+    return fetchAPI<{ session: Session; player: Player }>(`${BASE_PATH}/join`, {
       method: 'POST',
       body: JSON.stringify(data),
     })
