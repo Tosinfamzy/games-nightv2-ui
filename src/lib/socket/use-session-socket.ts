@@ -168,6 +168,40 @@ export const useSessionSocket = (sessionId: string | undefined) => {
     };
   }, [sessionsSocket, sessionId, queryClient]);
 
+  // Listen for player online events
+  useEffect(() => {
+    if (!sessionsSocket || !sessionId) return;
+
+    const handlePlayerOnline = (data: any) => {
+      console.log('Player online:', data);
+      // Invalidate queries to update player online status
+      queryClient.invalidateQueries({ queryKey: ['players', 'session', sessionId] });
+    };
+
+    sessionsSocket.on('session:player-online', handlePlayerOnline);
+
+    return () => {
+      sessionsSocket.off('session:player-online', handlePlayerOnline);
+    };
+  }, [sessionsSocket, sessionId, queryClient]);
+
+  // Listen for player offline events
+  useEffect(() => {
+    if (!sessionsSocket || !sessionId) return;
+
+    const handlePlayerOffline = (data: any) => {
+      console.log('Player offline:', data);
+      // Invalidate queries to update player online status
+      queryClient.invalidateQueries({ queryKey: ['players', 'session', sessionId] });
+    };
+
+    sessionsSocket.on('session:player-offline', handlePlayerOffline);
+
+    return () => {
+      sessionsSocket.off('session:player-offline', handlePlayerOffline);
+    };
+  }, [sessionsSocket, sessionId, queryClient]);
+
   return {
     isConnected,
     socket: sessionsSocket,

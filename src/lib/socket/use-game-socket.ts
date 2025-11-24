@@ -191,6 +191,38 @@ export const useGameSocket = (gameId: string | undefined) => {
     };
   }, [gamesSocket, gameId, queryClient]);
 
+  // Listen for turn started events (timer)
+  useEffect(() => {
+    if (!gamesSocket || !gameId) return;
+
+    const handleTurnStarted = (data: any) => {
+      console.log('Turn started:', data);
+      queryClient.invalidateQueries({ queryKey: ['games', gameId] });
+    };
+
+    gamesSocket.on('game:turn-started', handleTurnStarted);
+
+    return () => {
+      gamesSocket.off('game:turn-started', handleTurnStarted);
+    };
+  }, [gamesSocket, gameId, queryClient]);
+
+  // Listen for turn advanced events (timer)
+  useEffect(() => {
+    if (!gamesSocket || !gameId) return;
+
+    const handleTurnAdvanced = (data: any) => {
+      console.log('Turn advanced:', data);
+      queryClient.invalidateQueries({ queryKey: ['games', gameId] });
+    };
+
+    gamesSocket.on('game:turn-advanced', handleTurnAdvanced);
+
+    return () => {
+      gamesSocket.off('game:turn-advanced', handleTurnAdvanced);
+    };
+  }, [gamesSocket, gameId, queryClient]);
+
   return {
     isConnected,
     socket: gamesSocket,

@@ -3,6 +3,7 @@
 export type UUID = string
 
 export * from './common'
+export * from './chat'
 
 // Session types
 export interface Session {
@@ -83,6 +84,7 @@ export interface Player {
   name: string
   email: string
   status: 'joined' | 'ready' | 'playing' | 'disconnected'
+  isOnline: boolean
   teams: Array<Team>
   teamId?: string // Legacy compatibility
 }
@@ -186,4 +188,39 @@ export interface SessionLeaderboard {
   gamesCompleted: number
   teamsCount: number
   completedAt: string | null
+}
+
+// Timer event types
+export interface TimerTickEvent {
+  gameId: UUID
+  timeRemaining: number
+  timestamp: string
+}
+
+export interface TurnStartedEvent {
+  gameId: UUID
+  teamId: UUID
+  teamName: string
+  turnTimeLimit: number | null
+  turnStartedAt: string
+  turnEndsAt: string | null
+  timestamp: string
+}
+
+export interface TurnAdvancedEvent {
+  gameId: UUID
+  previousTeamId: UUID
+  nextTeamId: UUID
+  nextTeamName: string
+  turnTimeLimit: number | null
+  turnStartedAt: string
+  turnEndsAt: string | null
+  autoAdvanced: boolean
+  timestamp: string
+}
+
+export interface TimerExpiredEvent {
+  gameId: UUID
+  teamName: string
+  timestamp: string
 }

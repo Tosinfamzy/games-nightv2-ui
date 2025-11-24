@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { gameService } from '../lib/api/services/game.service'
 import { scoreService, type TeamScore } from '../lib/api/services/score.service'
 import type { Game } from '../lib/api/types'
+import GameTimer from './GameTimer'
+import { useGameSocket } from '../lib/socket'
 
 interface LiveGameViewProps {
   sessionId: string
@@ -20,6 +22,9 @@ export function LiveGameView({
   const queryClient = useQueryClient()
   const [selectedTeamId, setSelectedTeamId] = useState<string>('')
   const [scoreValue, setScoreValue] = useState<number>(0)
+
+  // Connect to game WebSocket for real-time updates (including timer)
+  useGameSocket(game.id)
 
   // Fetch game details with teams
   const { data: gameDetails, isLoading: gameLoading } = useQuery({
@@ -176,6 +181,11 @@ export function LiveGameView({
           </button>
         </div>
       </div>
+
+      {/* Game Timer (if configured) */}
+      {gameStatus === 'IN_PROGRESS' && (
+        <GameTimer gameId={game.id} showTeamName={true} size="md" />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Score Input */}

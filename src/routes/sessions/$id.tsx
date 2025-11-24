@@ -13,6 +13,9 @@ import { TeamDisplay } from '../../components/TeamDisplay'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
 import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
 import { ManualTeamCreator } from '../../components/ManualTeamCreator'
+import SessionChat from '../../components/SessionChat'
+import PlayerStatusBadge from '../../components/PlayerStatusBadge'
+import OnlinePlayerCount from '../../components/OnlinePlayerCount'
 import {
   enrichTeamsWithPlayers,
   transformGames,
@@ -27,7 +30,7 @@ function SessionDetailsPage() {
   const { id } = Route.useParams()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'players' | 'games' | 'teams'
+    'overview' | 'players' | 'games' | 'teams' | 'chat'
   >('overview')
   const [showManualTeamCreator, setShowManualTeamCreator] = useState(false)
 
@@ -37,6 +40,10 @@ function SessionDetailsPage() {
   // Fetch session with all nested resources (games, teams, players) in parallel
   const { session, games, teams, players, isLoading, isError, error } =
     useSessionFull(id)
+
+  // TODO: Get current player ID from auth context
+  // For now, use the first player as a placeholder
+  const currentPlayerId = players?.[0]?.id || 'demo-player-id'
 
   // Transform API data to UI-friendly format for components
   const uiPlayers = transformPlayers(players)
@@ -224,6 +231,7 @@ function SessionDetailsPage() {
                 },
                 { id: 'games', label: 'Games', icon: '🎮' },
                 { id: 'teams', label: 'Teams', icon: '🏆' },
+                { id: 'chat', label: 'Chat', icon: '💬' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -367,6 +375,15 @@ function SessionDetailsPage() {
                   )}
                 />
               )}
+            </div>
+          )}
+
+          {activeTab === 'chat' && (
+            <div className="max-w-4xl mx-auto">
+              <SessionChat
+                sessionId={id}
+                playerId={currentPlayerId}
+              />
             </div>
           )}
         </div>
@@ -587,9 +604,7 @@ function PlayersTab({ session, players }: any) {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Session Players</h3>
         <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-600">
-            {players.length} player{players.length !== 1 ? 's' : ''} joined
-          </div>
+          <OnlinePlayerCount players={players} showDetails={true} />
           {session.status !== 'COMPLETED' && session.status !== 'CANCELLED' && (
             <button
               onClick={() => setShowAddPlayerForm(!showAddPlayerForm)}
@@ -730,7 +745,10 @@ function PlayersTab({ session, players }: any) {
                       />
                     </form>
                   ) : (
-                    <h4 className="font-medium text-gray-900">{player.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-gray-900">{player.name}</h4>
+                      <PlayerStatusBadge isOnline={player.isOnline} size="sm" />
+                    </div>
                   )}
 
                   <div className="flex items-center space-x-2">

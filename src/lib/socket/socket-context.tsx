@@ -7,12 +7,14 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 interface SocketContextValue {
   sessionsSocket: Socket | null;
   gamesSocket: Socket | null;
+  chatSocket: Socket | null;
   isConnected: boolean;
 }
 
 const SocketContext = createContext<SocketContextValue>({
   sessionsSocket: null,
   gamesSocket: null,
+  chatSocket: null,
   isConnected: false,
 });
 
@@ -31,6 +33,7 @@ interface SocketProviderProps {
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [sessionsSocket, setSessionsSocket] = useState<Socket | null>(null);
   const [gamesSocket, setGamesSocket] = useState<Socket | null>(null);
+  const [chatSocket, setChatSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -44,6 +47,14 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     // Create games namespace socket
     const gameSocket = io(`${API_URL}/games`, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+    });
+
+    // Create chat namespace socket
+    const chatSocket = io(`${API_URL}/chat`, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -78,18 +89,33 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       console.error('Games socket connection error:', error);
     });
 
+    // Connection handlers for chat socket
+    chatSocket.on('connect', () => {
+      console.log('Chat socket connected:', chatSocket.id);
+    });
+
+    chatSocket.on('disconnect', () => {
+      console.log('Chat socket disconnected');
+    });
+
+    chatSocket.on('connect_error', (error) => {
+      console.error('Chat socket connection error:', error);
+    });
+
     setSessionsSocket(sessionSocket);
     setGamesSocket(gameSocket);
+    setChatSocket(chatSocket);
 
     // Cleanup on unmount
     return () => {
       sessionSocket.disconnect();
       gameSocket.disconnect();
+      chatSocket.disconnect();
     };
   }, []);
 
   return (
-    <SocketContext.Provider value={{ sessionsSocket, gamesSocket, isConnected }}>
+    <SocketContext.Provider value={{ sessionsSocket, gamesSocket, chatSocket, isConnected }}>
       {children}
     </SocketContext.Provider>
   );
