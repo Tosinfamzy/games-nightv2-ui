@@ -4,6 +4,7 @@ export type UUID = string
 
 export * from './common'
 export * from './chat'
+export * from './dashboard'
 
 // Session types
 export interface Session {

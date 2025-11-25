@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
-import { ChatMessage as ChatMessageType } from '../lib/api/types';
-import ChatMessage from './ChatMessage';
+import { useEffect, useRef, useState } from 'react'
+import ChatMessage from './ChatMessage'
+import type { ChatMessage as ChatMessageType } from '../lib/api/types'
 
 interface ChatMessageListProps {
-  messages: ChatMessageType[];
-  currentPlayerId?: string;
-  hasMore: boolean;
-  onLoadMore: () => void;
-  isLoading?: boolean;
+  messages: Array<ChatMessageType>
+  currentPlayerId?: string
+  hasMore: boolean
+  onLoadMore: () => void
+  isLoading?: boolean
 }
 
 /**
@@ -20,31 +20,31 @@ export default function ChatMessageList({
   onLoadMore,
   isLoading = false,
 }: ChatMessageListProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
   // Auto-scroll to bottom when new messages arrive (if user is near bottom)
   useEffect(() => {
     if (shouldAutoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages, shouldAutoScroll]);
+  }, [messages, shouldAutoScroll])
 
   // Check if user is near bottom of chat
   const handleScroll = () => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) return
 
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-    setShouldAutoScroll(isNearBottom);
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
+    setShouldAutoScroll(isNearBottom)
 
     // Load more messages when scrolling to top
-    const isNearTop = scrollTop < 100;
+    const isNearTop = scrollTop < 100
     if (isNearTop && hasMore && !isLoading) {
-      onLoadMore();
+      onLoadMore()
     }
-  };
+  }
 
   // Empty state
   if (messages.length === 0) {
@@ -68,7 +68,7 @@ export default function ChatMessageList({
           <p className="text-sm">Be the first to start the conversation!</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -110,5 +110,5 @@ export default function ChatMessageList({
       {/* Scroll anchor */}
       <div ref={messagesEndRef} />
     </div>
-  );
+  )
 }

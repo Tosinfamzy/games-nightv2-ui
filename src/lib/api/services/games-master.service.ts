@@ -1,4 +1,5 @@
 import { fetchAPI } from '../client'
+import type { GMDashboard } from '../types'
 
 export interface GamesMaster {
   id: string
@@ -81,5 +82,10 @@ export const gamesMasterService = {
   // Get active sessions for a games master
   getActiveSessions: (id: string): Promise<Array<ActiveSession>> => {
     return fetchAPI<Array<ActiveSession>>(`/games-master/${id}/active-sessions`)
+  },
+
+  // Get dashboard data for a games master (Phase 1)
+  getDashboard: (id: string): Promise<GMDashboard> => {
+    return fetchAPI<GMDashboard>(`/games-master/${id}/dashboard`)
   },
 }

@@ -4,14 +4,14 @@ import { io, Socket } from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-interface SocketContextValue {
+export interface SocketContextValue {
   sessionsSocket: Socket | null;
   gamesSocket: Socket | null;
   chatSocket: Socket | null;
   isConnected: boolean;
 }
 
-const SocketContext = createContext<SocketContextValue>({
+export const SocketContext = createContext<SocketContextValue>({
   sessionsSocket: null,
   gamesSocket: null,
   chatSocket: null,

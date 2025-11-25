@@ -138,7 +138,7 @@ export default function SessionChat({
 
       {/* Message list */}
       <ChatMessageList
-        messages={messages}
+        messages={messages as any}
         currentPlayerId={playerId}
         hasMore={hasMore}
         onLoadMore={loadMoreMessages}

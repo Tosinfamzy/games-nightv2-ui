@@ -1,25 +1,29 @@
-import { ChatMessage as ChatMessageType, MessageType } from '../lib/api/types';
+import { MessageType } from '../lib/api/types'
+import type { ChatMessage as ChatMessageType } from '../lib/api/types'
 
 interface ChatMessageProps {
-  message: ChatMessageType;
-  currentPlayerId?: string;
+  message: ChatMessageType
+  currentPlayerId?: string
 }
 
 /**
  * Individual chat message component
  */
-export default function ChatMessage({ message, currentPlayerId }: ChatMessageProps) {
-  const isOwnMessage = message.playerId === currentPlayerId;
-  const isSystemMessage = message.type === MessageType.SYSTEM;
+export default function ChatMessage({
+  message,
+  currentPlayerId,
+}: ChatMessageProps) {
+  const isOwnMessage = message.playerId === currentPlayerId
+  const isSystemMessage = message.type === MessageType.SYSTEM
 
   // Format timestamp
   const formatTime = (date: Date | string) => {
-    const messageDate = typeof date === 'string' ? new Date(date) : date;
+    const messageDate = typeof date === 'string' ? new Date(date) : date
     return messageDate.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-    });
-  };
+    })
+  }
 
   // System messages (join/leave notifications, etc.)
   if (isSystemMessage) {
@@ -29,15 +33,13 @@ export default function ChatMessage({ message, currentPlayerId }: ChatMessagePro
           {message.content}
         </div>
       </div>
-    );
+    )
   }
 
   // Regular chat messages
   return (
     <div
-      className={`flex mb-3 ${
-        isOwnMessage ? 'justify-end' : 'justify-start'
-      }`}
+      className={`flex mb-3 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
     >
       <div
         className={`max-w-[70%] ${
@@ -75,5 +77,5 @@ export default function ChatMessage({ message, currentPlayerId }: ChatMessagePro
         </div>
       </div>
     </div>
-  );
+  )
 }

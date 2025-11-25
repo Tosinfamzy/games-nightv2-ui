@@ -1,9 +1,10 @@
-import { Player } from '../lib/api/types';
+/* eslint-disable @typescript-eslint/array-type */
+import type { Player } from '../lib/api/types'
 
 interface OnlinePlayerCountProps {
-  players: Player[];
-  showDetails?: boolean;
-  className?: string;
+  players: Player[]
+  showDetails?: boolean
+  className?: string
 }
 
 /**
@@ -14,17 +15,18 @@ export default function OnlinePlayerCount({
   showDetails = false,
   className = '',
 }: OnlinePlayerCountProps) {
-  const onlineCount = players.filter((p) => p.isOnline).length;
-  const totalCount = players.length;
-  const percentage = totalCount > 0 ? (onlineCount / totalCount) * 100 : 0;
+  const onlineCount = players.filter((p) => p.isOnline).length
+  const totalCount = players.length
+  const percentage = totalCount > 0 ? (onlineCount / totalCount) * 100 : 0
 
   // Determine color based on percentage
   const getColorClasses = () => {
-    if (percentage >= 75) return 'bg-green-100 text-green-800 border-green-200';
-    if (percentage >= 50) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    if (percentage > 0) return 'bg-orange-100 text-orange-800 border-orange-200';
-    return 'bg-gray-100 text-gray-600 border-gray-200';
-  };
+    if (percentage >= 75) return 'bg-green-100 text-green-800 border-green-200'
+    if (percentage >= 50)
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    if (percentage > 0) return 'bg-orange-100 text-orange-800 border-orange-200'
+    return 'bg-gray-100 text-gray-600 border-gray-200'
+  }
 
   if (showDetails) {
     return (
@@ -49,11 +51,13 @@ export default function OnlinePlayerCount({
             <p className="text-sm font-semibold">
               {onlineCount} / {totalCount} Online
             </p>
-            <p className="text-xs opacity-75">{Math.round(percentage)}% active</p>
+            <p className="text-xs opacity-75">
+              {Math.round(percentage)}% active
+            </p>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -69,5 +73,5 @@ export default function OnlinePlayerCount({
         {onlineCount}/{totalCount} online
       </span>
     </div>
-  );
+  )
 }
