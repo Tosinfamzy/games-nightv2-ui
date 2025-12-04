@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionManagementService } from '../lib/api/services/session-management.service'
 import { gameLibraryService } from '../lib/api/services/game-library.service'
+import { showToast } from '../lib/toast'
 
 interface Player {
   id: string
@@ -62,12 +63,21 @@ export function EnhancedGamesTab({
   const addGamesMutation = useMutation({
     mutationFn: (gameLibraryIds: Array<string>) =>
       sessionManagementService.addGamesToSession(sessionId, { gameLibraryIds }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['sessions', sessionId],
+        queryKey: ['sessions', 'detail', sessionId],
       })
       setShowAddGames(false)
       setSelectedGames([])
+      // Show success toast
+      showToast.success(
+        `✓ Successfully added ${variables.length} game${variables.length === 1 ? '' : 's'} to session!`
+      )
+    },
+    onError: (error) => {
+      showToast.error(
+        `Failed to add games: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     },
   })
 
@@ -77,13 +87,19 @@ export function EnhancedGamesTab({
       sessionManagementService.removeGamesFromSession(sessionId, { gameId }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['sessions', sessionId],
+        queryKey: ['sessions', 'detail', sessionId],
       })
+      showToast.success('✓ Game removed from session')
+    },
+    onError: (error) => {
+      showToast.error(
+        `Failed to remove game: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     },
   })
 
   const getGameCompatibility = (game: Game) => {
-    const playerCount = players.length
+    const playerCount = players?.length ?? 0
     const isCompatible =
       playerCount >= game.minPlayers && playerCount <= game.maxPlayers
 
@@ -107,7 +123,7 @@ export function EnhancedGamesTab({
       }
     }
 
-    const avgTeamSize = players.length / teams.length
+    const avgTeamSize = (players?.length ?? 0) / teams.length
     const recommendedTeamSize = Math.ceil(
       game.maxPlayers / Math.max(teams.length, 2),
     )
@@ -240,7 +256,8 @@ export function EnhancedGamesTab({
         <button
           onClick={() => setShowAddGames(true)}
           disabled={
-            sessionStatus === 'in_progress' || sessionStatus === 'completed'
+            sessionStatus === 'in_progress' || sessionStatus === 'IN_PROGRESS' ||
+            sessionStatus === 'completed' || sessionStatus === 'COMPLETED'
           }
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -273,7 +290,7 @@ export function EnhancedGamesTab({
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getStatusIcon(status)}</span>
-                    {sessionStatus === 'scheduled' && (
+                    {(sessionStatus === 'scheduled' || sessionStatus === 'SCHEDULED') && (
                       <button
                         onClick={() => {
                           if (confirm(`Remove "${game.name}" from session?`)) {

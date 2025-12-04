@@ -1,8 +1,20 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { showToast } from '../toast';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Auto-detect API URL: use env var if set, otherwise use current host with port 3000
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Use current hostname with backend port (works for both localhost and network IPs)
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  return `${protocol}//${hostname}:3000`;
+};
+
+const API_URL = getApiUrl();
 
 export interface SocketContextValue {
   sessionsSocket: Socket | null;
@@ -74,6 +86,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     sessionSocket.on('connect_error', (error) => {
       console.error('Sessions socket connection error:', error);
+      showToast.error('Failed to connect to sessions. Retrying...');
     });
 
     // Connection handlers for games socket
@@ -87,6 +100,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     gameSocket.on('connect_error', (error) => {
       console.error('Games socket connection error:', error);
+      showToast.error('Failed to connect to games. Retrying...');
     });
 
     // Connection handlers for chat socket
@@ -100,6 +114,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     chatSocket.on('connect_error', (error) => {
       console.error('Chat socket connection error:', error);
+      showToast.error('Failed to connect to chat. Retrying...');
     });
 
     setSessionsSocket(sessionSocket);

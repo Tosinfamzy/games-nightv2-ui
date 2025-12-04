@@ -65,6 +65,40 @@ class GameService {
   async getResults(id: UUID): Promise<GameResults> {
     return fetchAPI<GameResults>(`${this.basePath}/${id}/results`)
   }
+
+  async pause(id: UUID): Promise<Game> {
+    return fetchAPI<Game>(`${this.basePath}/${id}/pause`, {
+      method: 'POST',
+    })
+  }
+
+  async resume(id: UUID): Promise<Game> {
+    return fetchAPI<Game>(`${this.basePath}/${id}/resume`, {
+      method: 'POST',
+    })
+  }
+
+  async endRound(id: UUID): Promise<Game> {
+    return fetchAPI<Game>(`${this.basePath}/${id}/end-round`, {
+      method: 'POST',
+    })
+  }
+
+  async nextTurn(id: UUID): Promise<Game> {
+    return fetchAPI<Game>(`${this.basePath}/${id}/next-turn`, {
+      method: 'POST',
+    })
+  }
+
+  async getStats(id: UUID): Promise<any> {
+    return fetchAPI(`${this.basePath}/${id}/stats`)
+  }
+
+  async cancel(id: UUID): Promise<Game> {
+    return fetchAPI<Game>(`${this.basePath}/${id}/cancel`, {
+      method: 'POST',
+    })
+  }
 }
 
 export const gameService = new GameService()

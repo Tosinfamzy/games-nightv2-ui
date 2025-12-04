@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { gamesMasterService, sessionService } from '../lib/api/services'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { sessionService } from '../lib/api/services'
+import { showToast } from '../lib/toast'
+import { useGamesMaster } from '../hooks/useGamesMaster'
+import { useNavigate } from '@tanstack/react-router'
 import type { CreateSessionDTO, Session } from '../lib/api/types'
 
 interface CreateSessionFormProps {
@@ -9,39 +12,32 @@ interface CreateSessionFormProps {
 
 export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { gm, isGM } = useGamesMaster()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
   const [location, setLocation] = useState('')
-  const [gamesMasterId, setGamesMasterId] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
 
-  const {
-    data: gamesMasters = [],
-    isLoading: gamesMastersLoading,
-    isError: gamesMastersError,
-  } = useQuery({
-    queryKey: ['gamesMasters'],
-    queryFn: gamesMasterService.getAll,
-  })
-
+  // Redirect to GM creation if no GM found
   useEffect(() => {
-    if (!gamesMasterId && gamesMasters.length > 0) {
-      setGamesMasterId(gamesMasters[0].id)
+    if (!isGM) {
+      navigate({ to: '/gm/new' })
     }
-  }, [gamesMasterId, gamesMasters])
+  }, [isGM, navigate])
 
   const createSessionMutation = useMutation({
     mutationFn: sessionService.create,
     onSuccess: (session) => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] })
+      showToast.success('Session created successfully!')
       onCreateSuccess?.(session)
       // Reset form
       setName('')
       setDescription('')
       setDate('')
       setLocation('')
-      setGamesMasterId(gamesMasters[0]?.id ?? '')
       setFormError(null)
     },
   })
@@ -49,12 +45,8 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!gamesMasterId) {
-      setFormError(
-        gamesMasters.length === 0
-          ? 'Please create a games master before scheduling a session.'
-          : 'Select a games master for this session.',
-      )
+    if (!gm) {
+      setFormError('Games Master profile not found. Please try again.')
       return
     }
 
@@ -63,10 +55,22 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
       description,
       date: new Date(date).toISOString(),
       location: location || undefined,
-      gamesMasterId,
+      gamesMasterId: gm.id,
     }
 
     createSessionMutation.mutate(sessionData)
+  }
+
+  // Loading state while checking GM
+  if (!gm) {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <div className="animate-pulse text-center">
+          <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -75,54 +79,21 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
         Create New Session
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="gamesMasterId"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Games Master *
-          </label>
-          <select
-            id="gamesMasterId"
-            value={gamesMasterId}
-            onChange={(e) => {
-              setGamesMasterId(e.target.value)
-              setFormError(null)
-            }}
-            disabled={
-              gamesMastersLoading ||
-              gamesMastersError ||
-              gamesMasters.length === 0
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {gamesMasters.length === 0 ? (
-              <option value="">
-                {gamesMastersLoading
-                  ? 'Loading games masters...'
-                  : 'No games masters available'}
-              </option>
-            ) : (
-              gamesMasters.map((master) => (
-                <option key={master.id} value={master.id}>
-                  {master.name}
-                </option>
-              ))
-            )}
-          </select>
-          {gamesMastersError && (
-            <p className="text-red-500 text-sm mt-1">
-              Unable to load games masters. Please try again.
-            </p>
-          )}
-          {!gamesMastersLoading && gamesMasters.length === 0 && (
-            <p className="text-sm text-gray-500 mt-1">
-              Create a games master first so you can assign them to this
-              session.
-            </p>
-          )}
+      {/* GM Info Display */}
+      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-blue-700">Hosting as</p>
+            <p className="font-bold text-blue-900">{gm.name}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-blue-600">Host Code</p>
+            <p className="font-mono font-bold text-blue-700">{gm.hostCode}</p>
+          </div>
         </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
 
         <div>
           <label
@@ -195,11 +166,7 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
         <button
           type="submit"
-          disabled={
-            createSessionMutation.isPending ||
-            gamesMastersLoading ||
-            gamesMasters.length === 0
-          }
+          disabled={createSessionMutation.isPending}
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         >
           {createSessionMutation.isPending ? 'Creating...' : 'Create Session'}
@@ -207,15 +174,6 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
         {formError && (
           <div className="text-red-500 text-sm mt-2">{formError}</div>
-        )}
-
-        {createSessionMutation.error && (
-          <div className="text-red-500 text-sm mt-2">
-            Error:{' '}
-            {createSessionMutation.error instanceof Error
-              ? createSessionMutation.error.message
-              : 'Failed to create session'}
-          </div>
         )}
       </form>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { sessionService } from '../lib/api/services'
+import { showToast } from '../lib/toast'
 import type { JoinSessionRequest, Session } from '../lib/api/types'
 
 interface JoinSessionFormProps {
@@ -14,6 +15,7 @@ export function JoinSessionForm({ onJoinSuccess }: JoinSessionFormProps) {
   const joinSessionMutation = useMutation({
     mutationFn: (data: JoinSessionRequest) => sessionService.joinSession(data),
     onSuccess: (response) => {
+      showToast.success('Successfully joined session!')
       onJoinSuccess?.(response.session)
     },
   })
@@ -82,14 +84,6 @@ export function JoinSessionForm({ onJoinSuccess }: JoinSessionFormProps) {
             required
           />
         </div>
-
-        {joinSessionMutation.error && (
-          <div className="text-red-600 text-sm">
-            {joinSessionMutation.error instanceof Error
-              ? joinSessionMutation.error.message
-              : 'Failed to join session'}
-          </div>
-        )}
 
         <button
           type="submit"

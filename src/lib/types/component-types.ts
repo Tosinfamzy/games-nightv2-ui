@@ -14,6 +14,7 @@ export interface UIPlayer {
   email: string
   status: 'ready' | 'not_ready' | 'playing'
   teamId?: string
+  isOnline: boolean
 }
 
 // UI Team type with enriched player data

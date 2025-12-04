@@ -38,6 +38,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
       // Invalidate players query to refetch
       queryClient.invalidateQueries({ queryKey: ['players', 'session', sessionId] });
       queryClient.invalidateQueries({ queryKey: ['session-readiness', sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] });
     };
 
     sessionsSocket.on('session:player-joined', handlePlayerJoined);
@@ -55,6 +56,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
       console.log('Player left:', data);
       queryClient.invalidateQueries({ queryKey: ['players', 'session', sessionId] });
       queryClient.invalidateQueries({ queryKey: ['session-readiness', sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] });
     };
 
     sessionsSocket.on('session:player-left', handlePlayerLeft);

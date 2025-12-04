@@ -4,9 +4,12 @@ import type { GMDashboard } from '../types'
 export interface GamesMaster {
   id: string
   name: string
+  hostCode: string
   email?: string
+  sessionCount: number
   createdAt: string
   updatedAt: string
+  sessionIds?: Array<string>
   sessions?: Array<SessionSummary>
 }
 
@@ -54,6 +57,16 @@ export const gamesMasterService = {
   // Get a specific games master
   getById: (id: string): Promise<GamesMaster> => {
     return fetchAPI<GamesMaster>(`/games-master/${id}`)
+  },
+
+  // Get games masters by name (for code retrieval)
+  getByName: (name: string): Promise<Array<GamesMaster>> => {
+    return fetchAPI<Array<GamesMaster>>(`/games-master/by-name/${encodeURIComponent(name)}`)
+  },
+
+  // Get games master by host code
+  getByCode: (code: string): Promise<GamesMaster> => {
+    return fetchAPI<GamesMaster>(`/games-master/by-code/${code.toUpperCase()}`)
   },
 
   // Create a new games master

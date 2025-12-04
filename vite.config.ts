@@ -12,6 +12,9 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  server: {
+    host: true, // Listen on all network interfaces for mobile testing
+  },
   test: {
     globals: true,
     environment: 'jsdom',

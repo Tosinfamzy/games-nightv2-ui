@@ -21,6 +21,7 @@ import {
   transformGames,
   transformPlayers,
 } from '../../lib/utils/data-transforms'
+import { showToast } from '../../lib/toast'
 
 export const Route = createFileRoute('/sessions/$id')({
   component: SessionDetailsPage,
@@ -486,14 +487,25 @@ function PlayersTab({ session, players }: any) {
   const setPlayerReadyMutation = useMutation({
     mutationFn: ({ playerId, ready }: { playerId: string; ready: boolean }) =>
       sessionManagementService.setPlayerReady(session.id, playerId, ready),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       // Invalidate both queries to refresh data
       queryClient.invalidateQueries({
         queryKey: ['session-readiness', session.id],
       })
       queryClient.invalidateQueries({
-        queryKey: ['players', 'session', session.id],
+        queryKey: ['sessions', 'detail', session.id, 'players'],
       })
+      // Show success toast
+      showToast.success(
+        variables.ready
+          ? '✓ Player marked as ready!'
+          : 'Player marked as not ready'
+      )
+    },
+    onError: (error) => {
+      showToast.error(
+        `Failed to update ready status: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     },
   })
 

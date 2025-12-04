@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Toaster } from 'react-hot-toast'
 import { SocketProvider } from './lib/socket'
+import { GamesMasterProvider } from './contexts'
+import { getErrorMessage, showToast } from './lib/toast'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
@@ -17,6 +20,13 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       retry: false,
+    },
+    mutations: {
+      // Global error handler for all mutations
+      onError: (error) => {
+        const message = getErrorMessage(error);
+        showToast.error(message);
+      },
     },
   },
 })
@@ -45,10 +55,13 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <SocketProvider>
-          <RouterProvider router={router} />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </SocketProvider>
+        <GamesMasterProvider>
+          <SocketProvider>
+            <RouterProvider router={router} />
+            <ReactQueryDevtools initialIsOpen={false} />
+            <Toaster />
+          </SocketProvider>
+        </GamesMasterProvider>
       </QueryClientProvider>
     </StrictMode>,
   )

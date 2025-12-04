@@ -25,6 +25,7 @@ export function transformPlayer(player: Player): UIPlayer {
     email: player.email,
     status: normalizedStatus,
     teamId: player.teamId,
+    isOnline: player.isOnline,
   }
 }
 
@@ -73,12 +74,16 @@ export function transformGame(
   game: Game,
   includeRecommendedTeamSize = false,
 ): UIGame {
+  // Extract min/max players from gameLibrary if available, otherwise use direct properties
+  const minPlayers = (game as any).gameLibrary?.minPlayers ?? game.minPlayers
+  const maxPlayers = (game as any).gameLibrary?.maxPlayers ?? game.maxPlayers
+
   const uiGame: UIGame = {
     id: game.id,
     name: game.name,
-    description: game.description,
-    minPlayers: game.minPlayers,
-    maxPlayers: game.maxPlayers,
+    description: game.description ?? (game as any).gameLibrary?.description,
+    minPlayers,
+    maxPlayers,
     // Normalize status to lowercase for UI components
     status: game.status.toLowerCase() as
       | 'scheduled'
@@ -88,8 +93,8 @@ export function transformGame(
 
   // Add recommendedTeamSize if requested
   if (includeRecommendedTeamSize) {
-    if (game.maxPlayers) {
-      uiGame.recommendedTeamSize = Math.floor(game.maxPlayers / 2)
+    if (maxPlayers) {
+      uiGame.recommendedTeamSize = Math.floor(maxPlayers / 2)
     } else {
       uiGame.recommendedTeamSize = 2
     }

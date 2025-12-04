@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService, sessionManagementService, playerService } from '../lib/api/services'
+import { showToast } from '../lib/toast'
 
 export function useSessionDetails(sessionId: string) {
   return useQuery({
@@ -50,6 +51,7 @@ export function useSessionManagement(sessionId: string) {
     mutationFn: () => sessionService.start(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      showToast.success('Session started!')
     },
   })
 
@@ -57,6 +59,7 @@ export function useSessionManagement(sessionId: string) {
     mutationFn: () => sessionService.complete(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      showToast.success('Session completed!')
     },
   })
 
@@ -64,6 +67,7 @@ export function useSessionManagement(sessionId: string) {
     mutationFn: () => sessionService.cancel(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      showToast.info('Session cancelled')
     },
   })
 
@@ -75,6 +79,7 @@ export function useSessionManagement(sessionId: string) {
       queryClient.invalidateQueries({
         queryKey: ['games', 'session', sessionId],
       })
+      showToast.success('Games added to session')
     },
   })
 
@@ -85,6 +90,7 @@ export function useSessionManagement(sessionId: string) {
       queryClient.invalidateQueries({
         queryKey: ['games', 'session', sessionId],
       })
+      showToast.info('Game removed from session')
     },
   })
 
@@ -100,6 +106,7 @@ export function useSessionManagement(sessionId: string) {
       queryClient.invalidateQueries({
         queryKey: ['teams', 'session', sessionId],
       })
+      showToast.success('Team created successfully')
     },
   })
 
@@ -121,6 +128,7 @@ export function useSessionManagement(sessionId: string) {
       queryClient.invalidateQueries({
         queryKey: ['players', 'session', sessionId],
       })
+      showToast.success('Players assigned to team')
     },
   })
 
@@ -128,13 +136,14 @@ export function useSessionManagement(sessionId: string) {
   const setPlayerReady = useMutation({
     mutationFn: ({ playerId, ready }: { playerId: string; ready: boolean }) =>
       sessionManagementService.setPlayerReady(sessionId, playerId, ready),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['session-readiness', sessionId],
       })
       queryClient.invalidateQueries({
         queryKey: ['players', 'session', sessionId],
       })
+      showToast.success(variables.ready ? 'Player marked as ready' : 'Player marked as not ready')
     },
   })
 
