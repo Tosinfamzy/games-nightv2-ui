@@ -1,9 +1,20 @@
-import { http, HttpResponse } from 'msw';
-import { mockDashboardData } from '../fixtures/dashboard.fixture';
-import { mockSessionData, mockActiveSessions } from '../fixtures/session.fixture';
-import { mockGameData } from '../fixtures/game.fixture';
+import { http, HttpResponse } from 'msw'
+import { mockDashboardData } from '../fixtures/dashboard.fixture'
+import {
+  mockSessionData,
+  mockActiveSessions,
+} from '../fixtures/session.fixture'
+import { mockGameData } from '../fixtures/game.fixture'
+import {
+  mockTeams,
+  mockSuggestions,
+  mockTeamStats,
+  DEFAULT_COLORS,
+  createMockTeams,
+} from '../fixtures/team.fixture'
+import type { CreateTeamsDto } from '../../lib/api/types/team.dto'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 /**
  * MSW HTTP handlers for API mocking
@@ -26,7 +37,7 @@ export const handlers = [
         createdAt: '2024-01-02T00:00:00Z',
         updatedAt: '2024-01-02T00:00:00Z',
       },
-    ]);
+    ])
   }),
 
   http.get(`${API_BASE_URL}/games-master/:id`, ({ params }) => {
@@ -36,18 +47,18 @@ export const handlers = [
       email: 'john@example.com',
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
-    });
+    })
   }),
 
   http.get(`${API_BASE_URL}/games-master/:id/dashboard`, ({ params }) => {
     return HttpResponse.json({
       ...mockDashboardData,
       gamesMasterId: params.id,
-    });
+    })
   }),
 
   http.post(`${API_BASE_URL}/games-master`, async ({ request }) => {
-    const body = (await request.json()) as { name: string };
+    const body = (await request.json()) as { name: string }
     return HttpResponse.json(
       {
         id: `gm-${Date.now()}`,
@@ -55,8 +66,8 @@ export const handlers = [
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      { status: 201 }
-    );
+      { status: 201 },
+    )
   }),
 
   // Session endpoints
@@ -64,11 +75,11 @@ export const handlers = [
     return HttpResponse.json({
       ...mockSessionData,
       id: params.id,
-    });
+    })
   }),
 
   http.get(`${API_BASE_URL}/games-master/:gmId/active-sessions`, () => {
-    return HttpResponse.json(mockActiveSessions);
+    return HttpResponse.json(mockActiveSessions)
   }),
 
   // Game endpoints
@@ -76,7 +87,7 @@ export const handlers = [
     return HttpResponse.json({
       ...mockGameData,
       id: params.id,
-    });
+    })
   }),
 
   http.get(`${API_BASE_URL}/sessions/:sessionId/games`, ({ params }) => {
@@ -85,7 +96,7 @@ export const handlers = [
         ...mockGameData,
         sessionId: params.sessionId,
       },
-    ]);
+    ])
   }),
 
   // Chat endpoints
@@ -103,11 +114,11 @@ export const handlers = [
       ],
       hasMore: false,
       nextCursor: null,
-    });
+    })
   }),
 
   http.post(`${API_BASE_URL}/chat/:sessionId`, async ({ params, request }) => {
-    const body = (await request.json()) as { message: string };
+    const body = (await request.json()) as { message: string }
     return HttpResponse.json(
       {
         id: `msg-${Date.now()}`,
@@ -117,37 +128,97 @@ export const handlers = [
         message: body.message,
         timestamp: new Date().toISOString(),
       },
-      { status: 201 }
-    );
+      { status: 201 },
+    )
   }),
-];
+
+  // Team formation endpoints
+  http.post(
+    `${API_BASE_URL}/v1/teams/game/:gameId/create-teams`,
+    async ({ params, request }) => {
+      const gameId = params.gameId as string
+      const body = (await request.json()) as CreateTeamsDto
+
+      // Simulate creating teams based on request
+      const teams = Array.from({ length: body.teamCount }).map((_, i) => ({
+        id: `team-${i + 1}`,
+        name: body.teamNames?.[i] || `Team ${i + 1}`,
+        color:
+          body.teamColors?.[i] || DEFAULT_COLORS[i % DEFAULT_COLORS.length],
+        position: i + 1,
+        isActive: true,
+        sessionId: null,
+        gameId,
+        players: [],
+        scores: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }))
+
+      return HttpResponse.json(teams, { status: 201 })
+    },
+  ),
+
+  http.put(
+    `${API_BASE_URL}/v1/teams/game/:gameId/rebalance`,
+    async ({ params }) => {
+      const gameId = params.gameId as string
+      // Return mock teams with the gameId
+      const rebalancedTeams = mockTeams.map((team) => ({
+        ...team,
+        gameId,
+        updatedAt: new Date().toISOString(),
+      }))
+      return HttpResponse.json(rebalancedTeams)
+    },
+  ),
+
+  http.get(`${API_BASE_URL}/v1/teams/game/:gameId/suggestions`, () => {
+    return HttpResponse.json(mockSuggestions)
+  }),
+
+  http.get(`${API_BASE_URL}/v1/teams/game/:gameId/stats`, () => {
+    return HttpResponse.json(mockTeamStats)
+  }),
+]
 
 /**
  * Error response handlers for testing error states
  */
 export const errorHandlers = {
-  dashboardError: http.get(
-    `${API_BASE_URL}/games-master/:id/dashboard`,
-    () => {
-      return HttpResponse.json(
-        { message: 'Failed to fetch dashboard data' },
-        { status: 500 }
-      );
-    }
-  ),
+  dashboardError: http.get(`${API_BASE_URL}/games-master/:id/dashboard`, () => {
+    return HttpResponse.json(
+      { message: 'Failed to fetch dashboard data' },
+      { status: 500 },
+    )
+  }),
 
   sessionNotFound: http.get(`${API_BASE_URL}/sessions/:id`, () => {
-    return HttpResponse.json(
-      { message: 'Session not found' },
-      { status: 404 }
-    );
+    return HttpResponse.json({ message: 'Session not found' }, { status: 404 })
   }),
 
   gameNotFound: http.get(`${API_BASE_URL}/games/:id`, () => {
-    return HttpResponse.json({ message: 'Game not found' }, { status: 404 });
+    return HttpResponse.json({ message: 'Game not found' }, { status: 404 })
   }),
 
   unauthorized: http.get(`${API_BASE_URL}/games-master/:id/dashboard`, () => {
-    return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 })
   }),
-};
+
+  teamCreationError: http.post(
+    `${API_BASE_URL}/v1/teams/game/:gameId/create-teams`,
+    () => {
+      return HttpResponse.json(
+        { message: 'Failed to create teams' },
+        { status: 500 },
+      )
+    },
+  ),
+
+  teamSuggestionsNotFound: http.get(
+    `${API_BASE_URL}/v1/teams/game/:gameId/suggestions`,
+    () => {
+      return HttpResponse.json({ message: 'Game not found' }, { status: 404 })
+    },
+  ),
+}

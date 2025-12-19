@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { gameService } from '../lib/api/services/game.service'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { playerService } from '../lib/api/services/player.service'
 import { sessionService } from '../lib/api/services/session.service'
 import { teamService } from '../lib/api/services/team.service'
@@ -21,6 +22,7 @@ function Teams() {
   const [selectedGame, setSelectedGame] = useState<string>('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingTeam, setEditingTeam] = useState<Team | null>(null)
+  const [teamToDelete, setTeamToDelete] = useState<string | null>(null)
 
   // Queries
   const { data: teams = [], isLoading: teamsLoading } = useQuery({
@@ -44,24 +46,33 @@ function Teams() {
   })
 
   const sessionsById = useMemo(() => {
-    return sessions.reduce((acc, session) => {
-      acc[session.id] = session
-      return acc
-    }, {} as Record<string, (typeof sessions)[number]>)
+    return sessions.reduce(
+      (acc, session) => {
+        acc[session.id] = session
+        return acc
+      },
+      {} as Record<string, (typeof sessions)[number]>,
+    )
   }, [sessions])
 
   const gamesById = useMemo(() => {
-    return games.reduce((acc, game) => {
-      acc[game.id] = game
-      return acc
-    }, {} as Record<string, (typeof games)[number]>)
+    return games.reduce(
+      (acc, game) => {
+        acc[game.id] = game
+        return acc
+      },
+      {} as Record<string, (typeof games)[number]>,
+    )
   }, [games])
 
   const playersById = useMemo(() => {
-    return players.reduce((acc, player) => {
-      acc[player.id] = player
-      return acc
-    }, {} as Record<string, (typeof players)[number]>)
+    return players.reduce(
+      (acc, player) => {
+        acc[player.id] = player
+        return acc
+      },
+      {} as Record<string, (typeof players)[number]>,
+    )
   }, [players])
 
   // Filter teams by selected session/game
@@ -176,9 +187,7 @@ function Teams() {
   }
 
   const handleDeleteTeam = (teamId: string) => {
-    if (confirm('Are you sure you want to delete this team?')) {
-      deleteTeamMutation.mutate(teamId)
-    }
+    setTeamToDelete(teamId)
   }
 
   if (teamsLoading) {
@@ -256,7 +265,9 @@ function Teams() {
           const teamGame = team.gameId ? gamesById[team.gameId] : undefined
           const teamPlayers = team.playerIds
             .map((playerId) => playersById[playerId])
-            .filter((player): player is (typeof players)[number] => Boolean(player))
+            .filter((player): player is (typeof players)[number] =>
+              Boolean(player),
+            )
 
           return (
             <div
@@ -312,7 +323,9 @@ function Teams() {
               </div>
 
               <div className="mb-4">
-                <p className="text-sm font-medium text-gray-700 mb-1">Session:</p>
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Session:
+                </p>
                 <p className="text-sm text-gray-600">
                   {teamSession
                     ? `${teamSession.name} (${teamSession.status})`
@@ -350,7 +363,9 @@ function Teams() {
                       className="flex justify-between items-center bg-gray-50 rounded px-3 py-2"
                     >
                       <div>
-                        <span className="text-sm font-medium">{player.name}</span>
+                        <span className="text-sm font-medium">
+                          {player.name}
+                        </span>
                         <span
                           className={`ml-2 px-2 py-1 rounded-full text-xs ${
                             player.status === 'ready'
@@ -569,6 +584,22 @@ function Teams() {
           </div>
         </div>
       )}
+
+      {/* Delete Team Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={teamToDelete !== null}
+        onClose={() => setTeamToDelete(null)}
+        onConfirm={() => {
+          if (teamToDelete) {
+            deleteTeamMutation.mutate(teamToDelete)
+            setTeamToDelete(null)
+          }
+        }}
+        title="Delete Team"
+        message="Are you sure you want to delete this team? This action cannot be undone."
+        confirmLabel="Delete Team"
+        variant="danger"
+      />
     </div>
   )
 }

@@ -1,12 +1,12 @@
-import { useGameTimer } from '../hooks/useGameTimer';
+import { useGameTimer } from '../hooks/useGameTimer'
 
 interface TimerControlsProps {
-  gameId: string;
-  onAdvanceTurn?: () => void;
-  onPauseTimer?: () => void;
-  onResumeTimer?: () => void;
-  disabled?: boolean;
-  className?: string;
+  gameId: string
+  onAdvanceTurn?: () => void
+  onPauseTimer?: () => void
+  onResumeTimer?: () => void
+  disabled?: boolean
+  className?: string
 }
 
 /**
@@ -21,19 +21,14 @@ export default function TimerControls({
   disabled = false,
   className = '',
 }: TimerControlsProps) {
-  const {
-    hasTimer,
-    isExpired,
-    isWarning,
-    formattedTime,
-  } = useGameTimer(gameId);
+  const { hasTimer, isExpired, isWarning, formattedTime } = useGameTimer(gameId)
 
   if (!hasTimer) {
     return (
       <div className={`text-sm text-gray-500 ${className}`}>
         No timer configured for this game
       </div>
-    );
+    )
   }
 
   return (
@@ -41,10 +36,18 @@ export default function TimerControls({
       {/* Timer status */}
       <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Timer Status:</span>
-          <span className={`text-sm font-mono ${
-            isExpired ? 'text-red-600' : isWarning ? 'text-orange-600' : 'text-blue-600'
-          }`}>
+          <span className="text-sm font-medium text-gray-700">
+            Timer Status:
+          </span>
+          <span
+            className={`text-sm font-mono ${
+              isExpired
+                ? 'text-red-600'
+                : isWarning
+                  ? 'text-orange-600'
+                  : 'text-blue-600'
+            }`}
+          >
             {formattedTime}
           </span>
         </div>
@@ -94,5 +97,5 @@ export default function TimerControls({
         Timer automatically advances turn when time expires
       </p>
     </div>
-  );
+  )
 }

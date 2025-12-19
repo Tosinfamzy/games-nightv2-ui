@@ -1,4 +1,9 @@
-import type { GMDashboard, DashboardSession, DashboardGame, DashboardPlayer } from '../../lib/api/types';
+import type {
+  GMDashboard,
+  DashboardSession,
+  DashboardGame,
+  DashboardPlayer,
+} from '../../lib/api/types'
 
 export const mockDashboardPlayers: DashboardPlayer[] = [
   {
@@ -16,7 +21,7 @@ export const mockDashboardPlayers: DashboardPlayer[] = [
     name: 'Charlie',
     isOnline: false,
   },
-];
+]
 
 export const mockDashboardGames: DashboardGame[] = [
   {
@@ -43,7 +48,7 @@ export const mockDashboardGames: DashboardGame[] = [
     winnerId: 'team-1',
     createdAt: new Date('2024-12-25T19:00:00Z').toISOString(),
   },
-];
+]
 
 export const mockDashboardSessions: DashboardSession[] = [
   {
@@ -76,7 +81,7 @@ export const mockDashboardSessions: DashboardSession[] = [
     gamesCompleted: 0,
     playersCount: 1,
   },
-];
+]
 
 export const mockDashboardData: GMDashboard = {
   gamesMasterId: 'gm-1',
@@ -92,54 +97,54 @@ export const mockDashboardData: GMDashboard = {
   },
   sessions: mockDashboardSessions,
   lastUpdated: new Date().toISOString(),
-};
+}
 
 /**
  * Factory function to create a mock dashboard with custom data
  */
 export function createMockDashboard(
-  overrides?: Partial<GMDashboard>
+  overrides?: Partial<GMDashboard>,
 ): GMDashboard {
   return {
     ...mockDashboardData,
     ...overrides,
-  };
+  }
 }
 
 /**
  * Factory function to create a mock dashboard session
  */
 export function createMockDashboardSession(
-  overrides?: Partial<DashboardSession>
+  overrides?: Partial<DashboardSession>,
 ): DashboardSession {
   return {
     ...mockDashboardSessions[0],
     ...overrides,
-  };
+  }
 }
 
 /**
  * Factory function to create a mock dashboard game
  */
 export function createMockDashboardGame(
-  overrides?: Partial<DashboardGame>
+  overrides?: Partial<DashboardGame>,
 ): DashboardGame {
   return {
     ...mockDashboardGames[0],
     ...overrides,
-  };
+  }
 }
 
 /**
  * Factory function to create a mock dashboard player
  */
 export function createMockDashboardPlayer(
-  overrides?: Partial<DashboardPlayer>
+  overrides?: Partial<DashboardPlayer>,
 ): DashboardPlayer {
   return {
     ...mockDashboardPlayers[0],
     ...overrides,
-  };
+  }
 }
 
 /**
@@ -159,4 +164,4 @@ export const emptyDashboardData: GMDashboard = {
   },
   sessions: [],
   lastUpdated: new Date().toISOString(),
-};
+}

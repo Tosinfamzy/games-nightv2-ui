@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { sessionService, sessionManagementService, playerService } from '../lib/api/services'
+import {
+  sessionService,
+  sessionManagementService,
+  playerService,
+} from '../lib/api/services'
 import { showToast } from '../lib/toast'
 
 export function useSessionDetails(sessionId: string) {
@@ -143,7 +147,11 @@ export function useSessionManagement(sessionId: string) {
       queryClient.invalidateQueries({
         queryKey: ['players', 'session', sessionId],
       })
-      showToast.success(variables.ready ? 'Player marked as ready' : 'Player marked as not ready')
+      showToast.success(
+        variables.ready
+          ? 'Player marked as ready'
+          : 'Player marked as not ready',
+      )
     },
   })
 

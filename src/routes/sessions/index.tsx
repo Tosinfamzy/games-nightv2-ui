@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useSessions } from '../../hooks/useSessions'
+import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
 
 function SessionsPage() {
   const { data: sessions, isLoading, error } = useSessions()
@@ -25,9 +26,14 @@ function SessionsPage() {
 
   if (error) {
     return (
-      <div className="p-4 text-red-500">
-        Error loading sessions: {error.message}
-      </div>
+      <QueryErrorDisplay
+        error={
+          error instanceof Error ? error : new Error('Failed to load sessions')
+        }
+        onRetry={() => window.location.reload()}
+        backTo="/"
+        showBackButton={false}
+      />
     )
   }
 

@@ -43,9 +43,7 @@ export default function OnlinePlayerCount({
             <p className="text-sm font-semibold">
               {totalCount} {totalCount === 1 ? 'Player' : 'Players'}
             </p>
-            <p className="text-xs opacity-75">
-              in session
-            </p>
+            <p className="text-xs opacity-75">in session</p>
           </div>
         </div>
       </div>

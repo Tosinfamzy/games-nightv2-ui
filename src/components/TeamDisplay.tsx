@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface Player {
   id: string
@@ -43,6 +44,10 @@ export function TeamDisplay({
   const [draggedPlayer, setDraggedPlayer] = useState<{
     playerId: string
     fromTeamId: string
+  } | null>(null)
+  const [teamToDelete, setTeamToDelete] = useState<{
+    id: string
+    name: string
   } | null>(null)
 
   const queryClient = useQueryClient()
@@ -303,12 +308,9 @@ export function TeamDisplay({
                         ✏️
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`Delete team "${team.name}"?`)) {
-                            deleteTeamMutation.mutate(team.id)
-                            onTeamDelete?.(team.id)
-                          }
-                        }}
+                        onClick={() =>
+                          setTeamToDelete({ id: team.id, name: team.name })
+                        }
                         className="p-1 text-gray-400 hover:text-red-600"
                         title="Delete team"
                       >
@@ -437,10 +439,13 @@ export function TeamDisplay({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {teams.map((team) => {
             const balance = getTeamBalance(team)
-            const avgSkill = (team.players?.length || 0) > 0
-              ? (team.players || []).reduce((sum, p) => sum + (p.skillLevel || 0), 0) /
-                (team.players?.length || 1)
-              : 0
+            const avgSkill =
+              (team.players?.length || 0) > 0
+                ? (team.players || []).reduce(
+                    (sum, p) => sum + (p.skillLevel || 0),
+                    0,
+                  ) / (team.players?.length || 1)
+                : 0
 
             return (
               <div key={team.id} className="text-center">
@@ -460,13 +465,30 @@ export function TeamDisplay({
           })}
         </div>
       </div>
+
+      {/* Delete Team Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={teamToDelete !== null}
+        onClose={() => setTeamToDelete(null)}
+        onConfirm={() => {
+          if (teamToDelete) {
+            deleteTeamMutation.mutate(teamToDelete.id)
+            onTeamDelete?.(teamToDelete.id)
+            setTeamToDelete(null)
+          }
+        }}
+        title="Delete Team"
+        message={`Are you sure you want to delete team "${teamToDelete?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete Team"
+        variant="danger"
+      />
     </div>
   )
 }
 
 // Helper function
 async function fetchAPI(url: string, options?: RequestInit) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
   const response = await fetch(`${baseUrl}${url}`, {
     headers: {
       'Content-Type': 'application/json',

@@ -1,27 +1,27 @@
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { server } from './mocks/server';
+import '@testing-library/jest-dom'
+import { cleanup } from '@testing-library/react'
+import { afterEach, beforeAll, afterAll, vi } from 'vitest'
+import { server } from './mocks/server'
 
 // Setup MSW server for API mocking
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
-});
+  server.listen({ onUnhandledRequest: 'error' })
+})
 
 afterEach(() => {
   // Cleanup React Testing Library
-  cleanup();
+  cleanup()
 
   // Reset MSW handlers
-  server.resetHandlers();
+  server.resetHandlers()
 
   // Clear all mocks
-  vi.clearAllMocks();
-});
+  vi.clearAllMocks()
+})
 
 afterAll(() => {
-  server.close();
-});
+  server.close()
+})
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -36,7 +36,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-});
+})
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -44,7 +44,7 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
   observe() {}
   takeRecords() {
-    return [];
+    return []
   }
   unobserve() {}
-} as any;
+} as any

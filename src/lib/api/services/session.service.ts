@@ -10,6 +10,13 @@ import type {
 import type { CreateSessionDTO, UpdateSessionDTO } from '../hooks/use-session'
 
 // Additional types for session functionality
+export interface CreateSessionResponse {
+  session: Session
+  gmPlayer: Player
+  message: string
+  playerToken: string
+}
+
 export interface JoinSessionDTO {
   joinCode: string
   playerName: string
@@ -50,8 +57,8 @@ export const sessionService = {
     return fetchAPI<Session>(`${BASE_PATH}/${id}`)
   },
 
-  create: async (session: CreateSessionDTO): Promise<Session> => {
-    return fetchAPI<Session>(BASE_PATH, {
+  create: async (session: CreateSessionDTO): Promise<CreateSessionResponse> => {
+    return fetchAPI<CreateSessionResponse>(BASE_PATH, {
       method: 'POST',
       body: JSON.stringify(session),
     })
@@ -92,12 +99,26 @@ export const sessionService = {
     return fetchAPI<Session>(`${BASE_PATH}/join/${joinCode}`)
   },
 
+  // Alias for getByJoinCode for consistency
+  findByJoinCode: async (joinCode: string): Promise<Session> => {
+    return fetchAPI<Session>(`${BASE_PATH}/join/${joinCode}`)
+  },
+
   joinSession: async (
     data: JoinSessionDTO,
-  ): Promise<{ session: Session; player: Player }> => {
-    return fetchAPI<{ session: Session; player: Player }>(`${BASE_PATH}/join`, {
+  ): Promise<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }> => {
+    return fetchAPI<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }>(`${BASE_PATH}/join`, {
       method: 'POST',
       body: JSON.stringify(data),
+    })
+  },
+
+  rejoinSession: async (
+    playerToken: string,
+  ): Promise<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }> => {
+    return fetchAPI<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }>(`${BASE_PATH}/rejoin`, {
+      method: 'POST',
+      body: JSON.stringify({ playerToken }),
     })
   },
 

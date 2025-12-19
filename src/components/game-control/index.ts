@@ -1,6 +1,6 @@
-export { default as GameControlPanel } from './GameControlPanel';
-export { default as RoundManager } from './RoundManager';
-export { default as TurnController } from './TurnController';
-export { default as LiveScoreEntry } from './LiveScoreEntry';
-export { default as RoundScorecard } from './RoundScorecard';
-export { default as LiveLeaderboard } from './LiveLeaderboard';
+export { default as GameControlPanel } from './GameControlPanel'
+export { default as RoundManager } from './RoundManager'
+export { default as TurnController } from './TurnController'
+export { default as LiveScoreEntry } from './LiveScoreEntry'
+export { default as RoundScorecard } from './RoundScorecard'
+export { default as LiveLeaderboard } from './LiveLeaderboard'

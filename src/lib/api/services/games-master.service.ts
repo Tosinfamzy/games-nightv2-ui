@@ -61,7 +61,9 @@ export const gamesMasterService = {
 
   // Get games masters by name (for code retrieval)
   getByName: (name: string): Promise<Array<GamesMaster>> => {
-    return fetchAPI<Array<GamesMaster>>(`/games-master/by-name/${encodeURIComponent(name)}`)
+    return fetchAPI<Array<GamesMaster>>(
+      `/games-master/by-name/${encodeURIComponent(name)}`,
+    )
   },
 
   // Get games master by host code

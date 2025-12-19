@@ -1,11 +1,19 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { JoinSessionForm } from '../components/JoinSessionForm'
+import { sessionKeys } from '../lib/api/hooks/use-session'
 import type { Session } from '../lib/api/types'
 
 function JoinSessionPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const handleJoinSuccess = (session: Session) => {
+    // Invalidate players query to ensure it's fresh when we navigate
+    queryClient.invalidateQueries({
+      queryKey: sessionKeys.players(session.id),
+    })
+
     // Navigate to the session dashboard
     navigate({
       to: '/sessions/$id',

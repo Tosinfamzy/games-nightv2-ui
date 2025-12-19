@@ -1,13 +1,14 @@
-import { useEffect } from 'react';
-import { useChatSocket } from '../lib/socket/use-chat-socket';
-import { handleWebSocketError } from '../lib/utils/socket-error-handler';
-import ChatMessageList from './ChatMessageList';
-import ChatInput from './ChatInput';
+import { useEffect } from 'react'
+import { useChatSocket } from '../lib/socket/use-chat-socket'
+import { handleWebSocketError } from '../lib/utils/socket-error-handler'
+import ChatMessageList from './ChatMessageList'
+import ChatInput from './ChatInput'
 
 interface SessionChatProps {
-  sessionId: string;
-  playerId: string;
-  className?: string;
+  sessionId: string
+  playerId: string | undefined
+  playerName?: string
+  className?: string
 }
 
 /**
@@ -19,6 +20,15 @@ export default function SessionChat({
   playerId,
   className = '',
 }: SessionChatProps) {
+  // Show message if player hasn't joined yet
+  if (!playerId) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-yellow-800">Please join the session to use chat.</p>
+      </div>
+    )
+  }
+
   const {
     isConnected,
     messages,
@@ -28,14 +38,14 @@ export default function SessionChat({
     loadHistory,
     loadMoreMessages,
     clearError,
-  } = useChatSocket(sessionId, playerId);
+  } = useChatSocket(sessionId, playerId)
 
   // Load initial message history when connected
   useEffect(() => {
     if (isConnected && sessionId) {
-      loadHistory(50);
+      loadHistory(50)
     }
-  }, [isConnected, sessionId, loadHistory]);
+  }, [isConnected, sessionId, loadHistory])
 
   // Handle WebSocket errors
   useEffect(() => {
@@ -43,11 +53,11 @@ export default function SessionChat({
       const processedError = handleWebSocketError({
         error,
         code: 'ChatError',
-      });
-      console.error('Chat error:', processedError.message);
+      })
+      console.error('Chat error:', processedError.message)
       // Error will be displayed in UI
     }
-  }, [error]);
+  }, [error])
 
   return (
     <div
@@ -153,5 +163,5 @@ export default function SessionChat({
         }
       />
     </div>
-  );
+  )
 }

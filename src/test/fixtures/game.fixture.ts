@@ -35,7 +35,7 @@ export const mockGameData = {
     },
   ],
   winnerId: undefined,
-};
+}
 
 export const mockCompletedGame = {
   ...mockGameData,
@@ -43,14 +43,14 @@ export const mockCompletedGame = {
   status: 'COMPLETED' as const,
   currentRound: 5,
   winnerId: 'team-1',
-};
+}
 
 export const mockGameWithTimer = {
   ...mockGameData,
   turnTimeLimit: 60,
   currentTurnStartedAt: new Date().toISOString(),
   timeRemaining: 45,
-};
+}
 
 /**
  * Factory function to create a mock game
@@ -59,19 +59,19 @@ export function createMockGame(overrides?: Partial<typeof mockGameData>) {
   return {
     ...mockGameData,
     ...overrides,
-  };
+  }
 }
 
 /**
  * Factory function to create a mock team
  */
 export function createMockTeam(
-  overrides?: Partial<typeof mockGameData.teams[0]>
+  overrides?: Partial<(typeof mockGameData.teams)[0]>,
 ) {
   return {
     ...mockGameData.teams[0],
     ...overrides,
-  };
+  }
 }
 
 /**
@@ -93,4 +93,4 @@ export const gameFixtures = {
     turnTimeLimit: 0,
     currentTurnStartedAt: undefined,
   }),
-};
+}

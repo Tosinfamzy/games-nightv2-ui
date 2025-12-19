@@ -1,11 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { LiveLeaderboard, RoundScorecard } from '../../components/game-control';
-import { useGameControl } from '../../hooks/useGameControl';
-import GameTimer from '../../components/GameTimer';
+import { createFileRoute } from '@tanstack/react-router'
+import { LiveLeaderboard, RoundScorecard } from '../../components/game-control'
+import { useGameControl } from '../../hooks/useGameControl'
+import GameTimer from '../../components/GameTimer'
 
 function LiveGameViewPage() {
-  const { id } = Route.useParams();
-  const { game, isLoading } = useGameControl(id);
+  const { id } = Route.useParams()
+  const { game, isLoading } = useGameControl(id)
 
   if (isLoading) {
     return (
@@ -15,7 +15,7 @@ function LiveGameViewPage() {
           <div className="text-xl">Loading game...</div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!game) {
@@ -24,15 +24,18 @@ function LiveGameViewPage() {
         <div className="text-center text-white">
           <div className="text-6xl mb-4">🎮</div>
           <div className="text-2xl font-bold mb-2">Game Not Found</div>
-          <div className="text-gray-300">The game you're looking for doesn't exist</div>
+          <div className="text-gray-300">
+            The game you're looking for doesn't exist
+          </div>
         </div>
       </div>
-    );
+    )
   }
 
-  const isGameActive = game.status === 'IN_PROGRESS';
-  const isGameCompleted = game.status === 'COMPLETED';
-  const progress = game.maxRounds > 0 ? (game.currentRound / game.maxRounds) * 100 : 0;
+  const isGameActive = game.status === 'IN_PROGRESS'
+  const isGameCompleted = game.status === 'COMPLETED'
+  const progress =
+    game.maxRounds > 0 ? (game.currentRound / game.maxRounds) * 100 : 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-8">
@@ -67,7 +70,9 @@ function LiveGameViewPage() {
               <span className="text-white/90 font-medium">
                 Round {game.currentRound} of {game.maxRounds}
               </span>
-              <span className="text-2xl font-bold">{Math.round(progress)}%</span>
+              <span className="text-2xl font-bold">
+                {Math.round(progress)}%
+              </span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-4 overflow-hidden">
               <div
@@ -106,8 +111,12 @@ function LiveGameViewPage() {
         {isGameCompleted && (
           <div className="mt-8 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-2xl p-8 text-center border-4 border-yellow-300 shadow-2xl">
             <div className="text-6xl mb-4 animate-bounce">🏆</div>
-            <h2 className="text-4xl font-bold text-white mb-2">Game Complete!</h2>
-            <p className="text-white/90 text-xl">Check the leaderboard to see the final results</p>
+            <h2 className="text-4xl font-bold text-white mb-2">
+              Game Complete!
+            </h2>
+            <p className="text-white/90 text-xl">
+              Check the leaderboard to see the final results
+            </p>
           </div>
         )}
 
@@ -125,9 +134,9 @@ function LiveGameViewPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const Route = createFileRoute('/games/$id/live')({
   component: LiveGameViewPage,
-});
+})

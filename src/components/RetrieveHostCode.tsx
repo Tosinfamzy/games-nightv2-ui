@@ -1,31 +1,37 @@
-import { useState } from 'react';
-import { useGamesMaster } from '../hooks/useGamesMaster';
-import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react'
+import { useGamesMaster } from '../hooks/useGamesMaster'
+import { useNavigate } from '@tanstack/react-router'
 
 export function RetrieveHostCode() {
-  const [mode, setMode] = useState<'code' | 'name'>('code');
-  const [codeInput, setCodeInput] = useState('');
-  const [nameInput, setNameInput] = useState('');
-  const { loadByCode, retrieveCodeByName, isLoading, isRetrieving, retrievedGMs } = useGamesMaster();
-  const navigate = useNavigate();
+  const [mode, setMode] = useState<'code' | 'name'>('code')
+  const [codeInput, setCodeInput] = useState('')
+  const [nameInput, setNameInput] = useState('')
+  const {
+    loadByCode,
+    retrieveCodeByName,
+    isLoading,
+    isRetrieving,
+    retrievedGMs,
+  } = useGamesMaster()
+  const navigate = useNavigate()
 
   const handleLoadByCode = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (codeInput.trim().length === 6) {
-      loadByCode(codeInput.trim());
+      loadByCode(codeInput.trim())
       // Will navigate on success via toast
       setTimeout(() => {
-        navigate({ to: '/sessions/new' });
-      }, 1500);
+        navigate({ to: '/sessions/new' })
+      }, 1500)
     }
-  };
+  }
 
   const handleRetrieveByName = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (nameInput.trim()) {
-      retrieveCodeByName(nameInput.trim());
+      retrieveCodeByName(nameInput.trim())
     }
-  };
+  }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
@@ -72,7 +78,14 @@ export function RetrieveHostCode() {
               type="text"
               id="code"
               value={codeInput}
-              onChange={(e) => setCodeInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+              onChange={(e) =>
+                setCodeInput(
+                  e.target.value
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9]/g, '')
+                    .slice(0, 6),
+                )
+              }
               placeholder="ABC123"
               required
               maxLength={6}
@@ -127,20 +140,28 @@ export function RetrieveHostCode() {
           {retrievedGMs && retrievedGMs.length > 0 && (
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-sm font-medium text-green-900 mb-2">
-                {retrievedGMs.length === 1 ? 'Found your code!' : `Found ${retrievedGMs.length} profiles:`}
+                {retrievedGMs.length === 1
+                  ? 'Found your code!'
+                  : `Found ${retrievedGMs.length} profiles:`}
               </p>
               <div className="space-y-2">
                 {retrievedGMs.map((gm) => (
-                  <div key={gm.id} className="flex items-center justify-between p-3 bg-white rounded border border-green-100">
+                  <div
+                    key={gm.id}
+                    className="flex items-center justify-between p-3 bg-white rounded border border-green-100"
+                  >
                     <div>
                       <p className="font-medium text-gray-900">{gm.name}</p>
                       <p className="text-xs text-gray-500">
-                        {gm.sessionCount} session{gm.sessionCount !== 1 ? 's' : ''}
+                        {gm.sessionCount} session
+                        {gm.sessionCount !== 1 ? 's' : ''}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600 mb-1">Code:</p>
-                      <p className="text-lg font-bold text-blue-600 tracking-wider">{gm.hostCode}</p>
+                      <p className="text-lg font-bold text-blue-600 tracking-wider">
+                        {gm.hostCode}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -163,5 +184,5 @@ export function RetrieveHostCode() {
         </button>
       </div>
     </div>
-  );
+  )
 }

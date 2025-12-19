@@ -78,7 +78,9 @@ export function GameQueueView({
 
         <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
           <div className="flex space-x-4">
-            <span>👥 {game.minPlayers}-{game.maxPlayers} players</span>
+            <span>
+              👥 {game.minPlayers}-{game.maxPlayers} players
+            </span>
             {game.currentRound && game.maxRounds && (
               <span>
                 🎯 Round {game.currentRound}/{game.maxRounds}
@@ -115,7 +117,9 @@ export function GameQueueView({
         <div>
           <div className="flex items-center mb-4">
             <div className="h-3 w-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-            <h2 className="text-xl font-bold text-gray-900">Currently Playing</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Currently Playing
+            </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {inProgressGames.map((game) => (

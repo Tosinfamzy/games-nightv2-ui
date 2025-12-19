@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { gameLibraryService } from '../lib/api/services/game-library.service'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import type {
   CreateGameLibraryItemDTO,
   GameLibraryItem,
@@ -16,6 +17,7 @@ function GamesPage() {
   const [categoryFilter, setCategoryFilter] = useState('')
   const [difficultyFilter, setDifficultyFilter] = useState('')
   const [showInactiveGames, setShowInactiveGames] = useState(false)
+  const [gameToDelete, setGameToDelete] = useState<string | null>(null)
 
   // Fetch games
   const { data: games = [], isLoading: gamesLoading } = useQuery({
@@ -545,11 +547,7 @@ function GamesPage() {
               key={game.id}
               game={game}
               onEdit={setEditingGame}
-              onDelete={(id) => {
-                if (confirm('Are you sure you want to delete this game?')) {
-                  deleteGameMutation.mutate(id)
-                }
-              }}
+              onDelete={(id) => setGameToDelete(id)}
               onToggleActive={(id, isActive) =>
                 toggleActiveMutation.mutate({ id, isActive })
               }
@@ -727,6 +725,22 @@ function GameCard({
           </button>
         </div>
       </div>
+
+      {/* Delete Game Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={gameToDelete !== null}
+        onClose={() => setGameToDelete(null)}
+        onConfirm={() => {
+          if (gameToDelete) {
+            deleteGameMutation.mutate(gameToDelete)
+            setGameToDelete(null)
+          }
+        }}
+        title="Delete Game"
+        message="Are you sure you want to delete this game? This action cannot be undone."
+        confirmLabel="Delete Game"
+        variant="danger"
+      />
     </div>
   )
 }

@@ -1,13 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { sessionService } from '../services/session.service'
+import { sessionService, type CreateSessionResponse } from '../services/session.service'
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
-import type {
-  Game,
-  Player,
-  Session,
-  SessionLeaderboard,
-  Team,
-} from '../types'
+import type { Game, Player, Session, SessionLeaderboard, Team } from '../types'
 import type { PaginationParams } from '../types/common'
 
 export interface CreateSessionDTO {
@@ -56,7 +50,7 @@ export const useSessions = (
 
 // Mutations
 export const useCreateSession = (): UseMutationResult<
-  Session,
+  CreateSessionResponse,
   Error,
   CreateSessionDTO
 > => {
@@ -64,11 +58,16 @@ export const useCreateSession = (): UseMutationResult<
 
   return useMutation({
     mutationFn: sessionService.create,
-    onSuccess: (newSession) => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: sessionKeys.lists() })
       queryClient.setQueryData<Session>(
-        sessionKeys.detail(newSession.id),
-        newSession,
+        sessionKeys.detail(response.session.id),
+        response.session,
+      )
+      // Cache the GM's player record
+      queryClient.setQueryData<Player[]>(
+        sessionKeys.players(response.session.id),
+        [response.gmPlayer],
       )
     },
   })

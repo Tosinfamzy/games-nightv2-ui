@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { playerService } from '../lib/api/services/player.service'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { sessionService } from '../lib/api/services/session.service'
 import type {
   CreatePlayerDTO,
@@ -14,6 +15,10 @@ function PlayerManagementPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [selectedSession, setSelectedSession] = useState<string>('')
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
+  const [playerToDelete, setPlayerToDelete] = useState<{
+    id: string
+    name: string
+  } | null>(null)
   const queryClient = useQueryClient()
 
   // Fetch all players
@@ -368,7 +373,9 @@ function PlayerManagementPage() {
                 {player.team && (
                   <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                     <h4 className="font-semibold text-blue-900 mb-1">Team</h4>
-                    <p className="text-sm text-blue-700">{player.team?.name ?? 'Unknown Team'}</p>
+                    <p className="text-sm text-blue-700">
+                      {player.team?.name ?? 'Unknown Team'}
+                    </p>
                   </div>
                 )}
 
@@ -435,15 +442,9 @@ function PlayerManagementPage() {
                       Edit
                     </button>
                     <button
-                      onClick={() => {
-                        if (
-                          confirm(
-                            `Are you sure you want to remove ${player.name}?`,
-                          )
-                        ) {
-                          deletePlayerMutation.mutate(player.id)
-                        }
-                      }}
+                      onClick={() =>
+                        setPlayerToDelete({ id: player.id, name: player.name })
+                      }
                       disabled={deletePlayerMutation.isPending}
                       className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 disabled:opacity-50"
                     >
@@ -496,6 +497,22 @@ function PlayerManagementPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Player Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={playerToDelete !== null}
+        onClose={() => setPlayerToDelete(null)}
+        onConfirm={() => {
+          if (playerToDelete) {
+            deletePlayerMutation.mutate(playerToDelete.id)
+            setPlayerToDelete(null)
+          }
+        }}
+        title="Remove Player"
+        message={`Are you sure you want to remove ${playerToDelete?.name}? This action cannot be undone.`}
+        confirmLabel="Remove Player"
+        variant="danger"
+      />
     </div>
   )
 }

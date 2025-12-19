@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionManagementService } from '../lib/api/services/session-management.service'
+import { ConfirmDialog } from './ConfirmDialog'
 import { gameLibraryService } from '../lib/api/services/game-library.service'
-import { showToast } from '../lib/toast'
+import { toastHelpers } from '../lib/toast'
+import EmptyState from './EmptyState'
 
 interface Player {
   id: string
@@ -48,6 +50,10 @@ export function EnhancedGamesTab({
   const [selectedGames, setSelectedGames] = useState<Array<string>>([])
   const [gameFilter, setGameFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [gameToRemove, setGameToRemove] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -70,14 +76,10 @@ export function EnhancedGamesTab({
       setShowAddGames(false)
       setSelectedGames([])
       // Show success toast
-      showToast.success(
-        `✓ Successfully added ${variables.length} game${variables.length === 1 ? '' : 's'} to session!`
-      )
+      toastHelpers.withCount('Added', variables.length, 'game')
     },
     onError: (error) => {
-      showToast.error(
-        `Failed to add games: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      toastHelpers.operationError('add games to session', error)
     },
   })
 
@@ -89,12 +91,10 @@ export function EnhancedGamesTab({
       queryClient.invalidateQueries({
         queryKey: ['sessions', 'detail', sessionId],
       })
-      showToast.success('✓ Game removed from session')
+      toastHelpers.deleted('Game')
     },
     onError: (error) => {
-      showToast.error(
-        `Failed to remove game: ${error instanceof Error ? error.message : 'Unknown error'}`
-      )
+      toastHelpers.operationError('remove game from session', error)
     },
   })
 
@@ -256,8 +256,10 @@ export function EnhancedGamesTab({
         <button
           onClick={() => setShowAddGames(true)}
           disabled={
-            sessionStatus === 'in_progress' || sessionStatus === 'IN_PROGRESS' ||
-            sessionStatus === 'completed' || sessionStatus === 'COMPLETED'
+            sessionStatus === 'in_progress' ||
+            sessionStatus === 'IN_PROGRESS' ||
+            sessionStatus === 'completed' ||
+            sessionStatus === 'COMPLETED'
           }
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -290,13 +292,12 @@ export function EnhancedGamesTab({
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getStatusIcon(status)}</span>
-                    {(sessionStatus === 'scheduled' || sessionStatus === 'SCHEDULED') && (
+                    {(sessionStatus === 'scheduled' ||
+                      sessionStatus === 'SCHEDULED') && (
                       <button
-                        onClick={() => {
-                          if (confirm(`Remove "${game.name}" from session?`)) {
-                            removeGameMutation.mutate(game.id)
-                          }
-                        }}
+                        onClick={() =>
+                          setGameToRemove({ id: game.id, name: game.name })
+                        }
                         className="text-red-500 hover:text-red-700 text-sm"
                         title="Remove game"
                       >
@@ -567,6 +568,22 @@ export function EnhancedGamesTab({
           </div>
         </div>
       )}
+
+      {/* Remove Game Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={gameToRemove !== null}
+        onClose={() => setGameToRemove(null)}
+        onConfirm={() => {
+          if (gameToRemove) {
+            removeGameMutation.mutate(gameToRemove.id)
+            setGameToRemove(null)
+          }
+        }}
+        title="Remove Game"
+        message={`Are you sure you want to remove "${gameToRemove?.name}" from this session?`}
+        confirmLabel="Remove Game"
+        variant="warning"
+      />
     </div>
   )
 }

@@ -46,7 +46,8 @@ export const useUpdatePlayer = (id: string) => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: UpdatePlayerDTO) => playerService.update(id, data as any),
+    mutationFn: (data: UpdatePlayerDTO) =>
+      playerService.update(id, data as any),
     onSuccess: (updatedPlayer) => {
       queryClient.setQueryData<any>([PLAYERS_KEY, id], updatedPlayer)
       queryClient.setQueryData<Array<any>>([PLAYERS_KEY], (old = []) =>

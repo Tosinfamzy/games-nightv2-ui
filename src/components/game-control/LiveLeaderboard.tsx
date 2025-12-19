@@ -1,10 +1,10 @@
-import { useGameScoring } from '../../hooks/useGameScoring';
-import type { UUID } from '../../lib/api/types';
+import { useGameScoring } from '../../hooks/useGameScoring'
+import type { UUID } from '../../lib/api/types'
 
 interface LiveLeaderboardProps {
-  gameId: UUID;
-  className?: string;
-  showRoundBreakdown?: boolean;
+  gameId: UUID
+  className?: string
+  showRoundBreakdown?: boolean
 }
 
 export default function LiveLeaderboard({
@@ -12,11 +12,13 @@ export default function LiveLeaderboard({
   className = '',
   showRoundBreakdown = false,
 }: LiveLeaderboardProps) {
-  const { leaderboard, winner, isLoading } = useGameScoring(gameId);
+  const { leaderboard, winner, isLoading } = useGameScoring(gameId)
 
   if (isLoading) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
           <div className="space-y-3">
@@ -26,25 +28,31 @@ export default function LiveLeaderboard({
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (leaderboard.length === 0) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <h3 className="text-lg font-bold text-gray-900 mb-4">🏆 Leaderboard</h3>
         <div className="text-center py-8 text-gray-500">
           <p>No scores yet</p>
-          <p className="text-sm mt-1">Start entering scores to see the leaderboard</p>
+          <p className="text-sm mt-1">
+            Start entering scores to see the leaderboard
+          </p>
         </div>
       </div>
-    );
+    )
   }
 
-  const maxScore = leaderboard[0]?.totalPoints || 1;
+  const maxScore = leaderboard[0]?.totalPoints || 1
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+    >
       {/* Header */}
       <div className="mb-4">
         <h3 className="text-lg font-bold text-gray-900 mb-1">🏆 Leaderboard</h3>
@@ -58,10 +66,11 @@ export default function LiveLeaderboard({
       {/* Leaderboard List */}
       <div className="space-y-3">
         {leaderboard.map((team, index) => {
-          const isFirst = index === 0;
-          const isSecond = index === 1;
-          const isThird = index === 2;
-          const percentage = maxScore > 0 ? (team.totalPoints / maxScore) * 100 : 0;
+          const isFirst = index === 0
+          const isSecond = index === 1
+          const isThird = index === 2
+          const percentage =
+            maxScore > 0 ? (team.totalPoints / maxScore) * 100 : 0
 
           return (
             <div
@@ -105,7 +114,13 @@ export default function LiveLeaderboard({
                             : 'text-gray-500'
                     }`}
                   >
-                    {isFirst ? '🥇' : isSecond ? '🥈' : isThird ? '🥉' : `${team.rank}.`}
+                    {isFirst
+                      ? '🥇'
+                      : isSecond
+                        ? '🥈'
+                        : isThird
+                          ? '🥉'
+                          : `${team.rank}.`}
                   </div>
 
                   {/* Team Info */}
@@ -118,13 +133,14 @@ export default function LiveLeaderboard({
                         </span>
                       )}
                     </div>
-                    {showRoundBreakdown && Object.keys(team.roundPoints).length > 0 && (
-                      <div className="text-xs text-gray-600 mt-1">
-                        {Object.entries(team.roundPoints)
-                          .map(([round, points]) => `R${round}: ${points}`)
-                          .join(' • ')}
-                      </div>
-                    )}
+                    {showRoundBreakdown &&
+                      Object.keys(team.roundPoints).length > 0 && (
+                        <div className="text-xs text-gray-600 mt-1">
+                          {Object.entries(team.roundPoints)
+                            .map(([round, points]) => `R${round}: ${points}`)
+                            .join(' • ')}
+                        </div>
+                      )}
                   </div>
                 </div>
 
@@ -137,7 +153,7 @@ export default function LiveLeaderboard({
                 </div>
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -147,17 +163,20 @@ export default function LiveLeaderboard({
           <div className="grid grid-cols-2 gap-4 text-center text-sm">
             <div>
               <div className="font-bold text-gray-900">
-                {leaderboard[0].totalPoints - (leaderboard[1]?.totalPoints || 0)}
+                {leaderboard[0].totalPoints -
+                  (leaderboard[1]?.totalPoints || 0)}
               </div>
               <div className="text-gray-600 text-xs">Point Lead</div>
             </div>
             <div>
-              <div className="font-bold text-gray-900">{leaderboard.length}</div>
+              <div className="font-bold text-gray-900">
+                {leaderboard.length}
+              </div>
               <div className="text-gray-600 text-xs">Teams</div>
             </div>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }

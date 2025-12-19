@@ -1,117 +1,118 @@
-import { useEffect, useState } from 'react';
-import { useSocketContext } from '../lib/socket/socket-context';
+import { useEffect, useState } from 'react'
+import { useSocketContext } from '../lib/socket/socket-context'
 import type {
   TimerTickEvent,
   TurnStartedEvent,
   TurnAdvancedEvent,
   TimerExpiredEvent,
-} from '../lib/api/types';
+} from '../lib/api/types'
 
 /**
  * Hook to manage game timer state from WebSocket events
  */
 export const useGameTimer = (gameId: string | undefined) => {
-  const { gamesSocket, isConnected } = useSocketContext();
-  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-  const [turnTimeLimit, setTurnTimeLimit] = useState<number | null>(null);
-  const [turnEndsAt, setTurnEndsAt] = useState<string | null>(null);
-  const [currentTeamName, setCurrentTeamName] = useState<string>('');
-  const [isExpired, setIsExpired] = useState(false);
-  const [autoAdvanced, setAutoAdvanced] = useState(false);
+  const { gamesSocket, isConnected } = useSocketContext()
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
+  const [turnTimeLimit, setTurnTimeLimit] = useState<number | null>(null)
+  const [turnEndsAt, setTurnEndsAt] = useState<string | null>(null)
+  const [currentTeamName, setCurrentTeamName] = useState<string>('')
+  const [isExpired, setIsExpired] = useState(false)
+  const [autoAdvanced, setAutoAdvanced] = useState(false)
 
   // Listen for timer tick events
   useEffect(() => {
-    if (!gamesSocket || !gameId) return;
+    if (!gamesSocket || !gameId) return
 
     const handleTimerTick = (data: TimerTickEvent) => {
       if (data.gameId === gameId) {
-        setTimeRemaining(data.timeRemaining);
-        setIsExpired(false);
+        setTimeRemaining(data.timeRemaining)
+        setIsExpired(false)
       }
-    };
+    }
 
-    gamesSocket.on('game:timer-tick', handleTimerTick);
+    gamesSocket.on('game:timer-tick', handleTimerTick)
 
     return () => {
-      gamesSocket.off('game:timer-tick', handleTimerTick);
-    };
-  }, [gamesSocket, gameId]);
+      gamesSocket.off('game:timer-tick', handleTimerTick)
+    }
+  }, [gamesSocket, gameId])
 
   // Listen for turn started events
   useEffect(() => {
-    if (!gamesSocket || !gameId) return;
+    if (!gamesSocket || !gameId) return
 
     const handleTurnStarted = (data: TurnStartedEvent) => {
       if (data.gameId === gameId) {
-        console.log('Turn started:', data);
-        setTurnTimeLimit(data.turnTimeLimit);
-        setTurnEndsAt(data.turnEndsAt);
-        setCurrentTeamName(data.teamName);
-        setTimeRemaining(data.turnTimeLimit);
-        setIsExpired(false);
-        setAutoAdvanced(false);
+        console.log('Turn started:', data)
+        setTurnTimeLimit(data.turnTimeLimit)
+        setTurnEndsAt(data.turnEndsAt)
+        setCurrentTeamName(data.teamName)
+        setTimeRemaining(data.turnTimeLimit)
+        setIsExpired(false)
+        setAutoAdvanced(false)
       }
-    };
+    }
 
-    gamesSocket.on('game:turn-started', handleTurnStarted);
+    gamesSocket.on('game:turn-started', handleTurnStarted)
 
     return () => {
-      gamesSocket.off('game:turn-started', handleTurnStarted);
-    };
-  }, [gamesSocket, gameId]);
+      gamesSocket.off('game:turn-started', handleTurnStarted)
+    }
+  }, [gamesSocket, gameId])
 
   // Listen for turn advanced events
   useEffect(() => {
-    if (!gamesSocket || !gameId) return;
+    if (!gamesSocket || !gameId) return
 
     const handleTurnAdvanced = (data: TurnAdvancedEvent) => {
       if (data.gameId === gameId) {
-        console.log('Turn advanced:', data);
-        setTurnTimeLimit(data.turnTimeLimit);
-        setTurnEndsAt(data.turnEndsAt);
-        setCurrentTeamName(data.nextTeamName);
-        setTimeRemaining(data.turnTimeLimit);
-        setAutoAdvanced(data.autoAdvanced);
-        setIsExpired(false);
+        console.log('Turn advanced:', data)
+        setTurnTimeLimit(data.turnTimeLimit)
+        setTurnEndsAt(data.turnEndsAt)
+        setCurrentTeamName(data.nextTeamName)
+        setTimeRemaining(data.turnTimeLimit)
+        setAutoAdvanced(data.autoAdvanced)
+        setIsExpired(false)
       }
-    };
+    }
 
-    gamesSocket.on('game:turn-advanced', handleTurnAdvanced);
+    gamesSocket.on('game:turn-advanced', handleTurnAdvanced)
 
     return () => {
-      gamesSocket.off('game:turn-advanced', handleTurnAdvanced);
-    };
-  }, [gamesSocket, gameId]);
+      gamesSocket.off('game:turn-advanced', handleTurnAdvanced)
+    }
+  }, [gamesSocket, gameId])
 
   // Listen for timer expired events
   useEffect(() => {
-    if (!gamesSocket || !gameId) return;
+    if (!gamesSocket || !gameId) return
 
     const handleTimerExpired = (data: TimerExpiredEvent) => {
       if (data.gameId === gameId) {
-        console.log('Timer expired:', data);
-        setTimeRemaining(0);
-        setIsExpired(true);
+        console.log('Timer expired:', data)
+        setTimeRemaining(0)
+        setIsExpired(true)
       }
-    };
+    }
 
-    gamesSocket.on('game:timer-expired', handleTimerExpired);
+    gamesSocket.on('game:timer-expired', handleTimerExpired)
 
     return () => {
-      gamesSocket.off('game:timer-expired', handleTimerExpired);
-    };
-  }, [gamesSocket, gameId]);
+      gamesSocket.off('game:timer-expired', handleTimerExpired)
+    }
+  }, [gamesSocket, gameId])
 
   // Format time for display (MM:SS)
   const formatTime = (seconds: number | null): string => {
-    if (seconds === null) return '--:--';
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+    if (seconds === null) return '--:--'
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
 
   // Check if timer is in warning state (< 10 seconds)
-  const isWarning = timeRemaining !== null && timeRemaining <= 10 && timeRemaining > 0;
+  const isWarning =
+    timeRemaining !== null && timeRemaining <= 10 && timeRemaining > 0
 
   return {
     isConnected,
@@ -124,5 +125,5 @@ export const useGameTimer = (gameId: string | undefined) => {
     isWarning,
     formattedTime: formatTime(timeRemaining),
     hasTimer: turnTimeLimit !== null && turnTimeLimit > 0,
-  };
-};
+  }
+}

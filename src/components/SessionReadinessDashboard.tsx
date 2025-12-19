@@ -39,7 +39,8 @@ export function SessionReadinessDashboard({
   const { data: readiness } = useQuery({
     queryKey: ['session-readiness', sessionId],
     queryFn: () => sessionManagementService.getSessionReadiness(sessionId),
-    refetchInterval: 5000, // Update every 5 seconds
+    staleTime: Infinity, // Trust WebSocket updates only
+    refetchOnMount: true, // Initial load only
   })
 
   const getReadinessScore = () => {

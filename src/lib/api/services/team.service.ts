@@ -1,5 +1,10 @@
 import { fetchAPI } from '../client'
-import type { TeamResponseDto } from '../types/team.dto'
+import type {
+  TeamResponseDto,
+  CreateTeamsDto,
+  TeamFormationStrategy,
+  TeamFormationSuggestionsResponse,
+} from '../types/team.dto'
 
 export interface Team {
   id: string
@@ -101,6 +106,90 @@ export const teamService = {
     return fetchAPI<void>(`/teams/${id}`, {
       method: 'DELETE',
     })
+  },
+
+  createTeams: async (
+    gameId: string,
+    data: CreateTeamsDto,
+  ): Promise<Team[]> => {
+    const result = await fetchAPI<TeamResponseDto[]>(
+      `/teams/game/${gameId}/create-teams`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      },
+    )
+    return result.map(mapDto)
+  },
+
+  rebalanceTeams: async (
+    gameId: string,
+    strategy: TeamFormationStrategy,
+  ): Promise<Team[]> => {
+    const result = await fetchAPI<TeamResponseDto[]>(
+      `/teams/game/${gameId}/rebalance`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ strategy }),
+      },
+    )
+    return result.map(mapDto)
+  },
+
+  getTeamSuggestions: async (
+    gameId: string,
+  ): Promise<TeamFormationSuggestionsResponse> => {
+    return fetchAPI<TeamFormationSuggestionsResponse>(
+      `/teams/game/${gameId}/suggestions`,
+      {
+        method: 'GET',
+      },
+    )
+  },
+
+  getTeamStats: async (gameId: string): Promise<any> => {
+    return fetchAPI<any>(`/teams/game/${gameId}/stats`, {
+      method: 'GET',
+    })
+  },
+
+  /**
+   * Swap a player from one team to another
+   */
+  swapPlayer: async (
+    playerId: string,
+    fromTeamId: string,
+    toTeamId: string,
+  ): Promise<Team[]> => {
+    const result = await fetchAPI<TeamResponseDto[]>(`/teams/swap-player`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, fromTeamId, toTeamId }),
+    })
+    return result.map(mapDto)
+  },
+
+  /**
+   * Dissolve a team and return its players to the unassigned pool
+   */
+  dissolveTeam: async (teamId: string): Promise<{ message: string }> => {
+    return fetchAPI<{ message: string }>(`/teams/${teamId}/dissolve`, {
+      method: 'DELETE',
+    })
+  },
+
+  /**
+   * Reassign a player to a different team (removes from current team if any)
+   */
+  reassignPlayer: async (playerId: string, newTeamId: string): Promise<Team> => {
+    const result = await fetchAPI<TeamResponseDto>(`/teams/reassign-player`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, newTeamId }),
+    })
+    return mapDto(result)
   },
 }
 

@@ -1,14 +1,14 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   LiveScoreEntry,
   RoundScorecard,
   LiveLeaderboard,
-} from '../../components/game-control';
-import { useGameControl } from '../../hooks/useGameControl';
+} from '../../components/game-control'
+import { useGameControl } from '../../hooks/useGameControl'
 
 function ScoreEntryPage() {
-  const { id } = Route.useParams();
-  const { game, isLoading } = useGameControl(id);
+  const { id } = Route.useParams()
+  const { game, isLoading } = useGameControl(id)
 
   if (isLoading) {
     return (
@@ -20,7 +20,7 @@ function ScoreEntryPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -52,8 +52,8 @@ function ScoreEntryPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Score Entry</h1>
               <p className="text-gray-600 mt-1">
-                {game?.name || 'Loading...'} • Round {game?.currentRound || 0} of{' '}
-                {game?.maxRounds || 0}
+                {game?.name || 'Loading...'} • Round {game?.currentRound || 0}{' '}
+                of {game?.maxRounds || 0}
               </p>
             </div>
             <div className="text-right">
@@ -113,7 +113,7 @@ function ScoreEntryPage() {
                     <span className="font-medium text-gray-900">
                       {game?.teams.reduce(
                         (total, team) => total + team.playerIds.length,
-                        0
+                        0,
                       ) || 0}
                     </span>
                   </div>
@@ -145,9 +145,9 @@ function ScoreEntryPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const Route = createFileRoute('/games/$id/score')({
   component: ScoreEntryPage,
-});
+})

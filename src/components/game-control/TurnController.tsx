@@ -1,53 +1,66 @@
-import { useGameControl } from '../../hooks/useGameControl';
-import type { UUID } from '../../lib/api/types';
+import { useGameControl } from '../../hooks/useGameControl'
+import type { UUID } from '../../lib/api/types'
 
 interface TurnControllerProps {
-  gameId: UUID;
-  className?: string;
+  gameId: UUID
+  className?: string
 }
 
-export default function TurnController({ gameId, className = '' }: TurnControllerProps) {
-  const { game, isLoading, nextTurn, isAdvancingTurn } = useGameControl(gameId);
+export default function TurnController({
+  gameId,
+  className = '',
+}: TurnControllerProps) {
+  const { game, isLoading, nextTurn, isAdvancingTurn } = useGameControl(gameId)
 
   if (isLoading) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="h-10 bg-gray-200 rounded"></div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!game) {
-    return null;
+    return null
   }
 
-  const isInProgress = game.status === 'IN_PROGRESS';
-  const currentTeamIndex = game.teams.findIndex((t) => t.id === game.teams[0]?.id);
-  const currentTeam = game.teams[currentTeamIndex];
-  const nextTeamIndex = (currentTeamIndex + 1) % game.teams.length;
-  const nextTeamName = game.teams[nextTeamIndex]?.name;
+  const isInProgress = game.status === 'IN_PROGRESS'
+  const currentTeamIndex = game.teams.findIndex(
+    (t) => t.id === game.teams[0]?.id,
+  )
+  const currentTeam = game.teams[currentTeamIndex]
+  const nextTeamIndex = (currentTeamIndex + 1) % game.teams.length
+  const nextTeamName = game.teams[nextTeamIndex]?.name
 
   // Check if game uses turn-based mechanics
-  const hasTurnBasedMechanics = game.teams.length > 1;
+  const hasTurnBasedMechanics = game.teams.length > 1
 
   if (!hasTurnBasedMechanics) {
-    return null; // Don't show turn controller for single-team or non-turn-based games
+    return null // Don't show turn controller for single-team or non-turn-based games
   }
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+    >
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Turn Management</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          Turn Management
+        </h3>
 
         {isInProgress ? (
           <div>
             {/* Current Turn Display */}
             <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="text-sm text-blue-600 font-medium mb-1">CURRENT TURN</div>
+              <div className="text-sm text-blue-600 font-medium mb-1">
+                CURRENT TURN
+              </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-blue-900">
@@ -66,7 +79,9 @@ export default function TurnController({ gameId, className = '' }: TurnControlle
             {nextTeamName && (
               <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="text-xs text-gray-600 mb-1">NEXT UP</div>
-                <div className="text-lg font-medium text-gray-900">{nextTeamName}</div>
+                <div className="text-lg font-medium text-gray-900">
+                  {nextTeamName}
+                </div>
               </div>
             )}
 
@@ -104,12 +119,18 @@ export default function TurnController({ gameId, className = '' }: TurnControlle
 
             {/* Keyboard Shortcut Hint */}
             <div className="mt-3 text-center text-xs text-gray-500">
-              Tip: Press <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded">N</kbd> for next turn
+              Tip: Press{' '}
+              <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded">
+                N
+              </kbd>{' '}
+              for next turn
             </div>
           </div>
         ) : (
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
-            <p className="text-gray-600">Turn management available when game is in progress</p>
+            <p className="text-gray-600">
+              Turn management available when game is in progress
+            </p>
           </div>
         )}
       </div>
@@ -119,12 +140,17 @@ export default function TurnController({ gameId, className = '' }: TurnControlle
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-gray-900">{game.teams.length}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {game.teams.length}
+              </div>
               <div className="text-xs text-gray-600">Total Teams</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">
-                {game.teams.reduce((total, team) => total + team.playerIds.length, 0)}
+                {game.teams.reduce(
+                  (total, team) => total + team.playerIds.length,
+                  0,
+                )}
               </div>
               <div className="text-xs text-gray-600">Total Players</div>
             </div>
@@ -132,5 +158,5 @@ export default function TurnController({ gameId, className = '' }: TurnControlle
         </div>
       )}
     </div>
-  );
+  )
 }

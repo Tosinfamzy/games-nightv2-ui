@@ -1,9 +1,10 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent } from 'react'
+import { showToast } from '../lib/toast'
 
 interface ChatInputProps {
-  onSendMessage: (content: string) => void;
-  disabled?: boolean;
-  placeholder?: string;
+  onSendMessage: (content: string) => void
+  disabled?: boolean
+  placeholder?: string
 }
 
 /**
@@ -14,29 +15,29 @@ export default function ChatInput({
   disabled = false,
   placeholder = 'Type a message...',
 }: ChatInputProps) {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('')
 
   const handleSend = () => {
-    const trimmedMessage = message.trim();
-    if (!trimmedMessage || disabled) return;
+    const trimmedMessage = message.trim()
+    if (!trimmedMessage || disabled) return
 
     // Check max length (backend limit is 1000)
     if (trimmedMessage.length > 1000) {
-      alert('Message is too long. Maximum 1000 characters.');
-      return;
+      showToast.warning('Message too long! Maximum 1000 characters.')
+      return
     }
 
-    onSendMessage(trimmedMessage);
-    setMessage('');
-  };
+    onSendMessage(trimmedMessage)
+    setMessage('')
+  }
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Send on Enter, but allow Shift+Enter for new lines
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault()
+      handleSend()
     }
-  };
+  }
 
   return (
     <div className="border-t border-gray-200 bg-white p-4">
@@ -49,10 +50,11 @@ export default function ChatInput({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="w-full px-4 py-3 border border-gray-300 rounded-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-base"
             style={{
               minHeight: '48px',
               maxHeight: '120px',
+              fontSize: '16px',
             }}
           />
           {/* Character count */}
@@ -83,5 +85,5 @@ export default function ChatInput({
         Press Enter to send, Shift+Enter for new line
       </p>
     </div>
-  );
+  )
 }

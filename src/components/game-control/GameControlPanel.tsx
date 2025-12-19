@@ -1,12 +1,18 @@
-import { useGameControl } from '../../hooks/useGameControl';
-import type { UUID, GameStatus } from '../../lib/api/types';
+import { useGameControl } from '../../hooks/useGameControl'
+import type { UUID, GameStatus } from '../../lib/api/types'
+import { ConfirmDialog } from '../ConfirmDialog'
+import { useState } from 'react'
 
 interface GameControlPanelProps {
-  gameId: UUID;
-  className?: string;
+  gameId: UUID
+  className?: string
 }
 
-export default function GameControlPanel({ gameId, className = '' }: GameControlPanelProps) {
+export default function GameControlPanel({
+  gameId,
+  className = '',
+}: GameControlPanelProps) {
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const {
     game,
     isLoading,
@@ -16,56 +22,63 @@ export default function GameControlPanel({ gameId, className = '' }: GameControl
     isPausing,
     isResuming,
     isCompleting,
-  } = useGameControl(gameId);
+  } = useGameControl(gameId)
 
   if (isLoading) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="h-10 bg-gray-200 rounded"></div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!game) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <p className="text-gray-500">Game not found</p>
       </div>
-    );
+    )
   }
 
   const getStatusColor = (status: GameStatus): string => {
     switch (status) {
       case 'IN_PROGRESS':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'
       case 'PAUSED':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800'
       case 'COMPLETED':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'
       case 'NOT_STARTED':
       default:
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800'
     }
-  };
+  }
 
-  const canPause = game.status === 'IN_PROGRESS';
-  const canResume = game.status === 'PAUSED';
-  const canComplete = game.status === 'IN_PROGRESS' && game.currentRound === game.maxRounds;
+  const canPause = game.status === 'IN_PROGRESS'
+  const canResume = game.status === 'PAUSED'
+  const canComplete =
+    game.status === 'IN_PROGRESS' && game.currentRound === game.maxRounds
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+    >
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-2xl font-bold text-gray-900">{game.name}</h2>
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-              game.status
+              game.status,
             )}`}
           >
             {game.status.replace('_', ' ')}
@@ -86,12 +99,17 @@ export default function GameControlPanel({ gameId, className = '' }: GameControl
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Teams</div>
-          <div className="text-2xl font-bold text-gray-900">{game.teams.length}</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {game.teams.length}
+          </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Players</div>
           <div className="text-2xl font-bold text-gray-900">
-            {game.teams.reduce((total, team) => total + team.playerIds.length, 0)}
+            {game.teams.reduce(
+              (total, team) => total + team.playerIds.length,
+              0,
+            )}
           </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
@@ -129,15 +147,7 @@ export default function GameControlPanel({ gameId, className = '' }: GameControl
 
         {canComplete && (
           <button
-            onClick={() => {
-              if (
-                window.confirm(
-                  'Are you sure you want to complete this game? This action cannot be undone.'
-                )
-              ) {
-                completeGame();
-              }
-            }}
+            onClick={() => setShowCompleteConfirm(true)}
             disabled={isCompleting}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors font-medium"
           >
@@ -170,6 +180,20 @@ export default function GameControlPanel({ gameId, className = '' }: GameControl
           </p>
         </div>
       )}
+
+      {/* Complete Game Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showCompleteConfirm}
+        onClose={() => setShowCompleteConfirm(false)}
+        onConfirm={() => {
+          completeGame()
+          setShowCompleteConfirm(false)
+        }}
+        title="Complete Game"
+        message="Are you sure you want to complete this game? This action cannot be undone."
+        confirmLabel="Complete Game"
+        variant="warning"
+      />
     </div>
-  );
+  )
 }

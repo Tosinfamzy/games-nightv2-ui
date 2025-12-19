@@ -1,8 +1,5 @@
 import { fetchAPI } from '../client'
-import type {
-  PlayerResponseDto,
-  PlayerListItemDto,
-} from '../types/player.dto'
+import type { PlayerResponseDto, PlayerListItemDto } from '../types/player.dto'
 
 export interface Player {
   id: string
@@ -95,10 +92,7 @@ export const playerService = {
     }).then(mapPlayerDto)
   },
 
-  updateStatus: (
-    id: string,
-    data: UpdatePlayerStatusDTO,
-  ): Promise<Player> => {
+  updateStatus: (id: string, data: UpdatePlayerStatusDTO): Promise<Player> => {
     return fetchAPI<PlayerResponseDto>(`/players/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify(data),

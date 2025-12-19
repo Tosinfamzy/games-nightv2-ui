@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useGameScores, useSubmitGameScore } from '../hooks/useScores'
+import { toastHelpers } from '../lib/toast'
 import type { SubmitGameScoreDTO } from '../lib/api/services/score.service'
 
 interface LiveScoreboardProps {
@@ -50,6 +51,9 @@ export function LiveScoreboard({
       {
         onSuccess: () => {
           setScoreInputs((prev) => ({ ...prev, [teamId]: '' }))
+        },
+        onError: (error) => {
+          toastHelpers.operationError('submit score', error)
         },
       },
     )

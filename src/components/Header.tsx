@@ -14,6 +14,24 @@ export default function Header() {
 
           <div className="flex gap-4">
             <Link
+              to="/join"
+              className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md"
+              activeProps={{
+                className: 'text-blue-600 hover:text-blue-700',
+              }}
+            >
+              Join Session
+            </Link>
+            <Link
+              to="/rejoin"
+              className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md"
+              activeProps={{
+                className: 'text-blue-600 hover:text-blue-700',
+              }}
+            >
+              Rejoin
+            </Link>
+            <Link
               to="/games-master"
               className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md"
             >

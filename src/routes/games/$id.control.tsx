@@ -1,14 +1,14 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   GameControlPanel,
   RoundManager,
   TurnController,
   LiveScoreEntry,
   LiveLeaderboard,
-} from '../../components/game-control';
+} from '../../components/game-control'
 
 function GameControlPage() {
-  const { id } = Route.useParams();
+  const { id } = Route.useParams()
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -35,7 +35,9 @@ function GameControlPage() {
             </svg>
             Back to Game Details
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Game Control Panel</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Game Control Panel
+          </h1>
           <p className="text-gray-600 mt-1">
             Manage your game in real-time: control rounds, turns, and scoring
           </p>
@@ -95,9 +97,9 @@ function GameControlPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const Route = createFileRoute('/games/$id/control')({
   component: GameControlPage,
-});
+})

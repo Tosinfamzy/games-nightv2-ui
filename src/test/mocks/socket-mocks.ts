@@ -1,15 +1,15 @@
-import { vi } from 'vitest';
-import type { Socket } from 'socket.io-client';
+import { vi } from 'vitest'
+import type { Socket } from 'socket.io-client'
 
 export type MockSocket = {
-  on: ReturnType<typeof vi.fn>;
-  off: ReturnType<typeof vi.fn>;
-  emit: ReturnType<typeof vi.fn>;
-  connect: ReturnType<typeof vi.fn>;
-  disconnect: ReturnType<typeof vi.fn>;
-  connected: boolean;
-  id: string;
-};
+  on: ReturnType<typeof vi.fn>
+  off: ReturnType<typeof vi.fn>
+  emit: ReturnType<typeof vi.fn>
+  connect: ReturnType<typeof vi.fn>
+  disconnect: ReturnType<typeof vi.fn>
+  connected: boolean
+  id: string
+}
 
 /**
  * Creates a mock Socket.IO client for testing
@@ -24,9 +24,9 @@ export function createMockSocket(overrides?: Partial<MockSocket>): Socket {
     connected: true,
     id: `mock-socket-${Math.random().toString(36).substring(7)}`,
     ...overrides,
-  };
+  }
 
-  return mockSocket as unknown as Socket;
+  return mockSocket as unknown as Socket
 }
 
 /**
@@ -35,13 +35,13 @@ export function createMockSocket(overrides?: Partial<MockSocket>): Socket {
 export function emitSocketEvent(
   socket: MockSocket,
   eventName: string,
-  data: any
+  data: any,
 ) {
   const listeners = socket.on.mock.calls
     .filter(([event]) => event === eventName)
-    .map(([, callback]) => callback);
+    .map(([, callback]) => callback)
 
-  listeners.forEach((listener) => listener(data));
+  listeners.forEach((listener) => listener(data))
 }
 
 /**
@@ -50,7 +50,7 @@ export function emitSocketEvent(
 export function getSocketListeners(socket: MockSocket, eventName: string) {
   return socket.on.mock.calls
     .filter(([event]) => event === eventName)
-    .map(([, callback]) => callback);
+    .map(([, callback]) => callback)
 }
 
 /**
@@ -58,13 +58,13 @@ export function getSocketListeners(socket: MockSocket, eventName: string) {
  */
 export function expectSocketListenerRegistered(
   socket: MockSocket,
-  eventName: string
+  eventName: string,
 ) {
-  const listeners = getSocketListeners(socket, eventName);
+  const listeners = getSocketListeners(socket, eventName)
   if (listeners.length === 0) {
-    throw new Error(`No listeners registered for event: ${eventName}`);
+    throw new Error(`No listeners registered for event: ${eventName}`)
   }
-  return listeners;
+  return listeners
 }
 
 /**
@@ -76,28 +76,28 @@ export function createMockSocketContext() {
     gamesSocket: createMockSocket(),
     chatSocket: createMockSocket(),
     isConnected: true,
-  };
+  }
 }
 
 /**
  * Simulates socket connection
  */
 export function simulateSocketConnect(socket: MockSocket) {
-  socket.connected = true;
-  emitSocketEvent(socket, 'connect', {});
+  socket.connected = true
+  emitSocketEvent(socket, 'connect', {})
 }
 
 /**
  * Simulates socket disconnection
  */
 export function simulateSocketDisconnect(socket: MockSocket) {
-  socket.connected = false;
-  emitSocketEvent(socket, 'disconnect', {});
+  socket.connected = false
+  emitSocketEvent(socket, 'disconnect', {})
 }
 
 /**
  * Creates a spy on socket event emissions
  */
 export function spyOnSocketEmit(socket: MockSocket) {
-  return socket.emit;
+  return socket.emit
 }

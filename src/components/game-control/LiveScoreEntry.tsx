@@ -1,21 +1,26 @@
-import { useState } from 'react';
-import { useGameControl } from '../../hooks/useGameControl';
-import { useGameScoring } from '../../hooks/useGameScoring';
-import type { UUID } from '../../lib/api/types';
+import { useState } from 'react'
+import { useGameControl } from '../../hooks/useGameControl'
+import { useGameScoring } from '../../hooks/useGameScoring'
+import type { UUID } from '../../lib/api/types'
 
 interface LiveScoreEntryProps {
-  gameId: UUID;
-  className?: string;
+  gameId: UUID
+  className?: string
 }
 
-export default function LiveScoreEntry({ gameId, className = '' }: LiveScoreEntryProps) {
-  const { game, isLoading: isLoadingGame } = useGameControl(gameId);
-  const { submitScore, isSubmittingScore } = useGameScoring(gameId);
-  const [scoreInputs, setScoreInputs] = useState<Record<string, string>>({});
+export default function LiveScoreEntry({
+  gameId,
+  className = '',
+}: LiveScoreEntryProps) {
+  const { game, isLoading: isLoadingGame } = useGameControl(gameId)
+  const { submitScore, isSubmittingScore } = useGameScoring(gameId)
+  const [scoreInputs, setScoreInputs] = useState<Record<string, string>>({})
 
   if (isLoadingGame) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
           <div className="space-y-3">
@@ -25,61 +30,69 @@ export default function LiveScoreEntry({ gameId, className = '' }: LiveScoreEntr
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!game) {
-    return null;
+    return null
   }
 
   const handleScoreChange = (teamId: string, value: string) => {
     // Allow only numbers and negative sign
     if (value === '' || value === '-' || /^-?\d+$/.test(value)) {
-      setScoreInputs((prev) => ({ ...prev, [teamId]: value }));
+      setScoreInputs((prev) => ({ ...prev, [teamId]: value }))
     }
-  };
+  }
 
   const handleSubmitScore = (teamId: string) => {
-    const scoreValue = scoreInputs[teamId];
-    if (!scoreValue || scoreValue === '-') return;
+    const scoreValue = scoreInputs[teamId]
+    if (!scoreValue || scoreValue === '-') return
 
-    const points = parseInt(scoreValue, 10);
-    if (isNaN(points)) return;
+    const points = parseInt(scoreValue, 10)
+    if (isNaN(points)) return
 
     submitScore({
       gameId,
       teamId,
       score: points,
       roundNumber: game.currentRound,
-    });
+    })
 
     // Clear the input after submission
-    setScoreInputs((prev) => ({ ...prev, [teamId]: '' }));
-  };
+    setScoreInputs((prev) => ({ ...prev, [teamId]: '' }))
+  }
 
   const handleKeyPress = (teamId: string, e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmitScore(teamId);
+      handleSubmitScore(teamId)
     }
-  };
+  }
 
   if (game.teams.length === 0) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
-        <h3 className="text-lg font-bold text-gray-900 mb-4">📝 Quick Score Entry</h3>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          📝 Quick Score Entry
+        </h3>
         <div className="text-center py-8 text-gray-500">
           <p>No teams found</p>
           <p className="text-sm mt-1">Add teams to start scoring</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+    >
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-1">📝 Quick Score Entry</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">
+          📝 Quick Score Entry
+        </h3>
         <p className="text-sm text-gray-600">
           Round {game.currentRound} of {game.maxRounds}
         </p>
@@ -88,8 +101,8 @@ export default function LiveScoreEntry({ gameId, className = '' }: LiveScoreEntr
       {/* Score Input for Each Team */}
       <div className="space-y-3">
         {game.teams.map((team) => {
-          const inputValue = scoreInputs[team.id] || '';
-          const hasValue = inputValue && inputValue !== '-';
+          const inputValue = scoreInputs[team.id] || ''
+          const hasValue = inputValue && inputValue !== '-'
 
           return (
             <div
@@ -101,7 +114,8 @@ export default function LiveScoreEntry({ gameId, className = '' }: LiveScoreEntr
                 <div className="flex-1">
                   <div className="font-bold text-gray-900">{team.name}</div>
                   <div className="text-xs text-gray-600">
-                    {team.playerIds.length} player{team.playerIds.length !== 1 ? 's' : ''}
+                    {team.playerIds.length} player
+                    {team.playerIds.length !== 1 ? 's' : ''}
                   </div>
                 </div>
 
@@ -129,7 +143,7 @@ export default function LiveScoreEntry({ gameId, className = '' }: LiveScoreEntr
                 </div>
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -141,5 +155,5 @@ export default function LiveScoreEntry({ gameId, className = '' }: LiveScoreEntr
         </div>
       </div>
     </div>
-  );
+  )
 }

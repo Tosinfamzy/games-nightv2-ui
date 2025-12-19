@@ -1,14 +1,14 @@
 interface StatCardProps {
-  label: string;
-  value: number | string;
-  icon?: string;
+  label: string
+  value: number | string
+  icon?: string
   trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-  color?: 'blue' | 'green' | 'purple' | 'orange' | 'red';
-  subtitle?: string;
-  className?: string;
+    value: number
+    isPositive: boolean
+  }
+  color?: 'blue' | 'green' | 'purple' | 'orange' | 'red'
+  subtitle?: string
+  className?: string
 }
 
 /**
@@ -29,7 +29,7 @@ export default function StatCard({
     purple: 'bg-purple-100',
     orange: 'bg-orange-100',
     red: 'bg-red-100',
-  };
+  }
 
   return (
     <div
@@ -50,9 +50,7 @@ export default function StatCard({
               </span>
             )}
           </div>
-          {subtitle && (
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
 
         {icon && (
@@ -64,5 +62,5 @@ export default function StatCard({
         )}
       </div>
     </div>
-  );
+  )
 }

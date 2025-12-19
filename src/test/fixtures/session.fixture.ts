@@ -50,7 +50,7 @@ export const mockSessionData = {
       createdAt: new Date('2024-12-25T19:00:00Z').toISOString(),
     },
   ],
-};
+}
 
 export const mockActiveSessions = [
   {
@@ -67,7 +67,7 @@ export const mockActiveSessions = [
     playerCount: 4,
     scheduledFor: new Date('2024-12-26T14:00:00Z').toISOString(),
   },
-];
+]
 
 /**
  * Factory function to create a mock session
@@ -76,17 +76,17 @@ export function createMockSession(overrides?: Partial<typeof mockSessionData>) {
   return {
     ...mockSessionData,
     ...overrides,
-  };
+  }
 }
 
 /**
  * Factory function to create a mock player
  */
 export function createMockPlayer(
-  overrides?: Partial<typeof mockSessionData.players[0]>
+  overrides?: Partial<(typeof mockSessionData.players)[0]>,
 ) {
   return {
     ...mockSessionData.players[0],
     ...overrides,
-  };
+  }
 }

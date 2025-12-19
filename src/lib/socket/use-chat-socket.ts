@@ -1,162 +1,236 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSocketContext } from './socket-context';
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { useSocketContext } from './socket-context'
+import { showToast } from '../toast'
+import { useNotifications } from '../../hooks/useNotifications'
 
 export interface ChatMessage {
-  id: string;
-  content: string;
-  sessionId: string;
-  playerId: string;
-  playerName: string;
-  type: 'text' | 'system';
-  isEdited: boolean;
-  createdAt: Date;
+  id: string
+  content: string
+  sessionId: string
+  playerId: string
+  playerName: string
+  type: 'text' | 'system'
+  isEdited: boolean
+  createdAt: Date
 }
 
 export interface ChatMessageEvent {
-  message: ChatMessage;
-  timestamp: string;
+  message: ChatMessage
+  timestamp: string
 }
 
 export interface ChatHistoryEvent {
-  messages: ChatMessage[];
-  hasMore: boolean;
-  timestamp: string;
+  messages: ChatMessage[]
+  hasMore: boolean
+  timestamp: string
 }
 
 export interface ChatErrorEvent {
-  error: string;
-  code: string;
+  error: string
+  code: string
 }
 
 /**
  * Hook to connect to chat and listen for real-time messages
  */
-export const useChatSocket = (sessionId: string | undefined, playerId: string | undefined) => {
-  const { chatSocket, isConnected } = useSocketContext();
-  const hasJoinedRef = useRef(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const useChatSocket = (
+  sessionId: string | undefined,
+  playerId: string | undefined,
+) => {
+  const { chatSocket, isConnected } = useSocketContext()
+  const hasJoinedRef = useRef(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [hasMore, setHasMore] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { notifyNewMessage } = useNotifications()
 
   // Join chat room
   useEffect(() => {
-    if (!chatSocket || !sessionId || !playerId || !isConnected || hasJoinedRef.current) {
-      return;
+    if (
+      !chatSocket ||
+      !sessionId ||
+      !playerId ||
+      !isConnected ||
+      hasJoinedRef.current
+    ) {
+      return
     }
 
-    console.log(`Joining chat for session: ${sessionId}`);
-    chatSocket.emit('join-chat', { sessionId, playerId });
-    hasJoinedRef.current = true;
+    console.log(`Joining chat for session: ${sessionId}`)
+    chatSocket.emit('join-chat', { sessionId, playerId })
+    hasJoinedRef.current = true
 
     return () => {
       if (chatSocket && sessionId && playerId) {
-        console.log(`Leaving chat for session: ${sessionId}`);
-        chatSocket.emit('leave-chat', { sessionId, playerId });
-        hasJoinedRef.current = false;
+        console.log(`Leaving chat for session: ${sessionId}`)
+        chatSocket.emit('leave-chat', { sessionId, playerId })
+        hasJoinedRef.current = false
       }
-    };
-  }, [chatSocket, sessionId, playerId, isConnected]);
+    }
+  }, [chatSocket, sessionId, playerId, isConnected])
 
   // Listen for new messages
   useEffect(() => {
-    if (!chatSocket || !sessionId) return;
+    if (!chatSocket || !sessionId) return
 
     const handleMessageSent = (data: ChatMessageEvent) => {
-      console.log('New message received:', data);
-      setMessages((prev) => [...prev, data.message]);
-    };
+      try {
+        console.log('New message received:', data)
 
-    chatSocket.on('chat:message-sent', handleMessageSent);
+        if (!data?.message?.id || !data?.message?.content) {
+          throw new Error('Invalid message event: missing required fields')
+        }
+
+        setMessages((prev) => [...prev, data.message])
+
+        // Notify about new message (only if not from current player and not a system message)
+        if (
+          data.message.playerId !== playerId &&
+          data.message.type === 'text' &&
+          data.message.playerName &&
+          data.message.content
+        ) {
+          notifyNewMessage(data.message.playerName, data.message.content)
+        }
+      } catch (error) {
+        console.error('Error handling new message:', error)
+        showToast.error('Failed to display new message. Please refresh.')
+      }
+    }
+
+    chatSocket.on('chat:message-sent', handleMessageSent)
 
     return () => {
-      chatSocket.off('chat:message-sent', handleMessageSent);
-    };
-  }, [chatSocket, sessionId]);
+      chatSocket.off('chat:message-sent', handleMessageSent)
+    }
+  }, [chatSocket, sessionId])
 
   // Listen for message history
   useEffect(() => {
-    if (!chatSocket || !sessionId) return;
+    if (!chatSocket || !sessionId) return
 
     const handleHistoryLoaded = (data: ChatHistoryEvent) => {
-      console.log('Chat history loaded:', data);
-      setMessages(data.messages);
-      setHasMore(data.hasMore);
-    };
+      try {
+        console.log('Chat history loaded:', data)
 
-    chatSocket.on('chat:history-loaded', handleHistoryLoaded);
+        if (!data?.messages || !Array.isArray(data.messages)) {
+          throw new Error('Invalid history data: messages must be an array')
+        }
+
+        setMessages(data.messages)
+        setHasMore(data.hasMore)
+      } catch (error) {
+        console.error('Error handling chat history:', error)
+        showToast.error('Failed to load chat history. Please refresh.')
+      }
+    }
+
+    chatSocket.on('chat:history-loaded', handleHistoryLoaded)
 
     return () => {
-      chatSocket.off('chat:history-loaded', handleHistoryLoaded);
-    };
-  }, [chatSocket, sessionId]);
+      chatSocket.off('chat:history-loaded', handleHistoryLoaded)
+    }
+  }, [chatSocket, sessionId])
 
   // Listen for errors
   useEffect(() => {
-    if (!chatSocket) return;
+    if (!chatSocket) return
 
     const handleError = (data: ChatErrorEvent) => {
-      console.error('Chat error:', data);
-      setError(data.error);
-    };
+      try {
+        console.error('Chat error:', data)
 
-    chatSocket.on('chat:error', handleError);
+        const errorMessage = data?.error || 'An unknown chat error occurred'
+        setError(errorMessage)
+
+        // Show user-friendly error message
+        if (data?.code === 'MESSAGE_TOO_LONG') {
+          showToast.error('Message is too long. Please shorten it.')
+        } else if (data?.code === 'RATE_LIMIT') {
+          showToast.error("Slow down! You're sending messages too quickly.")
+        } else if (data?.code === 'UNAUTHORIZED') {
+          showToast.error('You are not authorized to send messages.')
+        } else {
+          showToast.error(`Chat error: ${errorMessage}`)
+        }
+      } catch (error) {
+        console.error('Error handling chat error event:', error)
+        showToast.error('A chat error occurred.')
+      }
+    }
+
+    chatSocket.on('chat:error', handleError)
 
     return () => {
-      chatSocket.off('chat:error', handleError);
-    };
-  }, [chatSocket]);
+      chatSocket.off('chat:error', handleError)
+    }
+  }, [chatSocket])
 
   // Send message
   const sendMessage = useCallback(
     (content: string) => {
-      if (!chatSocket || !sessionId || !playerId) {
-        console.error('Cannot send message: missing socket, sessionId, or playerId');
-        return;
-      }
+      try {
+        if (!chatSocket || !sessionId || !playerId) {
+          console.error(
+            'Cannot send message: missing socket, sessionId, or playerId',
+          )
+          showToast.error('Unable to send message. Please refresh.')
+          return
+        }
 
-      if (!content.trim()) {
-        console.warn('Cannot send empty message');
-        return;
-      }
+        if (!content.trim()) {
+          console.warn('Cannot send empty message')
+          return
+        }
 
-      chatSocket.emit('send-message', {
-        content: content.trim(),
-        sessionId,
-        playerId,
-      });
+        chatSocket.emit('send-message', {
+          content: content.trim(),
+          sessionId,
+          playerId,
+        })
+      } catch (error) {
+        console.error('Error sending message:', error)
+        showToast.error('Failed to send message. Please try again.')
+      }
     },
-    [chatSocket, sessionId, playerId]
-  );
+    [chatSocket, sessionId, playerId],
+  )
 
   // Load message history
   const loadHistory = useCallback(
     (limit: number = 50, beforeMessageId?: string) => {
-      if (!chatSocket || !sessionId) {
-        console.error('Cannot load history: missing socket or sessionId');
-        return;
-      }
+      try {
+        if (!chatSocket || !sessionId) {
+          console.error('Cannot load history: missing socket or sessionId')
+          showToast.error('Unable to load chat history. Please refresh.')
+          return
+        }
 
-      chatSocket.emit('load-history', {
-        sessionId,
-        limit,
-        beforeMessageId,
-      });
+        chatSocket.emit('load-history', {
+          sessionId,
+          limit,
+          beforeMessageId,
+        })
+      } catch (error) {
+        console.error('Error loading chat history:', error)
+        showToast.error('Failed to load chat history. Please try again.')
+      }
     },
-    [chatSocket, sessionId]
-  );
+    [chatSocket, sessionId],
+  )
 
   // Load more messages (pagination)
   const loadMoreMessages = useCallback(() => {
-    if (!hasMore || messages.length === 0) return;
+    if (!hasMore || messages.length === 0) return
 
-    const oldestMessage = messages[0];
-    loadHistory(50, oldestMessage.id);
-  }, [hasMore, messages, loadHistory]);
+    const oldestMessage = messages[0]
+    loadHistory(50, oldestMessage.id)
+  }, [hasMore, messages, loadHistory])
 
   // Clear error
   const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+    setError(null)
+  }, [])
 
   return {
     isConnected,
@@ -168,5 +242,5 @@ export const useChatSocket = (sessionId: string | undefined, playerId: string | 
     loadHistory,
     loadMoreMessages,
     clearError,
-  };
-};
+  }
+}

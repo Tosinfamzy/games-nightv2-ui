@@ -1,24 +1,24 @@
-import { useState } from 'react';
-import { useGamesMaster } from '../hooks/useGamesMaster';
-import { useNavigate } from '@tanstack/react-router';
+import { useState } from 'react'
+import { useGamesMaster } from '../hooks/useGamesMaster'
+import { useNavigate } from '@tanstack/react-router'
 
 export function CreateGamesMasterForm() {
-  const [name, setName] = useState('');
-  const [showCode, setShowCode] = useState(false);
-  const { gm, createGamesMaster, isCreating } = useGamesMaster();
-  const navigate = useNavigate();
+  const [name, setName] = useState('')
+  const [showCode, setShowCode] = useState(false)
+  const { gm, createGamesMaster, isCreating } = useGamesMaster()
+  const navigate = useNavigate()
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (name.trim()) {
-      createGamesMaster(name.trim());
-      setShowCode(true);
+      createGamesMaster(name.trim())
+      setShowCode(true)
     }
-  };
+  }
 
   const handleContinue = () => {
-    navigate({ to: '/sessions/new' });
-  };
+    navigate({ to: '/sessions/new' })
+  }
 
   // If GM was just created, show success message with code
   if (showCode && gm) {
@@ -48,12 +48,15 @@ export function CreateGamesMasterForm() {
 
             <div className="text-xs text-gray-600 p-3 bg-gray-50 rounded-lg">
               <p className="font-medium mb-1">What's a host code?</p>
-              <p>Use this code to manage your sessions from any device. Lost it? Just enter your name to retrieve it!</p>
+              <p>
+                Use this code to manage your sessions from any device. Lost it?
+                Just enter your name to retrieve it!
+              </p>
             </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -106,5 +109,5 @@ export function CreateGamesMasterForm() {
         </button>
       </div>
     </div>
-  );
+  )
 }

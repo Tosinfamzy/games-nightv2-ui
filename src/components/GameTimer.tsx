@@ -1,10 +1,10 @@
-import { useGameTimer } from '../hooks/useGameTimer';
+import { useGameTimer } from '../hooks/useGameTimer'
 
 interface GameTimerProps {
-  gameId: string;
-  showTeamName?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+  gameId: string
+  showTeamName?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
 }
 
 /**
@@ -25,11 +25,11 @@ export default function GameTimer({
     autoAdvanced,
     hasTimer,
     isConnected,
-  } = useGameTimer(gameId);
+  } = useGameTimer(gameId)
 
   // Don't show timer if game doesn't have one
   if (!hasTimer) {
-    return null;
+    return null
   }
 
   // Size variants
@@ -52,20 +52,20 @@ export default function GameTimer({
       label: 'text-base',
       team: 'text-lg',
     },
-  };
+  }
 
-  const sizes = sizeClasses[size];
+  const sizes = sizeClasses[size]
 
   // Color based on state
   const getColorClasses = () => {
     if (isExpired) {
-      return 'bg-red-600 text-white border-red-700';
+      return 'bg-red-600 text-white border-red-700'
     }
     if (isWarning) {
-      return 'bg-orange-500 text-white border-orange-600 animate-pulse';
+      return 'bg-orange-500 text-white border-orange-600 animate-pulse'
     }
-    return 'bg-blue-600 text-white border-blue-700';
-  };
+    return 'bg-blue-600 text-white border-blue-700'
+  }
 
   return (
     <div className={`${className}`}>
@@ -114,7 +114,9 @@ export default function GameTimer({
         {/* Auto-advanced notification */}
         {autoAdvanced && (
           <div className="mt-3 text-center">
-            <p className={`${sizes.label} bg-white bg-opacity-20 rounded px-2 py-1 inline-block`}>
+            <p
+              className={`${sizes.label} bg-white bg-opacity-20 rounded px-2 py-1 inline-block`}
+            >
               Turn auto-advanced due to timeout
             </p>
           </div>
@@ -130,5 +132,5 @@ export default function GameTimer({
         )}
       </div>
     </div>
-  );
+  )
 }

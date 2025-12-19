@@ -1,25 +1,25 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { gamesMasterService } from '../lib/api/services/games-master.service';
-import { useGMDashboard } from '../hooks/useGMDashboard';
-import StatCard from '../components/dashboard/StatCard';
-import SessionMonitorCard from '../components/dashboard/SessionMonitorCard';
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { gamesMasterService } from '../lib/api/services/games-master.service'
+import { useGMDashboard } from '../hooks/useGMDashboard'
+import StatCard from '../components/dashboard/StatCard'
+import SessionMonitorCard from '../components/dashboard/SessionMonitorCard'
 
 export const Route = createFileRoute('/games-master')({
   component: GamesMasterDashboard,
-});
+})
 
 function GamesMasterDashboard() {
-  const queryClient = useQueryClient();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedMaster, setSelectedMaster] = useState<string>('');
+  const queryClient = useQueryClient()
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [selectedMaster, setSelectedMaster] = useState<string>('')
 
   // Fetch all games masters
   const { data: gamesMasters = [], isLoading: mastersLoading } = useQuery({
     queryKey: ['games-masters'],
     queryFn: gamesMasterService.getAll,
-  });
+  })
 
   // Fetch dashboard data for selected master with real-time updates
   const {
@@ -27,33 +27,33 @@ function GamesMasterDashboard() {
     isLoading: dashboardLoading,
     error: dashboardError,
     isConnected,
-  } = useGMDashboard(selectedMaster || undefined);
+  } = useGMDashboard(selectedMaster || undefined)
 
   // Create games master mutation
   const createMasterMutation = useMutation({
     mutationFn: gamesMasterService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['games-masters'] });
-      setShowCreateForm(false);
+      queryClient.invalidateQueries({ queryKey: ['games-masters'] })
+      setShowCreateForm(false)
     },
-  });
+  })
 
   const handleCreateMaster = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
     createMasterMutation.mutate({
       name: formData.get('name') as string,
-    });
-  };
+    })
+  }
 
-  const selectedMasterData = gamesMasters.find((m) => m.id === selectedMaster);
+  const selectedMasterData = gamesMasters.find((m) => m.id === selectedMaster)
 
   if (mastersLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">Loading games masters...</div>
       </div>
-    );
+    )
   }
 
   return (
@@ -266,10 +266,7 @@ function GamesMasterDashboard() {
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {dashboard.sessions.map((session) => (
-                      <SessionMonitorCard
-                        key={session.id}
-                        session={session}
-                      />
+                      <SessionMonitorCard key={session.id} session={session} />
                     ))}
                   </div>
                 )}
@@ -321,7 +318,10 @@ function GamesMasterDashboard() {
           ) : (
             <div className="divide-y divide-gray-200">
               {gamesMasters.map((master) => (
-                <div key={master.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div
+                  key={master.id}
+                  className="p-6 hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
@@ -346,5 +346,5 @@ function GamesMasterDashboard() {
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -1,15 +1,15 @@
 // Auto-detect API URL: use env var if set, otherwise use current host with port 3000
 const getApiUrl = () => {
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+    return import.meta.env.VITE_API_URL
   }
   // Use current hostname with backend port (works for both localhost and network IPs)
-  const protocol = window.location.protocol;
-  const hostname = window.location.hostname;
-  return `${protocol}//${hostname}:3000`;
-};
+  const protocol = window.location.protocol
+  const hostname = window.location.hostname
+  return `${protocol}//${hostname}:3000`
+}
 
-const API_URL = getApiUrl();
+const API_URL = getApiUrl()
 
 // Custom error class for API errors
 export class APIError extends Error {

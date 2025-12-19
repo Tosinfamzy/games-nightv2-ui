@@ -1,8 +1,8 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
-});
+})
 
 function HomePage() {
   return (
@@ -16,8 +16,8 @@ function HomePage() {
               Games Night Manager
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">
-              The ultimate platform for organizing epic game nights with real-time
-              scoring, live controls, and seamless team management
+              The ultimate platform for organizing epic game nights with
+              real-time scoring, live controls, and seamless team management
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
@@ -63,8 +63,8 @@ function HomePage() {
                 Live Game Control
               </h3>
               <p className="text-gray-600 mb-4">
-                Control games in real-time with pause/resume, round management, and
-                turn-based gameplay. Perfect for running smooth game nights.
+                Control games in real-time with pause/resume, round management,
+                and turn-based gameplay. Perfect for running smooth game nights.
               </p>
               <Link
                 to="/games"
@@ -135,8 +135,8 @@ function HomePage() {
                 Session Management
               </h3>
               <p className="text-gray-600 mb-4">
-                Create sessions, share join codes, and manage everything from player
-                check-ins to game queues all in one place.
+                Create sessions, share join codes, and manage everything from
+                player check-ins to game queues all in one place.
               </p>
               <Link
                 to="/sessions"
@@ -153,8 +153,8 @@ function HomePage() {
                 Live Player View
               </h3>
               <p className="text-gray-600 mb-4">
-                Beautiful spectator view for players to watch scores update live.
-                Perfect for casting to TVs during game night!
+                Beautiful spectator view for players to watch scores update
+                live. Perfect for casting to TVs during game night!
               </p>
               <div className="text-indigo-600 font-semibold">
                 Auto-updates with WebSocket ✨
@@ -193,9 +193,12 @@ function HomePage() {
               <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
                 2
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Invite Players</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Invite Players
+              </h3>
               <p className="text-gray-600">
-                Share the join code and players join instantly with their devices
+                Share the join code and players join instantly with their
+                devices
               </p>
             </div>
 
@@ -203,7 +206,9 @@ function HomePage() {
               <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
                 3
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Form Teams</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Form Teams
+              </h3>
               <p className="text-gray-600">
                 Auto-create balanced teams or manually assign players
               </p>
@@ -213,7 +218,9 @@ function HomePage() {
               <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
                 4
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Play & Score</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Play & Score
+              </h3>
               <p className="text-gray-600">
                 Use live controls to manage games and track scores in real-time
               </p>
@@ -225,10 +232,12 @@ function HomePage() {
       {/* CTA Section */}
       <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold mb-6">Ready to Level Up Your Game Night?</h2>
+          <h2 className="text-4xl font-bold mb-6">
+            Ready to Level Up Your Game Night?
+          </h2>
           <p className="text-xl text-indigo-100 mb-8">
-            Join game nights run by hosts who use professional tools for seamless
-            gameplay
+            Join game nights run by hosts who use professional tools for
+            seamless gameplay
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
@@ -251,10 +260,11 @@ function HomePage() {
       <div className="bg-gray-900 text-gray-300 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm">
-            Built with ❤️ for game night enthusiasts • Real-time powered by WebSocket
+            Built with ❤️ for game night enthusiasts • Real-time powered by
+            WebSocket
           </p>
         </div>
       </div>
     </div>
-  );
+  )
 }

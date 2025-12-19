@@ -1,40 +1,49 @@
-import { useGameControl } from '../../hooks/useGameControl';
-import { useGameScoring } from '../../hooks/useGameScoring';
-import type { UUID } from '../../lib/api/types';
+import { useGameControl } from '../../hooks/useGameControl'
+import { useGameScoring } from '../../hooks/useGameScoring'
+import type { UUID } from '../../lib/api/types'
 
 interface RoundScorecardProps {
-  gameId: UUID;
-  className?: string;
+  gameId: UUID
+  className?: string
 }
 
-export default function RoundScorecard({ gameId, className = '' }: RoundScorecardProps) {
-  const { game, isLoading: isLoadingGame } = useGameControl(gameId);
-  const { teamScores, isLoading: isLoadingScores } = useGameScoring(gameId);
+export default function RoundScorecard({
+  gameId,
+  className = '',
+}: RoundScorecardProps) {
+  const { game, isLoading: isLoadingGame } = useGameControl(gameId)
+  const { teamScores, isLoading: isLoadingScores } = useGameScoring(gameId)
 
   if (isLoadingGame || isLoadingScores) {
     return (
-      <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
           <div className="h-40 bg-gray-200 rounded"></div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!game) {
-    return null;
+    return null
   }
 
   // Get all rounds (1 to maxRounds or currentRound, whichever is greater)
-  const totalRounds = Math.max(game.maxRounds, game.currentRound);
-  const rounds = Array.from({ length: totalRounds }, (_, i) => i + 1);
+  const totalRounds = Math.max(game.maxRounds, game.currentRound)
+  const rounds = Array.from({ length: totalRounds }, (_, i) => i + 1)
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}>
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+    >
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-1">📊 Round Scorecard</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">
+          📊 Round Scorecard
+        </h3>
         <p className="text-sm text-gray-600">
           Round-by-round breakdown for all teams
         </p>
@@ -64,7 +73,9 @@ export default function RoundScorecard({ gameId, className = '' }: RoundScorecar
                   >
                     <div className="text-xs text-gray-600 mb-1">R{round}</div>
                     {round === game.currentRound && (
-                      <div className="text-[10px] text-blue-600 font-normal">CURRENT</div>
+                      <div className="text-[10px] text-blue-600 font-normal">
+                        CURRENT
+                      </div>
                     )}
                   </th>
                 ))}
@@ -75,7 +86,7 @@ export default function RoundScorecard({ gameId, className = '' }: RoundScorecar
             </thead>
             <tbody>
               {teamScores.map((team, index) => {
-                const isFirst = index === 0;
+                const isFirst = index === 0
 
                 return (
                   <tr
@@ -94,8 +105,8 @@ export default function RoundScorecard({ gameId, className = '' }: RoundScorecar
 
                     {/* Round Scores */}
                     {rounds.map((round) => {
-                      const roundScore = team.roundPoints[round] || 0;
-                      const hasScore = team.roundPoints[round] !== undefined;
+                      const roundScore = team.roundPoints[round] || 0
+                      const hasScore = team.roundPoints[round] !== undefined
 
                       return (
                         <td
@@ -120,7 +131,7 @@ export default function RoundScorecard({ gameId, className = '' }: RoundScorecar
                             <span className="text-gray-400">-</span>
                           )}
                         </td>
-                      );
+                      )
                     })}
 
                     {/* Total Score */}
@@ -133,7 +144,7 @@ export default function RoundScorecard({ gameId, className = '' }: RoundScorecar
                       )}
                     </td>
                   </tr>
-                );
+                )
               })}
             </tbody>
           </table>
@@ -162,5 +173,5 @@ export default function RoundScorecard({ gameId, className = '' }: RoundScorecar
         </div>
       )}
     </div>
-  );
+  )
 }

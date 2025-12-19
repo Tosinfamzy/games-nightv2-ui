@@ -1,6 +1,7 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useGame, useUpdateGame } from '../../hooks/useGames'
 import { GameStatus } from '../../lib/api/types'
+import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
 
 function GameDetailsPage() {
   const { id } = Route.useParams()
@@ -22,25 +23,13 @@ function GameDetailsPage() {
 
   if (isError) {
     return (
-      <div className="text-center p-8">
-        <p className="text-red-500 font-medium mb-2">
-          {error instanceof Error ? error.message : 'Failed to load game'}
-        </p>
-        <div className="space-x-4">
-          <button
-            onClick={() => navigate({ to: '/games' })}
-            className="text-blue-500 hover:text-blue-600"
-          >
-            Back to Games
-          </button>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-blue-500 hover:text-blue-600"
-          >
-            Try again
-          </button>
-        </div>
-      </div>
+      <QueryErrorDisplay
+        error={
+          error instanceof Error ? error : new Error('Failed to load game')
+        }
+        onRetry={() => window.location.reload()}
+        backTo="/games"
+      />
     )
   }
 

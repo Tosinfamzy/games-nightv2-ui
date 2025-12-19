@@ -1,12 +1,12 @@
-import { Link } from '@tanstack/react-router';
-import type { DashboardSession } from '../../lib/api/types';
-import OnlinePlayerCount from '../OnlinePlayerCount';
-import GameProgressCard from './GameProgressCard';
+import { Link } from '@tanstack/react-router'
+import type { DashboardSession } from '../../lib/api/types'
+import OnlinePlayerCount from '../OnlinePlayerCount'
+import GameProgressCard from './GameProgressCard'
 
 interface SessionMonitorCardProps {
-  session: DashboardSession;
-  onViewDetails?: () => void;
-  className?: string;
+  session: DashboardSession
+  onViewDetails?: () => void
+  className?: string
 }
 
 /**
@@ -21,28 +21,28 @@ export default function SessionMonitorCard({
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case 'SCHEDULED':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800'
       case 'IN_PROGRESS':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800'
       case 'COMPLETED':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800'
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
+    const d = typeof date === 'string' ? new Date(date) : date
     return d.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    });
-  };
+    })
+  }
 
   return (
     <div
@@ -70,7 +70,10 @@ export default function SessionMonitorCard({
 
         {/* Players Online Status */}
         <div className="mt-3">
-          <OnlinePlayerCount players={session.players as any} showDetails={false} />
+          <OnlinePlayerCount
+            players={session.players as any}
+            showDetails={false}
+          />
         </div>
       </div>
 
@@ -126,5 +129,5 @@ export default function SessionMonitorCard({
         )}
       </div>
     </div>
-  );
+  )
 }

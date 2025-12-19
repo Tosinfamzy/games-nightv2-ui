@@ -2,9 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { gameService } from '../lib/api/services/game.service'
 import { scoreService, type TeamScore } from '../lib/api/services/score.service'
+import { ConfirmDialog } from './ConfirmDialog'
 import type { Game } from '../lib/api/types'
 import GameTimer from './GameTimer'
+import TimerControls from './TimerControls'
 import { useGameSocket } from '../lib/socket'
+import { toastHelpers } from '../lib/toast'
 
 interface LiveGameViewProps {
   sessionId: string
@@ -22,6 +25,7 @@ export function LiveGameView({
   const queryClient = useQueryClient()
   const [selectedTeamId, setSelectedTeamId] = useState<string>('')
   const [scoreValue, setScoreValue] = useState<number>(0)
+  const [showEndGameConfirm, setShowEndGameConfirm] = useState(false)
 
   // Connect to game WebSocket for real-time updates (including timer)
   useGameSocket(game.id)
@@ -66,7 +70,11 @@ export function LiveGameView({
   })
 
   const submitScoreMutation = useMutation({
-    mutationFn: (data: { teamId: string; roundNumber: number; points: number }) =>
+    mutationFn: (data: {
+      teamId: string
+      roundNumber: number
+      points: number
+    }) =>
       scoreService.create({
         gameId: game.id,
         teamId: data.teamId,
@@ -76,6 +84,39 @@ export function LiveGameView({
       queryClient.invalidateQueries({ queryKey: ['scores', 'game', game.id] })
       setSelectedTeamId('')
       setScoreValue(0)
+    },
+  })
+
+  const nextTurnMutation = useMutation({
+    mutationFn: () => gameService.nextTurn(game.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['games', game.id] })
+      toastHelpers.updated('Turn advanced', 'Next team is up!')
+    },
+    onError: (error) => {
+      toastHelpers.operationError('advance turn', error)
+    },
+  })
+
+  const pauseGameMutation = useMutation({
+    mutationFn: () => gameService.pause(game.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['games', game.id] })
+      toastHelpers.info('⏸️ Game paused')
+    },
+    onError: (error) => {
+      toastHelpers.operationError('pause game', error)
+    },
+  })
+
+  const resumeGameMutation = useMutation({
+    mutationFn: () => gameService.resume(game.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['games', game.id] })
+      toastHelpers.info('▶️ Game resumed')
+    },
+    onError: (error) => {
+      toastHelpers.operationError('resume game', error)
     },
   })
 
@@ -103,7 +144,9 @@ export function LiveGameView({
 
   // Merge team data with scores
   const teamScores = teams.map((team) => {
-    const teamScore = teamScoresData.find((ts: TeamScore) => ts.teamId === team.id)
+    const teamScore = teamScoresData.find(
+      (ts: TeamScore) => ts.teamId === team.id,
+    )
     return {
       team,
       total: teamScore?.totalPoints || 0,
@@ -160,11 +203,7 @@ export function LiveGameView({
               )}
 
               <button
-                onClick={() => {
-                  if (confirm('Are you sure you want to end this game?')) {
-                    completeGameMutation.mutate()
-                  }
-                }}
+                onClick={() => setShowEndGameConfirm(true)}
                 disabled={completeGameMutation.isPending}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 disabled:opacity-50"
               >
@@ -182,9 +221,29 @@ export function LiveGameView({
         </div>
       </div>
 
-      {/* Game Timer (if configured) */}
+      {/* Game Timer and Controls (if configured) */}
       {gameStatus === 'IN_PROGRESS' && (
-        <GameTimer gameId={game.id} showTeamName={true} size="md" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Timer Display */}
+          <div className="lg:col-span-2">
+            <GameTimer gameId={game.id} showTeamName={true} size="md" />
+          </div>
+
+          {/* Timer Controls */}
+          <div className="lg:col-span-1">
+            <TimerControls
+              gameId={game.id}
+              onAdvanceTurn={() => nextTurnMutation.mutate()}
+              onPauseTimer={() => pauseGameMutation.mutate()}
+              onResumeTimer={() => resumeGameMutation.mutate()}
+              disabled={
+                nextTurnMutation.isPending ||
+                pauseGameMutation.isPending ||
+                resumeGameMutation.isPending
+              }
+            />
+          </div>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -232,7 +291,9 @@ export function LiveGameView({
                 disabled={!selectedTeamId || submitScoreMutation.isPending}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
               >
-                {submitScoreMutation.isPending ? 'Submitting...' : 'Submit Score'}
+                {submitScoreMutation.isPending
+                  ? 'Submitting...'
+                  : 'Submit Score'}
               </button>
 
               {submitScoreMutation.isError && (
@@ -278,7 +339,10 @@ export function LiveGameView({
                         {ts.team.name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {Object.keys(ts.roundPoints).length} round{Object.keys(ts.roundPoints).length !== 1 ? 's' : ''}{' '}
+                        {Object.keys(ts.roundPoints).length} round
+                        {Object.keys(ts.roundPoints).length !== 1
+                          ? 's'
+                          : ''}{' '}
                         scored
                       </div>
                     </div>
@@ -299,7 +363,9 @@ export function LiveGameView({
       {/* Round History */}
       {teamScoresData.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Round History</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">
+            Round History
+          </h3>
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -352,6 +418,20 @@ export function LiveGameView({
           </div>
         </div>
       )}
+
+      {/* End Game Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showEndGameConfirm}
+        onClose={() => setShowEndGameConfirm(false)}
+        onConfirm={() => {
+          completeGameMutation.mutate()
+          setShowEndGameConfirm(false)
+        }}
+        title="End Game"
+        message="Are you sure you want to end this game? Make sure all scores are recorded."
+        confirmLabel="End Game"
+        variant="warning"
+      />
     </div>
   )
 }

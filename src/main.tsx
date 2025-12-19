@@ -5,8 +5,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'react-hot-toast'
 import { SocketProvider } from './lib/socket'
-import { GamesMasterProvider } from './contexts'
+import { GamesMasterProvider, PlayerProvider } from './contexts'
 import { getErrorMessage, showToast } from './lib/toast'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
@@ -19,13 +20,18 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: false,
+      retry: 3, // Retry failed queries up to 3 times
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff: 1s, 2s, 4s, max 30s
+      networkMode: 'offlineFirst', // Use cached data when offline
+      refetchOnReconnect: true, // Refetch when connection restored
+      refetchOnWindowFocus: 'always', // Always refetch on focus
     },
     mutations: {
+      networkMode: 'online', // Only execute mutations when online
       // Global error handler for all mutations
       onError: (error) => {
-        const message = getErrorMessage(error);
-        showToast.error(message);
+        const message = getErrorMessage(error)
+        showToast.error(message)
       },
     },
   },
@@ -54,15 +60,19 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <GamesMasterProvider>
-          <SocketProvider>
-            <RouterProvider router={router} />
-            <ReactQueryDevtools initialIsOpen={false} />
-            <Toaster />
-          </SocketProvider>
-        </GamesMasterProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <GamesMasterProvider>
+            <PlayerProvider>
+              <SocketProvider>
+                <RouterProvider router={router} />
+                <ReactQueryDevtools initialIsOpen={false} />
+                <Toaster />
+              </SocketProvider>
+            </PlayerProvider>
+          </GamesMasterProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
     </StrictMode>,
   )
 }

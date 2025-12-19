@@ -1,8 +1,8 @@
 interface PlayerStatusBadgeProps {
-  isOnline: boolean;
-  showLabel?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+  isOnline: boolean
+  showLabel?: boolean
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
 }
 
 /**
@@ -18,17 +18,15 @@ export default function PlayerStatusBadge({
     sm: 'w-2 h-2',
     md: 'w-3 h-3',
     lg: 'w-4 h-4',
-  };
+  }
 
-  const dotSize = sizeClasses[size];
+  const dotSize = sizeClasses[size]
 
   if (showLabel) {
     return (
       <span
         className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
-          isOnline
-            ? 'bg-green-100 text-green-800'
-            : 'bg-gray-100 text-gray-600'
+          isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
         } ${className}`}
       >
         <span
@@ -38,7 +36,7 @@ export default function PlayerStatusBadge({
         />
         {isOnline ? 'Online' : 'Offline'}
       </span>
-    );
+    )
   }
 
   return (
@@ -49,5 +47,5 @@ export default function PlayerStatusBadge({
       title={isOnline ? 'Online' : 'Offline'}
       aria-label={isOnline ? 'Player is online' : 'Player is offline'}
     />
-  );
+  )
 }
