@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchAPI } from '../lib/api/client'
 import { showToast, toastHelpers } from '../lib/toast'
 import type { UUID } from '../lib/api/types'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface ShareSessionModalProps {
   sessionId: UUID
@@ -26,6 +27,7 @@ export default function ShareSessionModal({
   const [copyToClipboard] = useCopyToClipboard()
   const queryClient = useQueryClient()
   const [currentJoinCode, setCurrentJoinCode] = useState(joinCode)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   // Construct shareable link
   const shareableLink = `${window.location.origin}/join/${currentJoinCode}`
@@ -57,13 +59,11 @@ export default function ShareSessionModal({
   }
 
   const handleRegenerateCode = () => {
-    if (
-      window.confirm(
-        'Are you sure you want to regenerate the join code? The old code will no longer work.'
-      )
-    ) {
-      regenerateCodeMutation.mutate()
-    }
+    setShowConfirmDialog(true)
+  }
+
+  const confirmRegenerateCode = () => {
+    regenerateCodeMutation.mutate()
   }
 
   if (!isOpen) return null
@@ -232,6 +232,17 @@ export default function ShareSessionModal({
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="Regenerate Join Code?"
+        message="Are you sure you want to regenerate the join code? The old code will no longer work and players using it won't be able to join."
+        confirmText="Regenerate"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={confirmRegenerateCode}
+        onCancel={() => setShowConfirmDialog(false)}
+      />
     </div>
   )
 }

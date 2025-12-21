@@ -37,7 +37,7 @@ export const Route = createFileRoute('/sessions/$id')({
 })
 
 function SessionDetailsPage() {
-  const { id} = Route.useParams()
+  const { id } = Route.useParams()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<
     'overview' | 'players' | 'games' | 'teams' | 'chat' | 'history'
@@ -174,7 +174,10 @@ function SessionDetailsPage() {
     if (!currentPlayer) return
 
     const isReady = currentPlayer.status === 'ready'
-    setPlayerReadyMutation.mutate({ playerId: currentPlayerId, ready: !isReady })
+    setPlayerReadyMutation.mutate({
+      playerId: currentPlayerId,
+      ready: !isReady,
+    })
   }
 
   // Check if user just joined (for demo purposes)
@@ -274,11 +277,22 @@ function SessionDetailsPage() {
               </div>
               {isHost && (
                 <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-500 rounded">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  <svg
+                    className="w-5 h-5 text-purple-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                    />
                   </svg>
                   <span className="text-sm font-medium text-purple-900">
-                    🎮 You are the Games Master - You have full control over this session
+                    🎮 You are the Games Master - You have full control over
+                    this session
                   </span>
                 </div>
               )}
@@ -633,7 +647,14 @@ function SessionDetailsPage() {
 }
 
 // Tab Components
-function OverviewTab({ session, players, justJoined, currentPlayer, onToggleReady, isTogglingReady }: any) {
+function OverviewTab({
+  session,
+  players,
+  justJoined,
+  currentPlayer,
+  onToggleReady,
+  isTogglingReady,
+}: any) {
   const navigate = useNavigate()
 
   return (
@@ -655,36 +676,46 @@ function OverviewTab({ session, players, justJoined, currentPlayer, onToggleRead
 
       {/* Player Ready Status Card */}
       {currentPlayer ? (
-        <div className={`border-2 rounded-lg p-6 ${
-          currentPlayer.status === 'ready'
-            ? 'bg-green-50 border-green-300'
-            : 'bg-blue-50 border-blue-300'
-        }`}>
+        <div
+          className={`border-2 rounded-lg p-6 ${
+            currentPlayer.status === 'ready'
+              ? 'bg-green-50 border-green-300'
+              : 'bg-blue-50 border-blue-300'
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
-                  currentPlayer.status === 'ready'
-                    ? 'bg-green-100'
-                    : 'bg-blue-100'
-                }`}>
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                    currentPlayer.status === 'ready'
+                      ? 'bg-green-100'
+                      : 'bg-blue-100'
+                  }`}
+                >
                   {currentPlayer.status === 'ready' ? '✓' : '⏳'}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {currentPlayer.status === 'ready' ? "You're Ready!" : "Are You Ready?"}
+                    {currentPlayer.status === 'ready'
+                      ? "You're Ready!"
+                      : 'Are You Ready?'}
                   </h3>
                   <p className="text-sm text-gray-600">
                     {currentPlayer.status === 'ready'
                       ? 'Waiting for other players...'
-                      : 'Mark yourself as ready when you\'re all set'}
+                      : "Mark yourself as ready when you're all set"}
                   </p>
                 </div>
               </div>
             </div>
             <button
               onClick={onToggleReady}
-              disabled={isTogglingReady || session.status === 'COMPLETED' || session.status === 'CANCELLED'}
+              disabled={
+                isTogglingReady ||
+                session.status === 'COMPLETED' ||
+                session.status === 'CANCELLED'
+              }
               className={`px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none ${
                 currentPlayer.status === 'ready'
                   ? 'bg-gray-500 text-white hover:bg-gray-600'
@@ -712,7 +743,8 @@ function OverviewTab({ session, players, justJoined, currentPlayer, onToggleRead
                     Not Playing Yet
                   </h3>
                   <p className="text-sm text-gray-600">
-                    You're viewing this session as a spectator. Join as a player to participate and mark yourself ready.
+                    You're viewing this session as a spectator. Join as a player
+                    to participate and mark yourself ready.
                   </p>
                 </div>
               </div>
@@ -923,18 +955,30 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
         <h3 className="text-lg font-semibold">Session Players</h3>
         <div className="flex items-center space-x-4">
           <OnlinePlayerCount players={players} showDetails={true} />
-          {isHost && session.status !== 'COMPLETED' && session.status !== 'CANCELLED' && (
-            <button
-              onClick={() => setShowAddPlayerForm(!showAddPlayerForm)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 border-2 border-purple-300 shadow-sm"
-              title="Games Master Control"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
-              {showAddPlayerForm ? 'Cancel' : '+ Add Player'}
-            </button>
-          )}
+          {isHost &&
+            session.status !== 'COMPLETED' &&
+            session.status !== 'CANCELLED' && (
+              <button
+                onClick={() => setShowAddPlayerForm(!showAddPlayerForm)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 border-2 border-purple-300 shadow-sm"
+                title="Games Master Control"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                  />
+                </svg>
+                {showAddPlayerForm ? 'Cancel' : '+ Add Player'}
+              </button>
+            )}
           {(session.status === 'COMPLETED' ||
             session.status === 'CANCELLED') && (
             <div className="text-sm text-gray-500 italic">

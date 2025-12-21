@@ -409,20 +409,16 @@ export function EnhancedGamesTab({
           })}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <div className="text-6xl mb-4">🎮</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No Games Added
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Add games from the library to start planning your session
-          </p>
-          <button
-            onClick={() => setShowAddGames(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Browse Game Library
-          </button>
+        <div className="bg-gray-50 rounded-lg">
+          <EmptyState
+            icon={<span className="text-6xl">🎮</span>}
+            title="No Games Added"
+            description="Add games from the library to start planning your session"
+            action={{
+              label: 'Browse Game Library',
+              onClick: () => setShowAddGames(true),
+            }}
+          />
         </div>
       )}
 

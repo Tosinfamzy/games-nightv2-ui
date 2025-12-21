@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { teamService, type Team } from '../lib/api/services/team.service'
 import { playerService, type Player } from '../lib/api/services/player.service'
 import { useTeamManagement } from '../hooks/useTeamManagement'
+import { ConfirmDialog } from './ConfirmDialog'
+import EmptyState from './EmptyState'
 
 interface TeamManagementPanelProps {
   gameId: string
@@ -18,6 +20,11 @@ export function TeamManagementPanel({
   const [selectedTeamForDissolve, setSelectedTeamForDissolve] = useState<
     string | null
   >(null)
+  const [showDissolveConfirm, setShowDissolveConfirm] = useState(false)
+  const [teamToDissolve, setTeamToDissolve] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const { data: teams = [], isLoading: isLoadingTeams } = useQuery({
     queryKey: ['teams', 'game', gameId],
@@ -54,9 +61,12 @@ export function TeamManagementPanel({
 
   if (teams.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-600">
-        <p>No teams have been created yet.</p>
-        <p className="text-sm mt-2">Create teams first to manage them.</p>
+      <div className="p-6">
+        <EmptyState
+          icon={<span className="text-6xl">🏆</span>}
+          title="No Teams Created"
+          description="Create teams first to manage them. Use the team formation interface to organize players into teams."
+        />
       </div>
     )
   }
@@ -70,13 +80,15 @@ export function TeamManagementPanel({
   }
 
   const handleDissolveTeam = (teamId: string, teamName: string) => {
-    if (
-      confirm(
-        `Are you sure you want to dissolve ${teamName}? All players will be returned to the unassigned pool.`,
-      )
-    ) {
-      dissolveTeam(teamId)
+    setTeamToDissolve({ id: teamId, name: teamName })
+    setShowDissolveConfirm(true)
+  }
+
+  const confirmDissolveTeam = () => {
+    if (teamToDissolve) {
+      dissolveTeam(teamToDissolve.id)
       setSelectedTeamForDissolve(null)
+      setTeamToDissolve(null)
     }
   }
 
@@ -146,6 +158,20 @@ export function TeamManagementPanel({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={showDissolveConfirm}
+        title="Dissolve Team?"
+        message={`Are you sure you want to dissolve ${teamToDissolve?.name}? All players will be returned to the unassigned pool.`}
+        confirmText="Dissolve"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={confirmDissolveTeam}
+        onCancel={() => {
+          setShowDissolveConfirm(false)
+          setTeamToDissolve(null)
+        }}
+      />
     </div>
   )
 }

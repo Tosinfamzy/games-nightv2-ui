@@ -42,7 +42,8 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
       setPlayer(response.gmPlayer, response.playerToken)
 
       showToast.success(
-        response.message || 'Session created successfully! You have been added as a player.'
+        response.message ||
+          'Session created successfully! You have been added as a player.',
       )
       onCreateSuccess?.(response.session)
       // Reset form

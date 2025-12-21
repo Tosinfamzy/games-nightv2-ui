@@ -14,7 +14,7 @@ interface JoinSessionFormProps {
 export function JoinSessionForm({
   onJoinSuccess,
   initialJoinCode = '',
-  sessionPreview
+  sessionPreview,
 }: JoinSessionFormProps) {
   const { setPlayer } = usePlayer()
   const [joinCode, setJoinCode] = useState(initialJoinCode)

@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useSessions } from '../../hooks/useSessions'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
+import EmptyState from '../../components/EmptyState'
 
 function SessionsPage() {
   const { data: sessions, isLoading, error } = useSessions()
@@ -38,7 +39,35 @@ function SessionsPage() {
   }
 
   if (!sessions || sessions.length === 0) {
-    return <div className="p-4">No sessions found.</div>
+    return (
+      <div className="container mx-auto p-4">
+        <EmptyState
+          icon={
+            <svg
+              className="w-16 h-16"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+          }
+          title="No game sessions yet"
+          description="Create your first session to start organizing game nights with your friends."
+          action={{
+            label: 'Create Session',
+            onClick: () => {
+              window.location.href = '/sessions/new'
+            },
+          }}
+        />
+      </div>
+    )
   }
 
   return (
