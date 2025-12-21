@@ -6,6 +6,7 @@ import { fetchAPI } from '../lib/api/client'
 import { showToast, toastHelpers } from '../lib/toast'
 import type { UUID } from '../lib/api/types'
 import { ConfirmDialog } from './ConfirmDialog'
+import { ShareSessionButtons } from './ShareSessionButtons'
 
 interface ShareSessionModalProps {
   sessionId: UUID
@@ -131,7 +132,7 @@ export default function ShareSessionModal({
               />
               <button
                 onClick={handleCopyCode}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 text-base"
                 title="Copy join code"
               >
                 <svg
@@ -166,7 +167,7 @@ export default function ShareSessionModal({
               />
               <button
                 onClick={handleCopyLink}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 text-base"
                 title="Copy share link"
               >
                 <svg
@@ -190,13 +191,21 @@ export default function ShareSessionModal({
             </p>
           </div>
 
+          {/* Social Share Buttons */}
+          <div className="pt-4 border-t">
+            <ShareSessionButtons
+              joinCode={currentJoinCode}
+              sessionName={sessionName}
+            />
+          </div>
+
           {/* Regenerate Code Button (Host Only) */}
           {isHost && (
             <div className="pt-4 border-t">
               <button
                 onClick={handleRegenerateCode}
                 disabled={regenerateCodeMutation.isPending}
-                className="w-full px-4 py-2 text-sm text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 text-base text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -226,7 +235,7 @@ export default function ShareSessionModal({
         <div className="flex justify-end p-6 border-t bg-gray-50">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            className="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-base"
           >
             Close
           </button>

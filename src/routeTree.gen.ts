@@ -27,6 +27,7 @@ import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as SessionsNewRouteImport } from './routes/sessions/new'
 import { Route as SessionsIdRouteImport } from './routes/sessions/$id'
 import { Route as JoinJoinCodeRouteImport } from './routes/join_.$joinCode'
+import { Route as JoinCodeRouteImport } from './routes/join/$code'
 import { Route as GmNewRouteImport } from './routes/gm/new'
 import { Route as GmLoginRouteImport } from './routes/gm/login'
 import { Route as GamesNewRouteImport } from './routes/games/new'
@@ -125,6 +126,11 @@ const JoinJoinCodeRoute = JoinJoinCodeRouteImport.update({
   path: '/join/$joinCode',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JoinCodeRoute = JoinCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => JoinRoute,
+} as any)
 const GmNewRoute = GmNewRouteImport.update({
   id: '/gm/new',
   path: '/gm/new',
@@ -168,7 +174,7 @@ export interface FileRoutesByFullPath {
   '/games': typeof GamesRouteWithChildren
   '/games-master': typeof GamesMasterRoute
   '/history': typeof HistoryRoute
-  '/join': typeof JoinRoute
+  '/join': typeof JoinRouteWithChildren
   '/players': typeof PlayersRoute
   '/rejoin': typeof RejoinRoute
   '/scoring': typeof ScoringRoute
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
+  '/join/$code': typeof JoinCodeRoute
   '/join/$joinCode': typeof JoinJoinCodeRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
@@ -194,7 +201,7 @@ export interface FileRoutesByTo {
   '/flow-demo': typeof FlowDemoRoute
   '/games-master': typeof GamesMasterRoute
   '/history': typeof HistoryRoute
-  '/join': typeof JoinRoute
+  '/join': typeof JoinRouteWithChildren
   '/players': typeof PlayersRoute
   '/rejoin': typeof RejoinRoute
   '/scoring': typeof ScoringRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
+  '/join/$code': typeof JoinCodeRoute
   '/join/$joinCode': typeof JoinJoinCodeRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
@@ -221,7 +229,7 @@ export interface FileRoutesById {
   '/games': typeof GamesRouteWithChildren
   '/games-master': typeof GamesMasterRoute
   '/history': typeof HistoryRoute
-  '/join': typeof JoinRoute
+  '/join': typeof JoinRouteWithChildren
   '/players': typeof PlayersRoute
   '/rejoin': typeof RejoinRoute
   '/scoring': typeof ScoringRoute
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
+  '/join/$code': typeof JoinCodeRoute
   '/join_/$joinCode': typeof JoinJoinCodeRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/games/new'
     | '/gm/login'
     | '/gm/new'
+    | '/join/$code'
     | '/join/$joinCode'
     | '/sessions/$id'
     | '/sessions/new'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/games/new'
     | '/gm/login'
     | '/gm/new'
+    | '/join/$code'
     | '/join/$joinCode'
     | '/sessions/$id'
     | '/sessions/new'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/games/new'
     | '/gm/login'
     | '/gm/new'
+    | '/join/$code'
     | '/join_/$joinCode'
     | '/sessions/$id'
     | '/sessions/new'
@@ -330,7 +342,7 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRouteWithChildren
   GamesMasterRoute: typeof GamesMasterRoute
   HistoryRoute: typeof HistoryRoute
-  JoinRoute: typeof JoinRoute
+  JoinRoute: typeof JoinRouteWithChildren
   PlayersRoute: typeof PlayersRoute
   RejoinRoute: typeof RejoinRoute
   ScoringRoute: typeof ScoringRoute
@@ -470,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinJoinCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/join/$code': {
+      id: '/join/$code'
+      path: '/$code'
+      fullPath: '/join/$code'
+      preLoaderRoute: typeof JoinCodeRouteImport
+      parentRoute: typeof JoinRoute
+    }
     '/gm/new': {
       id: '/gm/new'
       path: '/gm/new'
@@ -551,6 +570,16 @@ const GamesRouteChildren: GamesRouteChildren = {
 
 const GamesRouteWithChildren = GamesRoute._addFileChildren(GamesRouteChildren)
 
+interface JoinRouteChildren {
+  JoinCodeRoute: typeof JoinCodeRoute
+}
+
+const JoinRouteChildren: JoinRouteChildren = {
+  JoinCodeRoute: JoinCodeRoute,
+}
+
+const JoinRouteWithChildren = JoinRoute._addFileChildren(JoinRouteChildren)
+
 interface SessionsRouteChildren {
   SessionsIdRoute: typeof SessionsIdRoute
   SessionsNewRoute: typeof SessionsNewRoute
@@ -574,7 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRouteWithChildren,
   GamesMasterRoute: GamesMasterRoute,
   HistoryRoute: HistoryRoute,
-  JoinRoute: JoinRoute,
+  JoinRoute: JoinRouteWithChildren,
   PlayersRoute: PlayersRoute,
   RejoinRoute: RejoinRoute,
   ScoringRoute: ScoringRoute,

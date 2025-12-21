@@ -61,8 +61,7 @@ export default function SessionChat({
 
   return (
     <div
-      className={`flex flex-col bg-white rounded-lg shadow-lg border border-gray-200 ${className}`}
-      style={{ height: '700px' }}
+      className={`flex flex-col bg-white rounded-lg shadow-lg border border-gray-200 h-[calc(100vh-12rem)] sm:h-[600px] lg:h-[700px] ${className}`}
     >
       {/* Chat header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-lg">

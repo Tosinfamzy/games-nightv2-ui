@@ -1,26 +1,10 @@
-import '@testing-library/jest-dom'
+import { expect, afterEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach, beforeAll, afterAll, vi } from 'vitest'
-import { server } from './mocks/server'
+import '@testing-library/jest-dom/vitest'
 
-// Setup MSW server for API mocking
-beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' })
-})
-
+// Cleanup after each test
 afterEach(() => {
-  // Cleanup React Testing Library
   cleanup()
-
-  // Reset MSW handlers
-  server.resetHandlers()
-
-  // Clear all mocks
-  vi.clearAllMocks()
-})
-
-afterAll(() => {
-  server.close()
 })
 
 // Mock window.matchMedia
@@ -38,13 +22,23 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  takeRecords() {
-    return []
-  }
-  unobserve() {}
-} as any
+// Mock navigator.clipboard
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
+    writeText: vi.fn(() => Promise.resolve()),
+  },
+  writable: true,
+  configurable: true,
+})
+
+// Mock window.location
+delete (window as any).location
+window.location = {
+  ...window.location,
+  origin: 'http://localhost:3000',
+  href: 'http://localhost:3000',
+}
+
+// Mock canvas for QR code generation
+HTMLCanvasElement.prototype.getContext = vi.fn()
+HTMLCanvasElement.prototype.toBlob = vi.fn()

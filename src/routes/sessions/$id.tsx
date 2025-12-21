@@ -13,7 +13,7 @@ import { useGamesMasterContext } from '../../contexts/GamesMasterContext'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { TeamDisplay } from '../../components/TeamDisplay'
-import { TeamManagementPanel } from '../../components/TeamManagementPanel'
+import { EnhancedTeamManagement } from '../../components/EnhancedTeamManagement'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
 import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
 import { ManualTeamCreator } from '../../components/ManualTeamCreator'
@@ -607,9 +607,9 @@ function SessionDetailsPage() {
                 />
               )}
 
-              {/* Team Management Panel */}
+              {/* Enhanced Team Management */}
               {teams.length > 0 && games.length > 0 && (
-                <TeamManagementPanel
+                <EnhancedTeamManagement
                   gameId={games[0].id}
                   sessionId={id}
                   isHost={isHost}
