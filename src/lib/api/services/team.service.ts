@@ -2,9 +2,9 @@ import { fetchAPI } from '../client'
 import type {
   TeamResponseDto,
   CreateTeamsDto,
-  TeamFormationStrategy,
   TeamFormationSuggestionsResponse,
 } from '../types/team.dto'
+import { TeamFormationStrategy } from '../types/team.dto'
 
 export interface Team {
   id: string
@@ -125,14 +125,30 @@ export const teamService = {
 
   rebalanceTeams: async (
     gameId: string,
-    strategy: TeamFormationStrategy,
+    strategy?: TeamFormationStrategy,
   ): Promise<Team[]> => {
     const result = await fetchAPI<TeamResponseDto[]>(
       `/teams/game/${gameId}/rebalance`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ strategy }),
+        body: JSON.stringify({
+          strategy: strategy || TeamFormationStrategy.BALANCED,
+        }),
+      },
+    )
+    return result.map(mapDto)
+  },
+
+  /**
+   * Shuffle players randomly across all teams
+   */
+  shufflePlayers: async (gameId: string): Promise<Team[]> => {
+    const result = await fetchAPI<TeamResponseDto[]>(
+      `/teams/game/${gameId}/shuffle`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
       },
     )
     return result.map(mapDto)
