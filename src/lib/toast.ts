@@ -196,4 +196,11 @@ export const toastHelpers = {
     const message = getErrorMessage(error)
     showToast.error(`Failed to ${operation}: ${message}`)
   },
+
+  /**
+   * Toast for informational messages
+   */
+  info: (message: string, duration?: number) => {
+    showToast.info(message, duration)
+  },
 }

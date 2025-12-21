@@ -1,4 +1,4 @@
-import type { UUID } from './common'
+import type { UUID } from './index'
 
 export interface FinalScore {
   teamId: string

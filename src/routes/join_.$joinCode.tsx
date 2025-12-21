@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { JoinSessionForm } from '../components/JoinSessionForm'
 import { sessionService } from '../lib/api/services'
@@ -11,7 +10,6 @@ function AutoJoinPage() {
   const { joinCode } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [prefillCode, setPrefillCode] = useState(joinCode)
 
   // Fetch session details using join code
   const {
@@ -89,7 +87,7 @@ function AutoJoinPage() {
             {/* Show join form as fallback */}
             <JoinSessionForm
               onJoinSuccess={handleJoinSuccess}
-              initialJoinCode={prefillCode}
+              initialJoinCode={joinCode}
             />
 
             <div className="text-center mt-6">

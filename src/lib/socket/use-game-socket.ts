@@ -11,8 +11,12 @@ export const useGameSocket = (gameId: string | undefined) => {
   const { gamesSocket, isConnected } = useSocketContext()
   const queryClient = useQueryClient()
   const hasJoinedRef = useRef(false)
-  const { notifyGameStarted, notifyRoundStarted, notifyYourTurn } =
-    useNotifications()
+  const {
+    notifyGameStarted,
+    notifyRoundStarted,
+    notifyYourTurn,
+    notifyGameCompleted,
+  } = useNotifications()
 
   // Join game room
   useEffect(() => {
@@ -165,6 +169,11 @@ export const useGameSocket = (gameId: string | undefined) => {
       try {
         console.log('Game completed:', data)
         queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+
+        // Notify about game completion
+        if (data?.game?.name) {
+          notifyGameCompleted(data.game.name, data?.winner?.name)
+        }
       } catch (error) {
         console.error('Error handling game completed event:', error)
         showToast.error('Failed to update game status. Please refresh.')

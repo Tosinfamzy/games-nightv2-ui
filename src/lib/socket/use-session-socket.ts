@@ -15,6 +15,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
   const {
     notifyPlayerJoined,
     notifyPlayerLeft,
+    notifyPlayerReady,
     notifySessionReady,
     notifyTeamsCreated,
   } = useNotifications()
@@ -134,6 +135,11 @@ export const useSessionSocket = (sessionId: string | undefined) => {
         queryClient.invalidateQueries({
           queryKey: ['session-can-start', sessionId],
         })
+
+        // Notify when player becomes ready
+        if (data?.ready && data?.player?.name) {
+          notifyPlayerReady(data.player.name)
+        }
       } catch (error) {
         console.error('Error handling player readiness change:', error)
         showToast.error('Failed to update player status. Please refresh.')

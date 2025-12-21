@@ -26,6 +26,16 @@ export const useNotifications = () => {
     })
   }, [])
 
+  const notifyPlayerReady = useCallback((playerName: string) => {
+    notificationService.notify({
+      type: NotificationType.SESSION,
+      priority: NotificationPriority.LOW,
+      title: 'Player Ready',
+      message: `${playerName} is ready`,
+      playSound: false,
+    })
+  }, [])
+
   const notifySessionReady = useCallback(() => {
     notificationService.notify({
       type: NotificationType.SESSION,
@@ -68,28 +78,45 @@ export const useNotifications = () => {
     })
   }, [])
 
+  const notifyGameCompleted = useCallback((gameName: string, winner?: string) => {
+    notificationService.notify({
+      type: NotificationType.GAME,
+      priority: NotificationPriority.MEDIUM,
+      title: 'Game Completed',
+      message: winner ? `${gameName} won by ${winner}!` : `${gameName} has ended`,
+      playSound: true,
+    })
+  }, [])
+
   const notifyTeamsCreated = useCallback((teamCount: number) => {
     notificationService.notify({
       type: NotificationType.TEAM,
       priority: NotificationPriority.MEDIUM,
       title: 'Teams Created',
-      message: `${teamCount} teams have been formed`,
+      message: `${teamCount} ${teamCount === 1 ? 'team has' : 'teams have'} been formed`,
       playSound: false,
     })
   }, [])
 
-  const notifyNewMessage = useCallback(
-    (senderName: string, preview: string) => {
-      notificationService.notify({
-        type: NotificationType.CHAT,
-        priority: NotificationPriority.LOW,
-        title: `New message from ${senderName}`,
-        message: preview.substring(0, 50) + (preview.length > 50 ? '...' : ''),
-        playSound: false,
-      })
-    },
-    [],
-  )
+  const notifyTeamAssignment = useCallback((playerName: string, teamName: string) => {
+    notificationService.notify({
+      type: NotificationType.TEAM,
+      priority: NotificationPriority.LOW,
+      title: 'Team Assignment',
+      message: `${playerName} joined ${teamName}`,
+      playSound: false,
+    })
+  }, [])
+
+  const notifyNewMessage = useCallback((senderName: string, preview: string) => {
+    notificationService.notify({
+      type: NotificationType.CHAT,
+      priority: NotificationPriority.LOW,
+      title: `New message from ${senderName}`,
+      message: preview.substring(0, 50) + (preview.length > 50 ? '...' : ''),
+      playSound: false,
+    })
+  }, [])
 
   const notifyConnectionRestored = useCallback(() => {
     notificationService.notify({
@@ -101,15 +128,29 @@ export const useNotifications = () => {
     })
   }, [])
 
+  const notifyConnectionLost = useCallback(() => {
+    notificationService.notify({
+      type: NotificationType.SYSTEM,
+      priority: NotificationPriority.HIGH,
+      title: 'Connection Lost',
+      message: 'Attempting to reconnect...',
+      playSound: false,
+    })
+  }, [])
+
   return {
     notifyPlayerJoined,
     notifyPlayerLeft,
+    notifyPlayerReady,
     notifySessionReady,
     notifyGameStarted,
     notifyRoundStarted,
     notifyYourTurn,
+    notifyGameCompleted,
     notifyTeamsCreated,
+    notifyTeamAssignment,
     notifyNewMessage,
     notifyConnectionRestored,
+    notifyConnectionLost,
   }
 }

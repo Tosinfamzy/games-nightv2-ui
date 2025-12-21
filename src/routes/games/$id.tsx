@@ -1,11 +1,10 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useGame, useUpdateGame } from '../../hooks/useGames'
 import { GameStatus } from '../../lib/api/types'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
 
 function GameDetailsPage() {
   const { id } = Route.useParams()
-  const navigate = useNavigate()
   const { data: game, isLoading, isError, error } = useGame(id)
   const { mutate: updateGame } = useUpdateGame(id)
 

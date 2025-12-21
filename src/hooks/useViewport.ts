@@ -1,33 +1,44 @@
 import { useState, useEffect } from 'react'
 
-export interface ViewportInfo {
+export interface ViewportState {
   width: number
   height: number
   isMobile: boolean
   isTablet: boolean
   isDesktop: boolean
   isPortrait: boolean
+  isLandscape: boolean
 }
 
-export const useViewport = (): ViewportInfo => {
-  const [viewport, setViewport] = useState<ViewportInfo>({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    isMobile: window.innerWidth < 768,
-    isTablet: window.innerWidth >= 768 && window.innerWidth < 1024,
-    isDesktop: window.innerWidth >= 1024,
-    isPortrait: window.innerHeight > window.innerWidth,
+export const useViewport = (): ViewportState => {
+  const [viewport, setViewport] = useState<ViewportState>(() => {
+    const width = window.innerWidth
+    const height = window.innerHeight
+
+    return {
+      width,
+      height,
+      isMobile: width < 768,
+      isTablet: width >= 768 && width < 1024,
+      isDesktop: width >= 1024,
+      isPortrait: height > width,
+      isLandscape: width > height,
+    }
   })
 
   useEffect(() => {
     const handleResize = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+
       setViewport({
-        width: window.innerWidth,
-        height: window.innerHeight,
-        isMobile: window.innerWidth < 768,
-        isTablet: window.innerWidth >= 768 && window.innerWidth < 1024,
-        isDesktop: window.innerWidth >= 1024,
-        isPortrait: window.innerHeight > window.innerWidth,
+        width,
+        height,
+        isMobile: width < 768,
+        isTablet: width >= 768 && width < 1024,
+        isDesktop: width >= 1024,
+        isPortrait: height > width,
+        isLandscape: width > height,
       })
     }
 

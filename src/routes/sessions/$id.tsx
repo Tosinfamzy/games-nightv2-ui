@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   playerService,
@@ -25,6 +25,9 @@ import JoinCodeQR from '../../components/JoinCodeQR'
 import ShareSessionModal from '../../components/ShareSessionModal'
 import LoadingSkeleton, { CardSkeleton } from '../../components/LoadingSkeleton'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
+import { SessionStatusBadge } from '../../components/SessionStatusBadge'
+import { StartSessionButton } from '../../components/StartSessionButton'
+import { ReadyCelebration } from '../../components/ReadyCelebration'
 import {
   enrichTeamsWithPlayers,
   transformGames,
@@ -46,6 +49,8 @@ function SessionDetailsPage() {
   const [showQRCode, setShowQRCode] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [showReadyCelebration, setShowReadyCelebration] = useState(false)
+  const [previousReadyState, setPreviousReadyState] = useState(false)
 
   // Connect to session WebSocket for real-time updates
   useSessionSocket(id)
@@ -59,14 +64,33 @@ function SessionDetailsPage() {
   const currentPlayerId = player?.id
 
   // Check if current user is the Games Master/host
-  const { gamesMaster } = useGamesMasterContext()
-  const isHost = gamesMaster?.id === session?.host.id
+  const { gm } = useGamesMasterContext()
+  const isHost = gm?.id === session?.host.id
 
   // Transform API data to UI-friendly format for components
   const uiPlayers = transformPlayers(players)
   const uiGames = transformGames(games)
   const uiGamesWithTeamSize = transformGames(games, true) // Include recommended team size
   const uiTeams = enrichTeamsWithPlayers(teams, players)
+
+  // Fetch session readiness for celebration trigger
+  const { data: readiness } = useQuery({
+    queryKey: ['session-readiness', id],
+    queryFn: () => sessionManagementService.getSessionReadiness(id),
+    staleTime: Infinity,
+    refetchOnMount: true,
+    enabled: !!session,
+  })
+
+  // Trigger celebration when all players become ready
+  useEffect(() => {
+    if (readiness?.allReady && !previousReadyState) {
+      setShowReadyCelebration(true)
+      setPreviousReadyState(true)
+    } else if (!readiness?.allReady) {
+      setPreviousReadyState(false)
+    }
+  }, [readiness?.allReady, previousReadyState])
 
   // Session mutations
   const startSessionMutation = useMutation({
@@ -145,7 +169,7 @@ function SessionDetailsPage() {
       showToast.success(`✓ You are marked as ${status}!`)
     },
 
-    onError: (error, variables, context) => {
+    onError: (error, _variables, context) => {
       // Rollback optimistic update on error
       if (context?.previousPlayers) {
         queryClient.setQueryData(
@@ -223,21 +247,6 @@ function SessionDetailsPage() {
     )
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'SCHEDULED':
-        return 'bg-blue-100 text-blue-800'
-      case 'IN_PROGRESS':
-        return 'bg-green-100 text-green-800'
-      case 'COMPLETED':
-        return 'bg-gray-100 text-gray-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   return (
     <div className="container mx-auto p-6">
       <div className="max-w-6xl mx-auto">
@@ -298,11 +307,11 @@ function SessionDetailsPage() {
               )}
             </div>
             <div className="text-right">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(session.status)}`}
-              >
-                {session.status}
-              </span>
+              <SessionStatusBadge
+                status={session.status}
+                size="md"
+                showDescription={false}
+              />
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-sm text-gray-600">Join Code:</span>
                 <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">
@@ -385,15 +394,20 @@ function SessionDetailsPage() {
           <div className="flex space-x-2">
             {session.status === 'SCHEDULED' && (
               <>
-                <button
-                  onClick={() => startSessionMutation.mutate(id)}
-                  disabled={startSessionMutation.isPending}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                >
-                  {startSessionMutation.isPending
-                    ? 'Starting...'
-                    : 'Start Session'}
-                </button>
+                <StartSessionButton
+                  onStart={() => startSessionMutation.mutate(id)}
+                  isLoading={startSessionMutation.isPending}
+                  isReady={
+                    (readiness?.allReady || false) &&
+                    teams.length > 0 &&
+                    games.length > 0
+                  }
+                  readyToStart={{
+                    playersReady: readiness?.allReady || false,
+                    teamsFormed: teams.length > 0,
+                    gamesAvailable: games.length > 0,
+                  }}
+                />
                 <button
                   onClick={() => setShowCancelConfirm(true)}
                   disabled={cancelSessionMutation.isPending}
@@ -640,6 +654,12 @@ function SessionDetailsPage() {
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
           isHost={isHost}
+        />
+
+        {/* Ready Celebration Effect */}
+        <ReadyCelebration
+          isReady={readiness?.allReady || false}
+          trigger={showReadyCelebration}
         />
       </div>
     </div>

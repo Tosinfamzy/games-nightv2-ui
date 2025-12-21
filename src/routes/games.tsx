@@ -613,6 +613,22 @@ function GamesPage() {
             </p>
           </div>
         </div>
+
+        {/* Delete Game Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={gameToDelete !== null}
+          onClose={() => setGameToDelete(null)}
+          onConfirm={() => {
+            if (gameToDelete) {
+              deleteGameMutation.mutate(gameToDelete)
+              setGameToDelete(null)
+            }
+          }}
+          title="Delete Game"
+          message="Are you sure you want to delete this game? This action cannot be undone."
+          confirmLabel="Delete Game"
+          variant="danger"
+        />
       </div>
     </div>
   )
@@ -725,22 +741,6 @@ function GameCard({
           </button>
         </div>
       </div>
-
-      {/* Delete Game Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={gameToDelete !== null}
-        onClose={() => setGameToDelete(null)}
-        onConfirm={() => {
-          if (gameToDelete) {
-            deleteGameMutation.mutate(gameToDelete)
-            setGameToDelete(null)
-          }
-        }}
-        title="Delete Game"
-        message="Are you sure you want to delete this game? This action cannot be undone."
-        confirmLabel="Delete Game"
-        variant="danger"
-      />
     </div>
   )
 }

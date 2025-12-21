@@ -7,8 +7,8 @@ interface ConfirmDialogProps {
   confirmText?: string
   confirmLabel?: string
   cancelText?: string
-  variant?: 'danger' | 'primary'
-  confirmVariant?: 'danger' | 'primary'
+  variant?: 'danger' | 'primary' | 'warning' | 'info'
+  confirmVariant?: 'danger' | 'primary' | 'warning' | 'info'
   onConfirm: () => void
   onClose?: () => void
   onCancel?: () => void
@@ -61,7 +61,11 @@ export function ConfirmDialog({
   const confirmButtonClasses =
     buttonVariant === 'danger'
       ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
-      : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+      : buttonVariant === 'warning'
+        ? 'bg-orange-600 text-white hover:bg-orange-700 focus:ring-orange-500'
+        : buttonVariant === 'info'
+          ? 'bg-cyan-600 text-white hover:bg-cyan-700 focus:ring-cyan-500'
+          : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
 
   return (
     <div

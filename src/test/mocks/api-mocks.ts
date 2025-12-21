@@ -10,7 +10,6 @@ import {
   mockSuggestions,
   mockTeamStats,
   DEFAULT_COLORS,
-  createMockTeams,
 } from '../fixtures/team.fixture'
 import type { CreateTeamsDto } from '../../lib/api/types/team.dto'
 

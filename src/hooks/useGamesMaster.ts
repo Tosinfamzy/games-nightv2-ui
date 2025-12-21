@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useGamesMasterContext } from '../contexts'
 import { gamesMasterService } from '../lib/api/services'
 import { showToast } from '../lib/toast'

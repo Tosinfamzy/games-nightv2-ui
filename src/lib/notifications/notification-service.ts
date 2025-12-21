@@ -70,7 +70,7 @@ class NotificationService {
 
   private playNotificationSound(): void {
     try {
-      // Simple beep for now (can be enhanced later)
+      // Simple beep for now (can be enhanced later with audio files)
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)()
       const oscillator = audioContext.createOscillator()
@@ -131,14 +131,26 @@ class NotificationService {
     return this.soundEnabled
   }
 
-  getPreferences(): Record<NotificationType, boolean> {
+  getTypeEnabled(type: NotificationType): boolean {
+    return this.preferences[type]
+  }
+
+  getAllPreferences(): Record<NotificationType, boolean> {
     return { ...this.preferences }
   }
 
-  requestBrowserPermission(): void {
+  requestBrowserPermission(): Promise<NotificationPermission> {
     if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission()
+      return Notification.requestPermission()
     }
+    return Promise.resolve(Notification.permission)
+  }
+
+  getBrowserPermission(): NotificationPermission | null {
+    if ('Notification' in window) {
+      return Notification.permission
+    }
+    return null
   }
 
   // Load preferences from localStorage
@@ -153,6 +165,7 @@ class NotificationService {
       if (prefs !== null) this.preferences = JSON.parse(prefs)
     } catch (error) {
       console.error('Failed to load notification preferences:', error)
+      // Keep defaults if parsing fails
     }
   }
 }

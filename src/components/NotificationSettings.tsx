@@ -5,21 +5,23 @@ import {
 } from '../lib/notifications/notification-service'
 
 export function NotificationSettings() {
-  const [enabled, setEnabled] = useState(true)
-  const [soundEnabled, setSoundEnabled] = useState(true)
-  const [preferences, setPreferences] = useState({
-    [NotificationType.SESSION]: true,
-    [NotificationType.GAME]: true,
-    [NotificationType.TEAM]: true,
-    [NotificationType.CHAT]: true,
-    [NotificationType.SYSTEM]: true,
-  })
+  const [enabled, setEnabled] = useState(notificationService.getEnabled())
+  const [soundEnabled, setSoundEnabled] = useState(
+    notificationService.getSoundEnabled(),
+  )
+  const [preferences, setPreferences] = useState(
+    notificationService.getAllPreferences(),
+  )
+  const [browserPermission, setBrowserPermission] = useState(
+    notificationService.getBrowserPermission(),
+  )
 
   useEffect(() => {
-    // Load current preferences from service
-    setEnabled(notificationService.getEnabled())
-    setSoundEnabled(notificationService.getSoundEnabled())
-    setPreferences(notificationService.getPreferences())
+    // Update browser permission state when it changes
+    const checkPermission = () => {
+      setBrowserPermission(notificationService.getBrowserPermission())
+    }
+    checkPermission()
   }, [])
 
   const handleToggleEnabled = () => {
@@ -43,167 +45,169 @@ export function NotificationSettings() {
     notificationService.setTypeEnabled(type, newPreferences[type])
   }
 
-  const notificationLabels: Record<NotificationType, string> = {
+  const handleRequestBrowserPermission = async () => {
+    const permission = await notificationService.requestBrowserPermission()
+    setBrowserPermission(permission)
+  }
+
+  const notificationTypeLabels: Record<NotificationType, string> = {
+    [NotificationType.SESSION]: 'Session Events',
+    [NotificationType.GAME]: 'Game Events',
+    [NotificationType.TEAM]: 'Team Events',
+    [NotificationType.CHAT]: 'Chat Messages',
+    [NotificationType.SYSTEM]: 'System Alerts',
+  }
+
+  const notificationTypeDescriptions: Record<NotificationType, string> = {
     [NotificationType.SESSION]:
-      'Session Events (player joined/left, session ready)',
-    [NotificationType.GAME]: 'Game Events (game started, rounds, turns)',
-    [NotificationType.TEAM]: 'Team Events (teams created, assignments)',
-    [NotificationType.CHAT]: 'Chat Messages (new messages from other players)',
-    [NotificationType.SYSTEM]: 'System Events (connection status)',
+      'Player joins/leaves, readiness changes, session ready',
+    [NotificationType.GAME]:
+      'Game started, rounds, turns, game completed',
+    [NotificationType.TEAM]: 'Team creation, player assignments',
+    [NotificationType.CHAT]: 'New chat messages when not viewing chat',
+    [NotificationType.SYSTEM]: 'Connection status, errors, warnings',
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6">Notification Settings</h2>
 
-      {/* Master toggle */}
-      <div className="mb-6 pb-6 border-b">
+      {/* Master Toggle */}
+      <div className="mb-6 p-4 border rounded-lg bg-gray-50">
         <label className="flex items-center justify-between cursor-pointer">
           <div>
-            <span className="text-lg font-medium">Enable notifications</span>
+            <span className="font-semibold text-gray-900">
+              Enable Notifications
+            </span>
             <p className="text-sm text-gray-600 mt-1">
-              Receive real-time updates about game events
+              Turn all notifications on or off
             </p>
           </div>
-          <div className="relative inline-block w-12 h-6 transition duration-200 ease-linear rounded-full">
-            <input
-              type="checkbox"
-              checked={enabled}
-              onChange={handleToggleEnabled}
-              className="sr-only peer"
-            />
-            <div
-              className={`block w-12 h-6 rounded-full transition ${
-                enabled ? 'bg-blue-500' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                enabled ? 'transform translate-x-6' : ''
-              }`}
-            ></div>
-          </div>
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={handleToggleEnabled}
+            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+          />
         </label>
       </div>
 
-      {/* Sound toggle */}
-      <div className="mb-6 pb-6 border-b">
+      {/* Sound Toggle */}
+      <div className="mb-6 p-4 border rounded-lg">
         <label className="flex items-center justify-between cursor-pointer">
           <div>
-            <span className="text-lg font-medium">Play sounds</span>
+            <span className="font-semibold text-gray-900">Play Sounds</span>
             <p className="text-sm text-gray-600 mt-1">
               Play audio alerts for important notifications
             </p>
           </div>
-          <div className="relative inline-block w-12 h-6 transition duration-200 ease-linear rounded-full">
-            <input
-              type="checkbox"
-              checked={soundEnabled}
-              onChange={handleToggleSound}
-              disabled={!enabled}
-              className="sr-only peer"
-            />
-            <div
-              className={`block w-12 h-6 rounded-full transition ${
-                soundEnabled && enabled ? 'bg-blue-500' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                soundEnabled && enabled ? 'transform translate-x-6' : ''
-              }`}
-            ></div>
-          </div>
+          <input
+            type="checkbox"
+            checked={soundEnabled}
+            onChange={handleToggleSound}
+            disabled={!enabled}
+            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          />
         </label>
       </div>
 
-      {/* Type-specific toggles */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Notification Types</h3>
-        <div className="space-y-4">
+      {/* Notification Types */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-4">Notification Types</h3>
+        <div className="space-y-3">
           {Object.values(NotificationType).map((type) => (
-            <label
-              key={type}
-              className="flex items-start justify-between cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition"
-            >
-              <div className="flex-1 mr-4">
-                <span className="font-medium capitalize">{type}</span>
-                <p className="text-sm text-gray-600 mt-1">
-                  {notificationLabels[type]}
-                </p>
-              </div>
-              <div className="relative inline-block w-12 h-6 transition duration-200 ease-linear rounded-full flex-shrink-0">
+            <div key={type} className="p-4 border rounded-lg">
+              <label className="flex items-start justify-between cursor-pointer">
+                <div className="flex-1">
+                  <span className="font-medium text-gray-900">
+                    {notificationTypeLabels[type]}
+                  </span>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {notificationTypeDescriptions[type]}
+                  </p>
+                </div>
                 <input
                   type="checkbox"
                   checked={preferences[type]}
                   onChange={() => handleToggleType(type)}
                   disabled={!enabled}
-                  className="sr-only peer"
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ml-4 flex-shrink-0"
                 />
-                <div
-                  className={`block w-12 h-6 rounded-full transition ${
-                    preferences[type] && enabled ? 'bg-blue-500' : 'bg-gray-300'
-                  }`}
-                ></div>
-                <div
-                  className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                    preferences[type] && enabled
-                      ? 'transform translate-x-6'
-                      : ''
-                  }`}
-                ></div>
-              </div>
-            </label>
+              </label>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Browser notification permission */}
-      {'Notification' in window && Notification.permission === 'default' && (
-        <div className="mt-8 pt-6 border-t">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">
-              Enable Browser Notifications
-            </h4>
-            <p className="text-sm text-blue-800 mb-4">
-              Get notifications even when the tab is not active. Click the
-              button below to allow browser notifications.
-            </p>
-            <button
-              onClick={() => notificationService.requestBrowserPermission()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Allow Browser Notifications
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Browser Notifications */}
+      <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
+        <h3 className="font-semibold text-blue-900 mb-2">
+          Browser Notifications
+        </h3>
+        <p className="text-sm text-blue-700 mb-4">
+          Get notifications even when the tab is not active (requires browser
+          permission)
+        </p>
 
-      {/* Permission granted message */}
-      {'Notification' in window && Notification.permission === 'granted' && (
-        <div className="mt-8 pt-6 border-t">
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-green-600 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <span className="text-green-900 font-medium">
-                Browser notifications are enabled
-              </span>
-            </div>
+        {browserPermission === 'granted' && (
+          <div className="flex items-center text-green-700">
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="font-medium">Permission granted</span>
           </div>
-        </div>
-      )}
+        )}
+
+        {browserPermission === 'denied' && (
+          <div className="text-red-700">
+            <p className="text-sm font-medium">Permission denied</p>
+            <p className="text-xs mt-1">
+              Please enable notifications in your browser settings
+            </p>
+          </div>
+        )}
+
+        {browserPermission === 'default' && (
+          <button
+            onClick={handleRequestBrowserPermission}
+            disabled={!enabled}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Enable Browser Notifications
+          </button>
+        )}
+
+        {!browserPermission && (
+          <p className="text-sm text-gray-600">
+            Browser notifications are not supported in this browser
+          </p>
+        )}
+      </div>
+
+      {/* Info Box */}
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h4 className="font-medium text-gray-900 mb-2">About Notifications</h4>
+        <ul className="text-sm text-gray-600 space-y-1">
+          <li>
+            • Toast notifications appear in the corner of your screen
+          </li>
+          <li>
+            • Important events (session ready, your turn) play sounds if enabled
+          </li>
+          <li>
+            • Browser notifications work even when the tab is in the background
+          </li>
+          <li>• Your preferences are saved automatically</li>
+        </ul>
+      </div>
     </div>
   )
 }

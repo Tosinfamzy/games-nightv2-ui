@@ -1,10 +1,9 @@
-import { TeamFormationStrategy } from '../../lib/api/types/team.dto'
-import type {
-  Team,
-  TeamFormationSuggestionsResponse,
-  TeamSuggestion,
-} from '../../lib/api/services/team.service'
-import type { TeamFormationSuggestionsResponse as SuggestionsResponseDto } from '../../lib/api/types/team.dto'
+import {
+  TeamFormationStrategy,
+  type TeamFormationSuggestionsResponse,
+  type TeamSuggestion,
+} from '../../lib/api/types/team.dto'
+import type { Team } from '../../lib/api/services/team.service'
 
 // Mock team data
 export const mockTeam: Team = {
@@ -15,8 +14,8 @@ export const mockTeam: Team = {
   isActive: true,
   sessionId: 'session-1',
   gameId: 'game-1',
-  players: [],
-  scores: [],
+  playerIds: [],
+  scoreIds: [],
   createdAt: new Date('2025-01-01T00:00:00Z').toISOString(),
   updatedAt: new Date('2025-01-01T00:00:00Z').toISOString(),
 }
@@ -43,44 +42,18 @@ export const mockTeamsWithPlayers: Team[] = [
     ...mockTeam,
     id: 'team-1',
     name: 'Team Alpha',
-    players: [
-      {
-        id: 'player-1',
-        name: 'Player 1',
-        status: 'ready' as const,
-        skillLevel: 5,
-      },
-      {
-        id: 'player-2',
-        name: 'Player 2',
-        status: 'ready' as const,
-        skillLevel: 4,
-      },
-    ],
+    playerIds: ['player-1', 'player-2'],
   },
   {
     ...mockTeam,
     id: 'team-2',
     name: 'Team Beta',
-    players: [
-      {
-        id: 'player-3',
-        name: 'Player 3',
-        status: 'ready' as const,
-        skillLevel: 5,
-      },
-      {
-        id: 'player-4',
-        name: 'Player 4',
-        status: 'ready' as const,
-        skillLevel: 4,
-      },
-    ],
+    playerIds: ['player-3', 'player-4'],
   },
 ]
 
 // Mock suggestions
-export const mockSuggestions: SuggestionsResponseDto = {
+export const mockSuggestions: TeamFormationSuggestionsResponse = {
   suggestions: [
     {
       teamCount: 2,
@@ -114,7 +87,7 @@ export const mockSuggestions: SuggestionsResponseDto = {
   },
 }
 
-export const mockSuggestionsWithWarnings: SuggestionsResponseDto = {
+export const mockSuggestionsWithWarnings: TeamFormationSuggestionsResponse = {
   suggestions: [
     {
       teamCount: 2,
@@ -134,7 +107,7 @@ export const mockSuggestionsWithWarnings: SuggestionsResponseDto = {
   },
 }
 
-export const mockSuggestionsWithErrors: SuggestionsResponseDto = {
+export const mockSuggestionsWithErrors: TeamFormationSuggestionsResponse = {
   suggestions: [],
   validation: {
     isValid: false,
@@ -194,8 +167,8 @@ export function createMockTeams(
 }
 
 export function createMockSuggestions(
-  overrides?: Partial<SuggestionsResponseDto>,
-): SuggestionsResponseDto {
+  overrides?: Partial<TeamFormationSuggestionsResponse>,
+): TeamFormationSuggestionsResponse {
   return {
     ...mockSuggestions,
     ...overrides,

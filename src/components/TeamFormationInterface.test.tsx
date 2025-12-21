@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../test/test-utils'
 import { TeamFormationInterface } from './TeamFormationInterface'
@@ -115,7 +115,6 @@ describe('TeamFormationInterface', () => {
     it('should populate dropdown with games from props', () => {
       renderWithProviders(<TeamFormationInterface {...defaultProps} />)
 
-      const dropdown = screen.getByRole('combobox')
       const options = screen.getAllByRole('option')
 
       // +1 for "Choose a game..." placeholder
@@ -408,7 +407,7 @@ describe('TeamFormationInterface', () => {
     it('should display players in teams count when teams exist', () => {
       const propsWithTeams = {
         ...defaultProps,
-        teams: mockTeams,
+        teams: mockTeams as any,
       }
 
       renderWithProviders(<TeamFormationInterface {...propsWithTeams} />)
@@ -492,12 +491,10 @@ describe('TeamFormationInterface', () => {
 
       const propsWithTeams = {
         ...defaultProps,
-        teams: mockTeams,
+        teams: mockTeams as any,
       }
 
-      const { rerender } = renderWithProviders(
-        <TeamFormationInterface {...propsWithTeams} />,
-      )
+      renderWithProviders(<TeamFormationInterface {...propsWithTeams} />)
 
       expect(
         screen.getByRole('button', { name: /Rebalance/i }),

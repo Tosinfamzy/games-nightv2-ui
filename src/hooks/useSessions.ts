@@ -28,10 +28,11 @@ export const useCreateSession = () => {
 
   return useMutation({
     mutationFn: (data: CreateSessionDTO) => sessionService.create(data),
-    onSuccess: (newSession) => {
+    onSuccess: (response) => {
+      // CreateSessionResponse returns { session, gmPlayer, message }
       queryClient.setQueryData<Array<Session>>([SESSIONS_KEY], (old = []) => [
         ...old,
-        newSession,
+        response.session,
       ])
     },
   })
