@@ -5,6 +5,7 @@ import { playerService, type Player } from '../lib/api/services/player.service'
 import { useTeamManagement } from '../hooks/useTeamManagement'
 import { ConfirmDialog } from './ConfirmDialog'
 import EmptyState from './EmptyState'
+import { TeamCardSkeleton } from './LoadingSkeleton'
 
 interface TeamManagementPanelProps {
   gameId: string
@@ -53,8 +54,12 @@ export function TeamManagementPanel({
 
   if (isLoadingTeams || isLoadingPlayers) {
     return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-6 bg-gray-200 rounded w-36 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-16 animate-pulse" />
+        </div>
+        <TeamCardSkeleton count={2} />
       </div>
     )
   }

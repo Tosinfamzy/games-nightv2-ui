@@ -95,7 +95,9 @@ describe('ShareSessionModal', () => {
 
   it('should have copy link button for share link', () => {
     renderModal()
-    expect(screen.getByRole('button', { name: /copy link/i })).toBeInTheDocument()
+    // There are now multiple copy link buttons (original + social share buttons)
+    const copyLinkButtons = screen.getAllByRole('button', { name: /copy link/i })
+    expect(copyLinkButtons.length).toBeGreaterThan(0)
   })
 
   it('should call onClose when close button is clicked', async () => {

@@ -159,9 +159,9 @@ describe('TeamManagementPanel', () => {
 
     renderPanel()
 
-    // Check for the loading spinner div
-    const spinner = document.querySelector('.animate-spin')
-    expect(spinner).toBeInTheDocument()
+    // Check for the loading skeleton (now uses TeamCardSkeleton)
+    const skeleton = document.querySelector('.animate-pulse')
+    expect(skeleton).toBeInTheDocument()
   })
 
   it('should show empty state when no teams exist', async () => {
@@ -173,11 +173,11 @@ describe('TeamManagementPanel', () => {
     renderPanel()
 
     await waitFor(() => {
-      expect(screen.getByText('No teams have been created yet.')).toBeInTheDocument()
+      expect(screen.getByText('No Teams Created')).toBeInTheDocument()
     })
 
     expect(
-      screen.getByText('Create teams first to manage them.'),
+      screen.getByText(/Create teams first to manage them/),
     ).toBeInTheDocument()
   })
 
@@ -213,9 +213,10 @@ describe('TeamManagementPanel', () => {
     const dissolveButtons = screen.getAllByText('Dissolve Team')
     await userEvent.click(dissolveButtons[0])
 
-    expect(global.confirm).toHaveBeenCalledWith(
-      expect.stringContaining('Team Alpha'),
-    )
+    // Component now uses ConfirmDialog - check dialog appears
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
   })
 
   it('should show move to dropdown for each player', async () => {
@@ -251,14 +252,14 @@ describe('TeamManagementPanel', () => {
     expect(screen.getByText('Diana')).toBeInTheDocument()
   })
 
-  it('should disable buttons during processing', async () => {
+  it('should show ConfirmDialog when dissolve button is clicked', async () => {
     vi.mocked(teamService.teamService.getByGame).mockResolvedValue(mockTeams)
     vi.mocked(playerService.playerService.getBySession).mockResolvedValue(
       mockPlayers,
     )
-    vi.mocked(teamService.teamService.dissolveTeam).mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 1000)),
-    )
+    vi.mocked(teamService.teamService.dissolveTeam).mockResolvedValue({
+      message: 'Team dissolved successfully',
+    })
 
     renderPanel()
 
@@ -269,9 +270,9 @@ describe('TeamManagementPanel', () => {
     const dissolveButtons = screen.getAllByText('Dissolve Team')
     await userEvent.click(dissolveButtons[0])
 
-    // Buttons should be disabled during operation
-    dissolveButtons.forEach((button) => {
-      expect(button).toBeDisabled()
+    // Should show ConfirmDialog
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
   })
 
@@ -306,8 +307,6 @@ describe('TeamManagementPanel', () => {
   })
 
   it('should not dissolve team if user cancels confirmation', async () => {
-    ;(global.confirm as any).mockReturnValue(false)
-
     vi.mocked(teamService.teamService.getByGame).mockResolvedValue(mockTeams)
     vi.mocked(playerService.playerService.getBySession).mockResolvedValue(
       mockPlayers,
@@ -324,6 +323,15 @@ describe('TeamManagementPanel', () => {
 
     const dissolveButtons = screen.getAllByText('Dissolve Team')
     await userEvent.click(dissolveButtons[0])
+
+    // Wait for ConfirmDialog to appear
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    // Click Cancel button
+    const cancelButton = screen.getByRole('button', { name: /cancel/i })
+    await userEvent.click(cancelButton)
 
     expect(teamService.teamService.dissolveTeam).not.toHaveBeenCalled()
   })

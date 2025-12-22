@@ -23,7 +23,7 @@ import PlayerStatusBadge from '../../components/PlayerStatusBadge'
 import OnlinePlayerCount from '../../components/OnlinePlayerCount'
 import JoinCodeQR from '../../components/JoinCodeQR'
 import ShareSessionModal from '../../components/ShareSessionModal'
-import LoadingSkeleton, { CardSkeleton } from '../../components/LoadingSkeleton'
+import { SessionDetailSkeleton } from '../../components/LoadingSkeleton'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
 import { SessionStatusBadge } from '../../components/SessionStatusBadge'
 import { StartSessionButton } from '../../components/StartSessionButton'
@@ -209,30 +209,7 @@ function SessionDetailsPage() {
     new URLSearchParams(window.location.search).get('joined') === 'true'
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Breadcrumb Skeleton */}
-          <LoadingSkeleton count={1} height="h-4" className="w-48 mb-6" />
-
-          {/* Header Skeleton */}
-          <div className="mb-8 space-y-4">
-            <LoadingSkeleton count={1} height="h-8" className="w-96" />
-            <LoadingSkeleton count={1} height="h-6" className="w-64" />
-          </div>
-
-          {/* Tabs Skeleton */}
-          <div className="mb-6">
-            <LoadingSkeleton count={1} height="h-10" className="w-full" />
-          </div>
-
-          {/* Content Skeleton */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <CardSkeleton count={3} />
-          </div>
-        </div>
-      </div>
-    )
+    return <SessionDetailSkeleton />
   }
 
   if (isError || !session) {

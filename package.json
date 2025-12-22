@@ -6,8 +6,10 @@
     "dev": "vite",
     "start": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:analyze": "tsc --noEmit && vite build && echo '\nBundle stats saved to dist/stats.html'",
     "serve": "vite preview",
     "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix"
@@ -43,6 +45,7 @@
     "jsdom": "^26.0.0",
     "msw": "^2.12.3",
     "prettier": "^3.5.3",
+    "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "^5.7.2",
     "vite": "^6.1.0",
     "vitest": "^3.0.5",

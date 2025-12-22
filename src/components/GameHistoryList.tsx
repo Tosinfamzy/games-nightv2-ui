@@ -1,5 +1,7 @@
 import { useGameHistory } from '../hooks/useGameHistory'
 import type { UUID } from '../lib/api/types'
+import { GameCardSkeleton } from './LoadingSkeleton'
+import EmptyState from './EmptyState'
 
 interface GameHistoryListProps {
   sessionId?: UUID
@@ -10,9 +12,8 @@ export default function GameHistoryList({ sessionId }: GameHistoryListProps) {
 
   if (isLoading) {
     return (
-      <div className="p-4 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-2 text-gray-600">Loading game history...</p>
+      <div className="space-y-4">
+        <GameCardSkeleton count={3} />
       </div>
     )
   }
@@ -27,10 +28,12 @@ export default function GameHistoryList({ sessionId }: GameHistoryListProps) {
 
   if (!games || games.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500">
-        <p className="text-lg">No games played yet.</p>
-        <p className="text-sm mt-2">Complete some games to see them here!</p>
-      </div>
+      <EmptyState
+        icon={<span>🎮</span>}
+        title="No games played yet"
+        description="Complete some games in this session to see your game history and scores here."
+        size="md"
+      />
     )
   }
 

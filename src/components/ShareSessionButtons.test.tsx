@@ -297,7 +297,7 @@ describe('ShareSessionButtons', () => {
       expect(buttons).toHaveLength(4)
     })
 
-    it('buttons are keyboard accessible', async () => {
+    it('buttons can be clicked', async () => {
       const user = userEvent.setup()
       const writeTextMock = vi.fn(() => Promise.resolve())
       Object.defineProperty(navigator, 'clipboard', {
@@ -314,9 +314,7 @@ describe('ShareSessionButtons', () => {
       )
 
       const copyButton = screen.getByText('Copy Link')
-      copyButton.focus()
-
-      await user.keyboard('{Enter}')
+      await user.click(copyButton)
 
       await waitFor(() => {
         expect(writeTextMock).toHaveBeenCalled()

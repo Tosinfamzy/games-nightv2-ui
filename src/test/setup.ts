@@ -1,10 +1,22 @@
-import { expect, afterEach, vi } from 'vitest'
+import { afterEach, beforeAll, afterAll, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
+import { server } from './mocks/server'
 
-// Cleanup after each test
+// Start MSW server before all tests
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'bypass' })
+})
+
+// Reset handlers after each test
 afterEach(() => {
   cleanup()
+  server.resetHandlers()
+})
+
+// Stop MSW server after all tests
+afterAll(() => {
+  server.close()
 })
 
 // Mock window.matchMedia
@@ -32,12 +44,24 @@ Object.defineProperty(navigator, 'clipboard', {
 })
 
 // Mock window.location
-delete (window as any).location
-window.location = {
-  ...window.location,
-  origin: 'http://localhost:3000',
-  href: 'http://localhost:3000',
-}
+Object.defineProperty(window, 'location', {
+  value: {
+    origin: 'http://localhost:3000',
+    href: 'http://localhost:3000',
+    pathname: '/',
+    search: '',
+    hash: '',
+    host: 'localhost:3000',
+    hostname: 'localhost',
+    port: '3000',
+    protocol: 'http:',
+    assign: vi.fn(),
+    reload: vi.fn(),
+    replace: vi.fn(),
+  },
+  writable: true,
+  configurable: true,
+})
 
 // Mock canvas for QR code generation
 HTMLCanvasElement.prototype.getContext = vi.fn()

@@ -1,4 +1,6 @@
 import { useLeaderboard } from '../hooks/useGameHistory'
+import { LeaderboardSkeleton } from './LoadingSkeleton'
+import EmptyState from './EmptyState'
 
 interface LeaderboardProps {
   limit?: number
@@ -11,21 +13,7 @@ export default function Leaderboard({ limit = 10 }: LeaderboardProps) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-2xl font-bold mb-6">Top Players</h3>
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse flex items-center space-x-4 p-3"
-            >
-              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-              <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2 mt-2"></div>
-              </div>
-              <div className="h-6 bg-gray-200 rounded w-12"></div>
-            </div>
-          ))}
-        </div>
+        <LeaderboardSkeleton count={5} />
       </div>
     )
   }
@@ -43,9 +31,12 @@ export default function Leaderboard({ limit = 10 }: LeaderboardProps) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-2xl font-bold mb-6">Top Players</h3>
-        <p className="text-gray-500 text-center py-8">
-          No players with game history yet.
-        </p>
+        <EmptyState
+          icon={<span>🏆</span>}
+          title="No champions yet"
+          description="Play some games to start building your leaderboard! The top performers will appear here."
+          size="sm"
+        />
       </div>
     )
   }

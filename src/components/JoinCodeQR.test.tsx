@@ -6,7 +6,7 @@ import JoinCodeQR from './JoinCodeQR'
 // Mock QRCode library
 vi.mock('qrcode', () => ({
   default: {
-    toCanvas: vi.fn((canvas, url, options, callback) => {
+    toCanvas: vi.fn((_canvas, _url, _options, callback) => {
       setTimeout(() => callback(null), 0)
     }),
   },
@@ -111,7 +111,7 @@ describe('JoinCodeQR', () => {
       const { showToast } = await import('../lib/toast')
 
       ;(QRCode.default.toCanvas as any).mockImplementation(
-        (canvas: any, url: string, options: any, callback: any) => {
+        (_canvas: unknown, _url: string, _options: unknown, callback: (err: Error | null) => void) => {
           callback(new Error('QR generation failed'))
         }
       )
