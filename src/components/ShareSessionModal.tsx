@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import QRCode from 'react-qr-code'
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -29,6 +29,60 @@ export default function ShareSessionModal({
   const queryClient = useQueryClient()
   const [currentJoinCode, setCurrentJoinCode] = useState(joinCode)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Focus close button when modal opens
+  useEffect(() => {
+    if (isOpen && closeButtonRef.current) {
+      closeButtonRef.current.focus()
+    }
+  }, [isOpen])
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen && !showConfirmDialog) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      return () => document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isOpen, onClose, showConfirmDialog])
+
+  // Focus trapping within modal
+  useEffect(() => {
+    if (!isOpen || !modalRef.current) return
+
+    const modal = modalRef.current
+    const focusableElements = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    const handleTabKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return
+
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          event.preventDefault()
+          lastElement?.focus()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          event.preventDefault()
+          firstElement?.focus()
+        }
+      }
+    }
+
+    modal.addEventListener('keydown', handleTabKey)
+    return () => modal.removeEventListener('keydown', handleTabKey)
+  }, [isOpen])
 
   // Construct shareable link
   const shareableLink = `${window.location.origin}/join/${currentJoinCode}`
@@ -70,18 +124,26 @@ export default function ShareSessionModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
       <div
+        ref={modalRef}
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold">Share Session</h2>
+          <h2 id="share-modal-title" className="text-2xl font-bold">Share Session</h2>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close modal"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Close share session modal"
           >
             <svg
               className="w-6 h-6"
@@ -132,8 +194,8 @@ export default function ShareSessionModal({
               />
               <button
                 onClick={handleCopyCode}
-                className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 text-base"
-                title="Copy join code"
+                className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 text-base min-h-[44px]"
+                aria-label="Copy join code to clipboard"
               >
                 <svg
                   className="w-5 h-5"
@@ -167,8 +229,8 @@ export default function ShareSessionModal({
               />
               <button
                 onClick={handleCopyLink}
-                className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 text-base"
-                title="Copy share link"
+                className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 text-base min-h-[44px]"
+                aria-label="Copy share link to clipboard"
               >
                 <svg
                   className="w-5 h-5"

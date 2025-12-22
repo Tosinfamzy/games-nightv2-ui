@@ -75,7 +75,7 @@ export function JoinSessionForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" aria-busy={joinSessionMutation.isPending}>
         {!sessionPreview && (
           <div>
             <label
@@ -99,8 +99,9 @@ export function JoinSessionForm({
               maxLength={6}
               required
               readOnly={!!initialJoinCode}
+              aria-describedby="joinCode-help"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p id="joinCode-help" className="text-xs text-gray-500 mt-1">
               Enter the 6-digit code from your host
             </p>
           </div>

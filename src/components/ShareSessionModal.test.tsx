@@ -114,7 +114,7 @@ describe('ShareSessionModal', () => {
     const onClose = vi.fn()
     renderModal({ onClose })
 
-    const xButton = screen.getByLabelText(/close modal/i)
+    const xButton = screen.getByRole('button', { name: /close share session modal/i })
     await userEvent.click(xButton)
 
     expect(onClose).toHaveBeenCalledTimes(1)

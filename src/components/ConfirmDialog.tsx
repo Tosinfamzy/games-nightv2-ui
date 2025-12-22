@@ -34,6 +34,7 @@ export function ConfirmDialog({
   // Support both variant and confirmVariant
   const buttonVariant = variant || confirmVariant || 'primary'
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   // Focus cancel button when dialog opens (safer default)
   useEffect(() => {
@@ -56,6 +57,37 @@ export function ConfirmDialog({
     }
   }, [isOpen, handleClose])
 
+  // Focus trapping within dialog
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return
+
+    const dialog = dialogRef.current
+    const focusableElements = dialog.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    const handleTabKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return
+
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          event.preventDefault()
+          lastElement?.focus()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          event.preventDefault()
+          firstElement?.focus()
+        }
+      }
+    }
+
+    dialog.addEventListener('keydown', handleTabKey)
+    return () => dialog.removeEventListener('keydown', handleTabKey)
+  }, [isOpen])
+
   if (!isOpen) return null
 
   const confirmButtonClasses =
@@ -73,6 +105,7 @@ export function ConfirmDialog({
       onClick={handleClose}
     >
       <div
+        ref={dialogRef}
         className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-4"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
