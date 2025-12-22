@@ -225,24 +225,24 @@ function SessionDetailsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto px-4 py-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
-          <Link to="/sessions" className="hover:text-gray-700">
+        <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4 sm:mb-6">
+          <Link to="/sessions" className="hover:text-gray-700 min-h-[44px] flex items-center">
             Sessions
           </Link>
           <span>›</span>
-          <span className="text-gray-900 font-medium">{session.name}</span>
+          <span className="text-gray-900 font-medium truncate">{session.name}</span>
         </nav>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 break-words">
                 {session.name}
               </h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                 <span>
                   <strong>Host:</strong> {session.host.name}
                   {isHost && (
@@ -251,20 +251,31 @@ function SessionDetailsPage() {
                     </span>
                   )}
                 </span>
-                <span>
+                <span className="hidden sm:inline">
                   <strong>Date:</strong>{' '}
                   {new Date(session.date).toLocaleString()}
                 </span>
                 {session.location && (
-                  <span>
+                  <span className="hidden sm:inline">
                     <strong>Location:</strong> {session.location}
                   </span>
+                )}
+              </div>
+              {/* Mobile-only date and location */}
+              <div className="sm:hidden mt-2 text-sm text-gray-600 space-y-1">
+                <div>
+                  <strong>Date:</strong> {new Date(session.date).toLocaleDateString()}
+                </div>
+                {session.location && (
+                  <div>
+                    <strong>Location:</strong> {session.location}
+                  </div>
                 )}
               </div>
               {isHost && (
                 <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-500 rounded">
                   <svg
-                    className="w-5 h-5 text-purple-600"
+                    className="w-5 h-5 text-purple-600 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -277,84 +288,89 @@ function SessionDetailsPage() {
                     />
                   </svg>
                   <span className="text-sm font-medium text-purple-900">
-                    🎮 You are the Games Master - You have full control over
-                    this session
+                    🎮 <span className="hidden sm:inline">You are the Games Master - You have full control over this session</span>
+                    <span className="sm:hidden">Games Master</span>
                   </span>
                 </div>
               )}
             </div>
-            <div className="text-right">
-              <SessionStatusBadge
-                status={session.status}
-                size="md"
-                showDescription={false}
-              />
-              <div className="mt-2 flex items-center gap-2">
+            <div className="lg:text-right">
+              <div className="flex items-center gap-2 lg:justify-end mb-2">
+                <SessionStatusBadge
+                  status={session.status}
+                  size="md"
+                  showDescription={false}
+                />
+              </div>
+              {/* Join Code Section - Mobile optimized */}
+              <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg lg:bg-transparent lg:p-0">
                 <span className="text-sm text-gray-600">Join Code:</span>
-                <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">
+                <span className="font-mono bg-gray-100 lg:bg-gray-100 px-3 py-1.5 rounded text-lg font-bold tracking-wider">
                   {session.joinCode}
                 </span>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(session.joinCode)
-                    toastHelpers.copied('join code to clipboard')
-                  }}
-                  className="p-1 hover:bg-gray-200 rounded transition-colors"
-                  title="Copy join code"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(session.joinCode)
+                      toastHelpers.copied('join code to clipboard')
+                    }}
+                    className="p-2.5 hover:bg-gray-200 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    title="Copy join code"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setShowQRCode(!showQRCode)}
-                  className="p-1 hover:bg-gray-200 rounded transition-colors"
-                  title={showQRCode ? 'Hide QR code' : 'Show QR code'}
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setShowQRCode(!showQRCode)}
+                    className="p-2.5 hover:bg-gray-200 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    title={showQRCode ? 'Hide QR code' : 'Show QR code'}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors flex items-center gap-1"
-                  title="Share session"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setShowShareModal(true)}
+                    className="px-4 py-2.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1.5 min-h-[44px]"
+                    title="Share session"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    />
-                  </svg>
-                  Share
-                </button>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                      />
+                    </svg>
+                    <span className="hidden sm:inline">Share</span>
+                  </button>
+                </div>
               </div>
               {showQRCode && (
                 <div className="mt-4">
@@ -368,7 +384,7 @@ function SessionDetailsPage() {
           </div>
 
           {/* Session Actions */}
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             {session.status === 'SCHEDULED' && (
               <>
                 <StartSessionButton
@@ -388,7 +404,7 @@ function SessionDetailsPage() {
                 <button
                   onClick={() => setShowCancelConfirm(true)}
                   disabled={cancelSessionMutation.isPending}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
                 >
                   Cancel Session
                 </button>
@@ -399,7 +415,7 @@ function SessionDetailsPage() {
               <button
                 onClick={() => completeSessionMutation.mutate(id)}
                 disabled={completeSessionMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
               >
                 {completeSessionMutation.isPending
                   ? 'Completing...'
@@ -409,42 +425,44 @@ function SessionDetailsPage() {
 
             <Link
               to="/sessions"
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              className="px-4 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 min-h-[44px] flex items-center text-sm sm:text-base"
             >
-              ← Back to Sessions
+              <span className="hidden sm:inline">←</span> Back<span className="hidden sm:inline"> to Sessions</span>
             </Link>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
+            <nav className="-mb-px flex space-x-1 sm:space-x-4 overflow-x-auto pb-px scrollbar-hide">
               {[
-                { id: 'overview', label: 'Overview', icon: '📋' },
+                { id: 'overview', label: 'Overview', shortLabel: 'Home', icon: '📋' },
                 {
                   id: 'players',
                   label: 'Players',
+                  shortLabel: 'Players',
                   icon: '👥',
                   count: players.length,
                 },
-                { id: 'games', label: 'Games', icon: '🎮' },
-                { id: 'teams', label: 'Teams', icon: '🏆' },
-                { id: 'chat', label: 'Chat', icon: '💬' },
-                { id: 'history', label: 'History', icon: '📊' },
+                { id: 'games', label: 'Games', shortLabel: 'Games', icon: '🎮' },
+                { id: 'teams', label: 'Teams', shortLabel: 'Teams', icon: '🏆' },
+                { id: 'chat', label: 'Chat', shortLabel: 'Chat', icon: '💬' },
+                { id: 'history', label: 'History', shortLabel: 'Hist.', icon: '📊' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-3 px-2 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap min-w-max ${
+                  className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap min-h-[44px] ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  {tab.icon} {tab.label}
+                  <span className="sm:hidden">{tab.icon}</span>
+                  <span className="hidden sm:inline">{tab.icon} {tab.label}</span>
                   {tab.count !== undefined && (
-                    <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">
+                    <span className="ml-1 sm:ml-2 bg-gray-100 text-gray-600 py-0.5 px-1.5 sm:px-2 rounded-full text-xs">
                       {tab.count}
                     </span>
                   )}
@@ -455,7 +473,7 @@ function SessionDetailsPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           {activeTab === 'overview' && (
             <OverviewTab
               session={session}
@@ -674,17 +692,17 @@ function OverviewTab({
       {/* Player Ready Status Card */}
       {currentPlayer ? (
         <div
-          className={`border-2 rounded-lg p-6 ${
+          className={`border-2 rounded-lg p-4 sm:p-6 ${
             currentPlayer.status === 'ready'
               ? 'bg-green-50 border-green-300'
               : 'bg-blue-50 border-blue-300'
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center space-x-3">
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${
                     currentPlayer.status === 'ready'
                       ? 'bg-green-100'
                       : 'bg-blue-100'
@@ -713,7 +731,7 @@ function OverviewTab({
                 session.status === 'COMPLETED' ||
                 session.status === 'CANCELLED'
               }
-              className={`px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none ${
+              className={`w-full sm:w-auto px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none min-h-[48px] ${
                 currentPlayer.status === 'ready'
                   ? 'bg-gray-500 text-white hover:bg-gray-600'
                   : 'bg-green-600 text-white hover:bg-green-700 shadow-lg'
@@ -728,11 +746,11 @@ function OverviewTab({
           </div>
         </div>
       ) : (
-        <div className="border-2 border-yellow-300 bg-yellow-50 rounded-lg p-6">
-          <div className="flex items-center justify-between">
+        <div className="border-2 border-yellow-300 bg-yellow-50 rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-2xl flex-shrink-0">
                   👤
                 </div>
                 <div>
@@ -740,8 +758,8 @@ function OverviewTab({
                     Not Playing Yet
                   </h3>
                   <p className="text-sm text-gray-600">
-                    You're viewing this session as a spectator. Join as a player
-                    to participate and mark yourself ready.
+                    <span className="hidden sm:inline">You're viewing this session as a spectator. Join as a player to participate and mark yourself ready.</span>
+                    <span className="sm:hidden">Join to participate!</span>
                   </p>
                 </div>
               </div>
@@ -753,7 +771,7 @@ function OverviewTab({
                   navigate({ to: '/join/$joinCode', params: { joinCode } })
                 }
               }}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors min-h-[48px]"
             >
               Join Session
             </button>
@@ -948,16 +966,16 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <h3 className="text-lg font-semibold">Session Players</h3>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <OnlinePlayerCount players={players} showDetails={true} />
           {isHost &&
             session.status !== 'COMPLETED' &&
             session.status !== 'CANCELLED' && (
               <button
                 onClick={() => setShowAddPlayerForm(!showAddPlayerForm)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 border-2 border-purple-300 shadow-sm"
+                className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 border-2 border-purple-300 shadow-sm min-h-[44px]"
                 title="Games Master Control"
               >
                 <svg
@@ -973,14 +991,15 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
                     d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
                   />
                 </svg>
-                {showAddPlayerForm ? 'Cancel' : '+ Add Player'}
+                <span className="hidden sm:inline">{showAddPlayerForm ? 'Cancel' : '+ Add Player'}</span>
+                <span className="sm:hidden">{showAddPlayerForm ? '✕' : '+'}</span>
               </button>
             )}
           {(session.status === 'COMPLETED' ||
             session.status === 'CANCELLED') && (
             <div className="text-sm text-gray-500 italic">
-              Player management disabled - session{' '}
-              {session.status.toLowerCase()}
+              <span className="hidden sm:inline">Player management disabled - session{' '}{session.status.toLowerCase()}</span>
+              <span className="sm:hidden">Session {session.status.toLowerCase()}</span>
             </div>
           )}
         </div>

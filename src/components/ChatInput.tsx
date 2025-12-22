@@ -40,7 +40,7 @@ export default function ChatInput({
   }
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
+    <div className="border-t border-gray-200 bg-white p-3 sm:p-4 flex-shrink-0">
       <div className="flex gap-2 items-end">
         <div className="flex-1 relative">
           <textarea
@@ -50,7 +50,7 @@ export default function ChatInput({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="w-full px-4 py-3 border border-gray-300 rounded-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-base"
+            className="w-full px-4 py-3 border border-gray-300 rounded-2xl sm:rounded-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-base"
             style={{
               minHeight: '48px',
               maxHeight: '120px',
@@ -73,15 +73,18 @@ export default function ChatInput({
         <button
           onClick={handleSend}
           disabled={disabled || !message.trim()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+          className="px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-2xl sm:rounded-full hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium min-w-[48px] min-h-[48px] flex items-center justify-center"
           aria-label="Send message"
         >
-          Send
+          <span className="hidden sm:inline">Send</span>
+          <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
         </button>
       </div>
 
-      {/* Help text */}
-      <p className="text-xs text-gray-500 mt-2">
+      {/* Help text - hide on mobile */}
+      <p className="hidden sm:block text-xs text-gray-500 mt-2">
         Press Enter to send, Shift+Enter for new line
       </p>
     </div>

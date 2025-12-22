@@ -132,15 +132,15 @@ export function TeamManagementPanel({
 
       {/* Unassigned Players */}
       {unassignedPlayers.length > 0 && (
-        <div className="border rounded-lg p-4 bg-gray-50">
+        <div className="border rounded-lg p-3 sm:p-4 bg-gray-50">
           <h4 className="font-medium mb-3">Unassigned Players</h4>
           <div className="space-y-2">
             {unassignedPlayers.map((player) => (
               <div
                 key={player.id}
-                className="flex items-center justify-between p-2 bg-white rounded border"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-white rounded border"
               >
-                <span className="text-sm">{player.name}</span>
+                <span className="text-sm font-medium">{player.name}</span>
                 <select
                   onChange={(e) => {
                     if (e.target.value) {
@@ -148,7 +148,7 @@ export function TeamManagementPanel({
                       e.target.value = ''
                     }
                   }}
-                  className="px-2 py-1 text-sm border rounded"
+                  className="px-3 py-2.5 text-sm border rounded-lg bg-white min-h-[44px] w-full sm:w-auto"
                   disabled={isReassigningPlayer}
                 >
                   <option value="">Assign to team...</option>
@@ -201,13 +201,13 @@ function TeamCard({
   const otherTeams = allTeams.filter((t) => t.id !== team.id)
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm">
+    <div className="border rounded-lg p-3 sm:p-4 bg-white shadow-sm">
       {/* Team Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
+        <div className="flex items-center gap-2 flex-wrap">
           {team.color && (
             <div
-              className="w-4 h-4 rounded-full"
+              className="w-4 h-4 rounded-full flex-shrink-0"
               style={{ backgroundColor: team.color }}
             />
           )}
@@ -220,7 +220,7 @@ function TeamCard({
         <button
           onClick={onDissolveTeam}
           disabled={isProcessing}
-          className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded border border-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px] w-full sm:w-auto"
         >
           Dissolve Team
         </button>
@@ -236,9 +236,9 @@ function TeamCard({
             return (
               <div
                 key={playerId}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg"
               >
-                <span className="text-sm">{player.name}</span>
+                <span className="text-sm font-medium">{player.name}</span>
                 {otherTeams.length > 0 && (
                   <select
                     onChange={(e) => {
@@ -247,7 +247,7 @@ function TeamCard({
                         e.target.value = ''
                       }
                     }}
-                    className="px-2 py-1 text-sm border rounded bg-white"
+                    className="px-3 py-2.5 text-sm border rounded-lg bg-white min-h-[44px] w-full sm:w-auto"
                     disabled={isProcessing}
                   >
                     <option value="">Move to...</option>
@@ -264,7 +264,7 @@ function TeamCard({
           })}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 text-center py-2">
+        <p className="text-sm text-gray-500 text-center py-4">
           No players assigned
         </p>
       )}

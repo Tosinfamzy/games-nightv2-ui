@@ -61,21 +61,21 @@ export default function SessionChat({
 
   return (
     <div
-      className={`flex flex-col bg-white rounded-lg shadow-lg border border-gray-200 h-[calc(100vh-12rem)] sm:h-[600px] lg:h-[700px] ${className}`}
+      className={`flex flex-col bg-white rounded-lg shadow-lg border border-gray-200 h-[calc(100vh-10rem)] min-h-[400px] sm:h-[600px] lg:h-[700px] ${className}`}
     >
-      {/* Chat header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-lg">
+      {/* Chat header - compact on mobile */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-t-lg flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Session Chat</h2>
-            <p className="text-sm text-blue-100 mt-1">
+            <h2 className="text-lg sm:text-xl font-bold">Session Chat</h2>
+            <p className="text-xs sm:text-sm text-blue-100 mt-0.5 sm:mt-1">
               {isConnected ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                   Connected
                 </span>
               ) : (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
                   Connecting...
                 </span>
@@ -85,19 +85,19 @@ export default function SessionChat({
 
           {/* Message count */}
           <div className="text-right">
-            <p className="text-2xl font-bold">{messages.length}</p>
-            <p className="text-sm text-blue-100">messages</p>
+            <p className="text-xl sm:text-2xl font-bold">{messages.length}</p>
+            <p className="text-xs sm:text-sm text-blue-100">messages</p>
           </div>
         </div>
       </div>
 
       {/* Error banner */}
       {error && (
-        <div className="bg-red-50 border-b border-red-200 px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+        <div className="bg-red-50 border-b border-red-200 px-4 py-2 sm:px-6 sm:py-3 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <svg
-                className="w-5 h-5 text-red-600"
+                className="w-5 h-5 text-red-600 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -109,11 +109,11 @@ export default function SessionChat({
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="text-sm text-red-800">{error}</span>
+              <span className="text-sm text-red-800 truncate">{error}</span>
             </div>
             <button
               onClick={clearError}
-              className="text-red-600 hover:text-red-700 text-sm font-medium"
+              className="text-red-600 hover:text-red-700 text-sm font-medium min-h-[44px] px-2 flex-shrink-0"
             >
               Dismiss
             </button>
@@ -123,10 +123,10 @@ export default function SessionChat({
 
       {/* Connection warning */}
       {!isConnected && (
-        <div className="bg-yellow-50 border-b border-yellow-200 px-6 py-3">
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 sm:px-6 sm:py-3 flex-shrink-0">
           <div className="flex items-center gap-2">
             <svg
-              className="w-5 h-5 text-yellow-600 animate-spin"
+              className="w-5 h-5 text-yellow-600 animate-spin flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
