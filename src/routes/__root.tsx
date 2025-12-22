@@ -4,6 +4,7 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import Header from '../components/Header'
 import { RouteErrorBoundary } from '../components/RouteErrorBoundary'
 import { OfflineBanner } from '../components/OfflineBanner'
+import { PageTransition } from '../components/PageTransition'
 import { useAutoRejoin } from '../hooks/useAutoRejoin'
 
 function RootComponent() {
@@ -25,7 +26,9 @@ function RootComponent() {
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
         <RouteErrorBoundary>
-          <Outlet />
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </RouteErrorBoundary>
       </main>
       <TanStackRouterDevtools />

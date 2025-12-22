@@ -73,7 +73,7 @@ export default function ChatInput({
         <button
           onClick={handleSend}
           disabled={disabled || !message.trim()}
-          className="px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-2xl sm:rounded-full hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium min-w-[48px] min-h-[48px] flex items-center justify-center"
+          className="px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-2xl sm:rounded-full hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium min-w-[48px] min-h-[48px] flex items-center justify-center btn-interactive"
           aria-label="Send message"
         >
           <span className="hidden sm:inline">Send</span>

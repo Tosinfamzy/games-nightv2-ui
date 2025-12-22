@@ -28,7 +28,7 @@ export default function ChatMessage({
   // System messages (join/leave notifications, etc.)
   if (isSystemMessage) {
     return (
-      <div className="flex justify-center my-2">
+      <div className="flex justify-center my-2 animate-fade-in">
         <div className="bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">
           {message.content}
         </div>
@@ -39,7 +39,7 @@ export default function ChatMessage({
   // Regular chat messages
   return (
     <div
-      className={`flex mb-3 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+      className={`flex mb-3 animate-slide-up ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
     >
       <div
         className={`max-w-[70%] ${

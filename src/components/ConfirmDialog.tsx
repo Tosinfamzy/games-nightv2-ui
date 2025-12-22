@@ -101,12 +101,12 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 animate-fade-in"
       onClick={handleClose}
     >
       <div
         ref={dialogRef}
-        className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-4"
+        className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 space-y-4 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

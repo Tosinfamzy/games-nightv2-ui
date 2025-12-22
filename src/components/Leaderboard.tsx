@@ -62,7 +62,7 @@ export default function Leaderboard({ limit = 10 }: LeaderboardProps) {
         {players.map((player, index) => (
           <div
             key={player.playerId}
-            className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors stagger-item"
           >
             {/* Rank */}
             <div

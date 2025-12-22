@@ -201,7 +201,7 @@ function TeamCard({
   const otherTeams = allTeams.filter((t) => t.id !== team.id)
 
   return (
-    <div className="border rounded-lg p-3 sm:p-4 bg-white shadow-sm">
+    <div className="border rounded-lg p-3 sm:p-4 bg-white shadow-sm card-hover">
       {/* Team Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
