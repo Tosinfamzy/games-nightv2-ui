@@ -283,8 +283,8 @@ test.describe('Share Modal Accessibility', () => {
           }
 
           // Focus should still be within the modal
-          const focusedElement = page.locator(':focus')
-          const isWithinModal = await modal.locator(':focus').count() > 0
+          const _focusedElement = page.locator(':focus')
+          const _isWithinModal = await modal.locator(':focus').count() > 0
           // This verifies focus trapping is working
         }
       }
@@ -307,7 +307,7 @@ test.describe('Regenerate Join Code', () => {
         await shareButton.click()
 
         // Look for regenerate button (only visible to host)
-        const regenerateButton = page.getByRole('button', { name: /regenerate/i })
+        const _regenerateButton = page.getByRole('button', { name: /regenerate/i })
         // This may or may not be visible depending on auth state
       }
     }
@@ -326,7 +326,7 @@ test.describe('Regenerate Join Code', () => {
       if (await shareButton.count() > 0) {
         await shareButton.click()
 
-        const regenerateButton = page.getByRole('button', { name: /regenerate/i })
+        const _regenerateButton = page.getByRole('button', { name: /regenerate/i })
 
         if (await regenerateButton.count() > 0) {
           await regenerateButton.click()
