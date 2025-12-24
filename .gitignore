@@ -13,3 +13,4 @@ count.txt
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.vercel
