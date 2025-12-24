@@ -65,7 +65,7 @@ test.describe('Session Creation Success', () => {
 
     // This test assumes a GM is already set up
     // In a real test, we'd mock the API or use test fixtures
-    const _successHeading = page.getByText(/session created/i)
+    const successHeading = page.getByText(/session created/i)
 
     // If form is visible, try to create a session
     const formVisible = await page.getByLabel(/session name/i).count() > 0

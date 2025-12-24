@@ -35,7 +35,7 @@ test.describe('Chat Interface', () => {
         await chatTab.click()
 
         // Check for message input
-        const _messageInput = page.locator('textarea, input[type="text"]').filter({ hasText: '' })
+        const messageInput = page.locator('textarea, input[type="text"]').filter({ hasText: '' })
         const inputWithPlaceholder = page.getByPlaceholder(/message|type/i)
 
         if (await inputWithPlaceholder.count() > 0) {
