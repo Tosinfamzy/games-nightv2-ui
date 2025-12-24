@@ -25,6 +25,7 @@ export interface SocketContextValue {
   sessionsConnected: boolean
   gamesConnected: boolean
   chatConnected: boolean
+  shouldBeConnected: boolean // Whether we expect sockets to be connected (have player token)
   reconnect: () => void
 }
 
@@ -36,6 +37,7 @@ export const SocketContext = createContext<SocketContextValue>({
   sessionsConnected: false,
   gamesConnected: false,
   chatConnected: false,
+  shouldBeConnected: false,
   reconnect: () => {},
 })
 
@@ -290,6 +292,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         sessionsConnected,
         gamesConnected,
         chatConnected,
+        shouldBeConnected: !!playerToken,
         reconnect,
       }}
     >

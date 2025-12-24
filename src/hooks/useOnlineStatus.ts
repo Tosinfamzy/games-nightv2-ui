@@ -7,8 +7,12 @@ import { useSocketContext } from '../lib/socket/socket-context'
  */
 export const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
-  const { sessionsConnected, gamesConnected, chatConnected } =
-    useSocketContext()
+  const {
+    sessionsConnected,
+    gamesConnected,
+    chatConnected,
+    shouldBeConnected,
+  } = useSocketContext()
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
@@ -26,9 +30,13 @@ export const useOnlineStatus = () => {
   const allSocketsConnected =
     sessionsConnected && gamesConnected && chatConnected
 
+  // Only consider socket status if we should be connected (have player token)
+  // If not in a session, don't show as "offline" just because sockets aren't connected
+  const socketsOffline = shouldBeConnected && !allSocketsConnected
+
   return {
-    isOnline: isOnline && allSocketsConnected,
-    isOffline: !isOnline || !allSocketsConnected,
+    isOnline: isOnline && (!shouldBeConnected || allSocketsConnected),
+    isOffline: !isOnline || socketsOffline,
     networkOnline: isOnline,
     socketsStatus: {
       sessionsConnected,
