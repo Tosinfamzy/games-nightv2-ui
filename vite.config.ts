@@ -42,15 +42,7 @@ export default defineConfig({
       output: {
         // Manual chunk splitting for better caching
         manualChunks: (id) => {
-          // Core React runtime - keep react and react-dom together
-          // Use exact matching to avoid issues with other react-* packages
-          if (
-            id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
-            id.includes('node_modules/scheduler/')
-          ) {
-            return 'react-vendor'
-          }
+          // Don't manually chunk React - let Vite handle it for proper initialization order
           // Router and query (core SPA functionality)
           if (id.includes('@tanstack/react-router') || id.includes('@tanstack/react-query')) {
             // Skip devtools - they're dev-only and already lazy

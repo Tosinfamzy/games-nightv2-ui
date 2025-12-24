@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { Toaster } from 'react-hot-toast'
+// import { Toaster } from 'react-hot-toast' // Temporarily disabled for React 19 compatibility
 import { SocketProvider } from './lib/socket'
 import { GamesMasterProvider, PlayerProvider } from './contexts'
 import { getErrorMessage, showToast } from './lib/toast'
@@ -67,7 +67,7 @@ if (rootElement && !rootElement.innerHTML) {
               <SocketProvider>
                 <RouterProvider router={router} />
                 <ReactQueryDevtools initialIsOpen={false} />
-                <Toaster />
+                {/* <Toaster /> - Disabled for React 19 compatibility testing */}
               </SocketProvider>
             </PlayerProvider>
           </GamesMasterProvider>
