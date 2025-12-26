@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ConfirmDialog } from './ConfirmDialog'
+import { fetchAPI } from '../lib/api/client'
 
 interface Player {
   id: string
@@ -484,22 +485,4 @@ export function TeamDisplay({
       />
     </div>
   )
-}
-
-// Helper function
-async function fetchAPI(url: string, options?: RequestInit) {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-  const response = await fetch(`${baseUrl}${url}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    ...options,
-  })
-
-  if (!response.ok) {
-    throw new Error(`API call failed: ${response.statusText}`)
-  }
-
-  return response.json()
 }
