@@ -100,19 +100,19 @@ export function SessionReadinessDashboard({
             : 'bg-yellow-50 border-yellow-200'
         }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               Session Readiness {overallReady ? '✅' : '⏳'}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               {overallReady
                 ? 'Ready to start! All systems go.'
                 : 'Preparing session... Some items need attention.'}
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold text-gray-900 mb-1">
+          <div className="flex items-center justify-between sm:justify-end sm:text-right gap-4">
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">
               {readinessScore}%
             </div>
             <div className="text-sm text-gray-600">Overall Ready</div>

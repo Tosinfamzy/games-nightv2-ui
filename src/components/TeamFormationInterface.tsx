@@ -206,18 +206,18 @@ export function TeamFormationInterface({
 
         {currentGame && (
           <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-sm">
+              <div className="flex justify-between sm:block">
                 <span className="font-medium">Min Players:</span>{' '}
-                {currentGame.minPlayers}
+                <span>{currentGame.minPlayers}</span>
               </div>
-              <div>
+              <div className="flex justify-between sm:block">
                 <span className="font-medium">Max Players:</span>{' '}
-                {currentGame.maxPlayers}
+                <span>{currentGame.maxPlayers}</span>
               </div>
-              <div>
+              <div className="flex justify-between sm:block">
                 <span className="font-medium">Team Size:</span>{' '}
-                {currentGame.recommendedTeamSize}
+                <span>{currentGame.recommendedTeamSize}</span>
               </div>
             </div>
           </div>
@@ -507,7 +507,7 @@ export function TeamFormationInterface({
               </label>
 
               {customizeColors && (
-                <div className="grid grid-cols-4 gap-3 ml-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 ml-6">
                   {Array.from({
                     length: suggestions?.suggestions?.[0]?.teamCount || 2,
                   }).map((_, index) => (
@@ -584,7 +584,7 @@ export function TeamFormationInterface({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex space-x-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <button
           onClick={handleAutoFormation}
           disabled={
@@ -592,7 +592,7 @@ export function TeamFormationInterface({
             createTeamsMutation.isPending ||
             unassignedPlayers.length === 0
           }
-          className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
         >
           {createTeamsMutation.isPending ? (
             <span className="flex items-center justify-center">
@@ -629,10 +629,10 @@ export function TeamFormationInterface({
             disabled={
               !selectedGameForFormation || rebalanceTeamsMutation.isPending
             }
-            className="px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
           >
             {rebalanceTeamsMutation.isPending ? (
-              <span className="flex items-center">
+              <span className="flex items-center justify-center">
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"

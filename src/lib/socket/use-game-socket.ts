@@ -330,6 +330,37 @@ export const useGameSocket = (gameId: string | undefined) => {
     }
   }, [gamesSocket, gameId, queryClient])
 
+  // Listen for server-pushed game errors
+  useEffect(() => {
+    if (!gamesSocket) return
+
+    const handleError = (data: { error: string; code: string }) => {
+      console.error('Game error from server:', data)
+
+      const errorMessage = data?.error || 'A game error occurred'
+
+      if (data?.code === 'UNAUTHORIZED' || data?.code === 'UnauthorizedException') {
+        showToast.error('Game access denied. Please rejoin the session.')
+      } else if (data?.code === 'NOT_FOUND' || data?.code === 'NotFoundException') {
+        showToast.error('Game not found. It may have ended.')
+      } else if (data?.code === 'FORBIDDEN' || data?.code === 'ForbiddenException') {
+        showToast.error(`Access denied: ${errorMessage}`)
+      } else if (data?.code === 'INVALID_STATE') {
+        showToast.error(`Cannot perform action: ${errorMessage}`)
+      } else {
+        showToast.error(`Game error: ${errorMessage}`)
+      }
+    }
+
+    gamesSocket.on('game:error', handleError)
+    gamesSocket.on('error', handleError)
+
+    return () => {
+      gamesSocket.off('game:error', handleError)
+      gamesSocket.off('error', handleError)
+    }
+  }, [gamesSocket])
+
   return {
     isConnected,
     socket: gamesSocket,

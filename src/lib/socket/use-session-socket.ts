@@ -371,6 +371,35 @@ export const useSessionSocket = (sessionId: string | undefined) => {
     }
   }, [sessionsSocket, sessionId, queryClient])
 
+  // Listen for server-pushed session errors
+  useEffect(() => {
+    if (!sessionsSocket) return
+
+    const handleError = (data: { error: string; code: string }) => {
+      console.error('Session error from server:', data)
+
+      const errorMessage = data?.error || 'A session error occurred'
+
+      if (data?.code === 'UNAUTHORIZED' || data?.code === 'UnauthorizedException') {
+        showToast.error('Session access denied. Please rejoin.')
+      } else if (data?.code === 'NOT_FOUND' || data?.code === 'NotFoundException') {
+        showToast.error('Session not found. It may have ended.')
+      } else if (data?.code === 'FORBIDDEN' || data?.code === 'ForbiddenException') {
+        showToast.error(`Access denied: ${errorMessage}`)
+      } else {
+        showToast.error(`Session error: ${errorMessage}`)
+      }
+    }
+
+    sessionsSocket.on('session:error', handleError)
+    sessionsSocket.on('error', handleError)
+
+    return () => {
+      sessionsSocket.off('session:error', handleError)
+      sessionsSocket.off('error', handleError)
+    }
+  }, [sessionsSocket])
+
   return {
     isConnected,
     socket: sessionsSocket,
