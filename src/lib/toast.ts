@@ -1,7 +1,7 @@
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 /**
- * Toast notification utility with custom Tailwind styling
+ * Toast notification utility using Sonner
  * Provides consistent toast notifications across the app
  */
 export const showToast = {
@@ -9,30 +9,14 @@ export const showToast = {
    * Show success toast
    */
   success: (message: string, duration = 4000) => {
-    toast.success(message, {
-      duration,
-      position: 'top-right',
-      className: 'bg-green-50 text-green-900 border border-green-200 shadow-lg',
-      iconTheme: {
-        primary: '#10B981',
-        secondary: '#FFFFFF',
-      },
-    })
+    toast.success(message, { duration })
   },
 
   /**
    * Show error toast
    */
   error: (message: string, duration = 5000) => {
-    toast.error(message, {
-      duration,
-      position: 'top-right',
-      className: 'bg-red-50 text-red-900 border border-red-200 shadow-lg',
-      iconTheme: {
-        primary: '#EF4444',
-        secondary: '#FFFFFF',
-      },
-    })
+    toast.error(message, { duration })
   },
 
   /**
@@ -40,41 +24,27 @@ export const showToast = {
    * Returns toast ID for dismissal
    */
   loading: (message: string) => {
-    return toast.loading(message, {
-      position: 'top-right',
-      className: 'bg-blue-50 text-blue-900 border border-blue-200 shadow-lg',
-    })
+    return toast.loading(message)
   },
 
   /**
    * Show info toast
    */
   info: (message: string, duration = 4000) => {
-    toast(message, {
-      duration,
-      position: 'top-right',
-      icon: 'ℹ️',
-      className: 'bg-blue-50 text-blue-900 border border-blue-200 shadow-lg',
-    })
+    toast.info(message, { duration })
   },
 
   /**
    * Show warning toast
    */
   warning: (message: string, duration = 5000) => {
-    toast(message, {
-      duration,
-      position: 'top-right',
-      icon: '⚠️',
-      className:
-        'bg-yellow-50 text-yellow-900 border border-yellow-200 shadow-lg',
-    })
+    toast.warning(message, { duration })
   },
 
   /**
    * Dismiss a specific toast
    */
-  dismiss: (toastId: string) => {
+  dismiss: (toastId: string | number) => {
     toast.dismiss(toastId)
   },
 
@@ -94,39 +64,14 @@ export const showToast = {
     messages: {
       loading: string
       success: string | ((data: T) => string)
-      error: string | ((error: any) => string)
+      error: string | ((error: unknown) => string)
     },
   ) => {
-    return toast.promise(
-      promise,
-      {
-        loading: messages.loading,
-        success: messages.success,
-        error: messages.error,
-      },
-      {
-        position: 'top-right',
-        success: {
-          className:
-            'bg-green-50 text-green-900 border border-green-200 shadow-lg',
-          iconTheme: {
-            primary: '#10B981',
-            secondary: '#FFFFFF',
-          },
-        },
-        error: {
-          className: 'bg-red-50 text-red-900 border border-red-200 shadow-lg',
-          iconTheme: {
-            primary: '#EF4444',
-            secondary: '#FFFFFF',
-          },
-        },
-        loading: {
-          className:
-            'bg-blue-50 text-blue-900 border border-blue-200 shadow-lg',
-        },
-      },
-    )
+    return toast.promise(promise, {
+      loading: messages.loading,
+      success: messages.success,
+      error: messages.error,
+    })
   },
 }
 
@@ -155,7 +100,7 @@ export const toastHelpers = {
    */
   created: (entityType: string, entityName?: string) => {
     const name = entityName ? ` "${entityName}"` : ''
-    showToast.success(`✨ ${entityType}${name} created successfully!`)
+    showToast.success(`${entityType}${name} created successfully!`)
   },
 
   /**
@@ -163,7 +108,7 @@ export const toastHelpers = {
    */
   updated: (entityType: string, entityName?: string) => {
     const name = entityName ? ` "${entityName}"` : ''
-    showToast.success(`✓ ${entityType}${name} updated successfully!`)
+    showToast.success(`${entityType}${name} updated successfully!`)
   },
 
   /**
@@ -171,7 +116,7 @@ export const toastHelpers = {
    */
   deleted: (entityType: string, entityName?: string) => {
     const name = entityName ? ` "${entityName}"` : ''
-    showToast.info(`🗑️ ${entityType}${name} removed`)
+    showToast.info(`${entityType}${name} removed`)
   },
 
   /**
@@ -179,14 +124,14 @@ export const toastHelpers = {
    */
   withCount: (action: string, count: number, entityType: string) => {
     const plural = count === 1 ? entityType : `${entityType}s`
-    showToast.success(`✓ ${action} ${count} ${plural}`)
+    showToast.success(`${action} ${count} ${plural}`)
   },
 
   /**
    * Toast for copy action
    */
   copied: (what: string = 'to clipboard') => {
-    showToast.success(`📋 Copied ${what}!`)
+    showToast.success(`Copied ${what}!`)
   },
 
   /**
