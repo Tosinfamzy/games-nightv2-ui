@@ -13,7 +13,7 @@ export interface GameResult {
   sessionId: UUID
   gameName: string
   winningTeamName?: string
-  finalScores: FinalScore[]
+  finalScores: Array<FinalScore>
   completedAt: string
   durationMinutes: number
   totalRounds: number

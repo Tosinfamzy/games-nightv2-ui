@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface StartSessionButtonProps {
   onStart: () => void
@@ -59,9 +59,7 @@ export function StartSessionButton({
             {isLoading ? '⏳' : isReady ? '🚀' : '⏸️'}
           </span>
           <span>{isLoading ? 'Starting...' : 'Start Session'}</span>
-          {isReady && !isLoading && (
-            <span className="animate-bounce">✨</span>
-          )}
+          {isReady && !isLoading && <span className="animate-bounce">✨</span>}
         </div>
       </button>
 
@@ -70,9 +68,7 @@ export function StartSessionButton({
         <div className="mt-3 space-y-1 text-sm">
           <div
             className={`flex items-center gap-2 ${
-              readyToStart.playersReady
-                ? 'text-green-600'
-                : 'text-gray-500'
+              readyToStart.playersReady ? 'text-green-600' : 'text-gray-500'
             }`}
           >
             <span>{readyToStart.playersReady ? '✅' : '⏳'}</span>
@@ -88,9 +84,7 @@ export function StartSessionButton({
           </div>
           <div
             className={`flex items-center gap-2 ${
-              readyToStart.gamesAvailable
-                ? 'text-green-600'
-                : 'text-gray-500'
+              readyToStart.gamesAvailable ? 'text-green-600' : 'text-gray-500'
             }`}
           >
             <span>{readyToStart.gamesAvailable ? '✅' : '⏳'}</span>

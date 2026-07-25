@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
-import { io, Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
 import { showToast } from '../toast'
 import { usePlayer } from '../../contexts/PlayerContext'
+import type { Socket } from 'socket.io-client'
+import type { ReactNode } from 'react'
 
 // Auto-detect API URL: use env var if set, otherwise use current host with port 3000
 const getApiUrl = () => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ConfirmDialog } from './ConfirmDialog'
 import { fetchAPI } from '../lib/api/client'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface Player {
   id: string

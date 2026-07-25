@@ -47,18 +47,16 @@ export default function EmptyState({
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center text-center ${sizeClasses[size]} ${className}`}>
+    <div
+      className={`flex flex-col items-center justify-center text-center ${sizeClasses[size]} ${className}`}
+    >
       {icon && (
-        <div className={`${iconSizes[size]} mb-4 opacity-60`}>
-          {icon}
-        </div>
+        <div className={`${iconSizes[size]} mb-4 opacity-60`}>{icon}</div>
       )}
       <h3 className={`${titleSizes[size]} font-semibold text-gray-900 mb-2`}>
         {title}
       </h3>
-      <p className="text-sm text-gray-600 mb-6 max-w-md">
-        {description}
-      </p>
+      <p className="text-sm text-gray-600 mb-6 max-w-md">{description}</p>
       {(action || secondaryAction) && (
         <div className="flex flex-col sm:flex-row gap-3">
           {action && (

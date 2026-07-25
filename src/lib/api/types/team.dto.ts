@@ -22,8 +22,8 @@ export enum TeamFormationStrategy {
 export interface CreateTeamsDto {
   strategy: TeamFormationStrategy
   teamCount: number
-  teamNames?: string[]
-  teamColors?: string[]
+  teamNames?: Array<string>
+  teamColors?: Array<string>
 }
 
 export interface RebalanceTeamsDto {
@@ -35,15 +35,15 @@ export interface TeamSuggestion {
   strategy: TeamFormationStrategy
   playersPerTeam: number
   remainder: number
-  pros: string[]
-  cons: string[]
+  pros: Array<string>
+  cons: Array<string>
 }
 
 export interface TeamFormationSuggestionsResponse {
-  suggestions: TeamSuggestion[]
+  suggestions: Array<TeamSuggestion>
   validation: {
     isValid: boolean
-    errors: string[]
-    warnings: string[]
+    errors: Array<string>
+    warnings: Array<string>
   }
 }

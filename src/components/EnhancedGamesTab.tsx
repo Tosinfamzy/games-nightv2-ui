@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionManagementService } from '../lib/api/services/session-management.service'
-import { ConfirmDialog } from './ConfirmDialog'
 import { gameLibraryService } from '../lib/api/services/game-library.service'
 import { toastHelpers } from '../lib/toast'
+import { ConfirmDialog } from './ConfirmDialog'
 import EmptyState from './EmptyState'
 
 interface Player {

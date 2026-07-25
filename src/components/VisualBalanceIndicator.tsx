@@ -3,11 +3,11 @@ import type { Team as BaseTeam } from '../lib/api/services/team.service'
 
 // Extended types with optional skill level for UI
 type Player = BasePlayer & { skillLevel?: number }
-type Team = BaseTeam & { players?: Player[] }
+type Team = BaseTeam & { players?: Array<Player> }
 
 interface VisualBalanceIndicatorProps {
-  teams: Team[]
-  players?: Player[]
+  teams: Array<Team>
+  players?: Array<Player>
 }
 
 export function VisualBalanceIndicator({
@@ -91,7 +91,8 @@ export function VisualBalanceIndicator({
                   <span className="font-medium text-gray-900">{team.name}</span>
                 </div>
                 <span className="text-gray-600">
-                  {team.playerCount} {team.playerCount === 1 ? 'player' : 'players'}
+                  {team.playerCount}{' '}
+                  {team.playerCount === 1 ? 'player' : 'players'}
                 </span>
               </div>
               <div className="flex items-center gap-2">

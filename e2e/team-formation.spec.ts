@@ -12,9 +12,11 @@ test.describe('Team Formation Interface', () => {
     await page.goto('/teams')
 
     // Look for create team button
-    const createButton = page.getByRole('button', { name: /create.*team|add.*team|new.*team/i })
+    const createButton = page.getByRole('button', {
+      name: /create.*team|add.*team|new.*team/i,
+    })
 
-    if (await createButton.count() > 0) {
+    if ((await createButton.count()) > 0) {
       await expect(createButton.first()).toBeVisible()
     }
   })
@@ -27,7 +29,7 @@ test.describe('Team Management', () => {
     // Look for team cards
     const teamCard = page.locator('[class*="team"], [class*="card"]').first()
 
-    if (await teamCard.count() > 0) {
+    if ((await teamCard.count()) > 0) {
       await expect(teamCard).toBeVisible()
     }
   })
@@ -38,10 +40,10 @@ test.describe('Team Management', () => {
     // Look for player names within team cards
     const teamCard = page.locator('[class*="team"]').first()
 
-    if (await teamCard.count() > 0) {
+    if ((await teamCard.count()) > 0) {
       // Team should show player information
       const playerInfo = teamCard.getByText(/player/i)
-      if (await playerInfo.count() > 0) {
+      if ((await playerInfo.count()) > 0) {
         await expect(playerInfo.first()).toBeVisible()
       }
     }
@@ -55,7 +57,7 @@ test.describe('Team Actions', () => {
     // Look for shuffle button
     const shuffleButton = page.getByRole('button', { name: /shuffle|random/i })
 
-    if (await shuffleButton.count() > 0) {
+    if ((await shuffleButton.count()) > 0) {
       await expect(shuffleButton.first()).toBeVisible()
     }
   })
@@ -64,9 +66,11 @@ test.describe('Team Actions', () => {
     await page.goto('/teams')
 
     // Look for team card with dissolve option
-    const dissolveButton = page.getByRole('button', { name: /dissolve|delete|remove/i })
+    const dissolveButton = page.getByRole('button', {
+      name: /dissolve|delete|remove/i,
+    })
 
-    if (await dissolveButton.count() > 0) {
+    if ((await dissolveButton.count()) > 0) {
       await expect(dissolveButton.first()).toBeVisible()
     }
   })
@@ -76,12 +80,12 @@ test.describe('Team Actions', () => {
 
     const dissolveButton = page.getByRole('button', { name: /dissolve/i })
 
-    if (await dissolveButton.count() > 0) {
+    if ((await dissolveButton.count()) > 0) {
       await dissolveButton.first().click()
 
       // Should show confirmation dialog
       const confirmDialog = page.locator('[role="dialog"]')
-      if (await confirmDialog.count() > 0) {
+      if ((await confirmDialog.count()) > 0) {
         await expect(confirmDialog).toBeVisible()
 
         // Should have cancel option
@@ -101,9 +105,11 @@ test.describe('Player Assignment', () => {
     await page.goto('/teams')
 
     // Look for unassigned players section or dropdown
-    const assignDropdown = page.locator('select').filter({ hasText: /assign|team/i })
+    const assignDropdown = page
+      .locator('select')
+      .filter({ hasText: /assign|team/i })
 
-    if (await assignDropdown.count() > 0) {
+    if ((await assignDropdown.count()) > 0) {
       await expect(assignDropdown.first()).toBeVisible()
     }
   })
@@ -114,7 +120,7 @@ test.describe('Player Assignment', () => {
     // Look for unassigned section
     const unassignedSection = page.getByText(/unassigned/i)
 
-    if (await unassignedSection.count() > 0) {
+    if ((await unassignedSection.count()) > 0) {
       await expect(unassignedSection.first()).toBeVisible()
     }
   })
@@ -159,7 +165,9 @@ test.describe('Team Formation Accessibility', () => {
     await page.waitForLoadState('networkidle')
 
     // Get all focusable elements on the page (including header links)
-    const focusableElements = page.locator('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    const focusableElements = page.locator(
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
     const count = await focusableElements.count()
 
     // Page should have at least some focusable elements (header has links)

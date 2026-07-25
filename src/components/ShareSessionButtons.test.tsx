@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '../test/test-utils'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor } from '../test/test-utils'
 import { ShareSessionButtons } from './ShareSessionButtons'
 
 // Mock the toast module
@@ -29,7 +29,7 @@ describe('ShareSessionButtons', () => {
       <ShareSessionButtons
         joinCode={mockJoinCode}
         sessionName={mockSessionName}
-      />
+      />,
     )
 
     expect(screen.getByText('Share Invite')).toBeInTheDocument()
@@ -53,7 +53,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const copyButton = screen.getByText('Copy Link')
@@ -72,7 +72,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const copyButton = screen.getByText('Copy Link')
@@ -80,7 +80,7 @@ describe('ShareSessionButtons', () => {
 
       await waitFor(() => {
         expect(showToast.success).toHaveBeenCalledWith(
-          'Link copied to clipboard!'
+          'Link copied to clipboard!',
         )
       })
     })
@@ -92,7 +92,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const copyButton = screen.getByText('Copy Link')
@@ -106,7 +106,7 @@ describe('ShareSessionButtons', () => {
     it('handles clipboard write errors gracefully', async () => {
       const user = userEvent.setup()
       const writeTextMock = vi.fn(() =>
-        Promise.reject(new Error('Clipboard error'))
+        Promise.reject(new Error('Clipboard error')),
       )
       Object.defineProperty(navigator, 'clipboard', {
         value: { writeText: writeTextMock },
@@ -119,7 +119,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const copyButton = screen.getByText('Copy Link')
@@ -134,13 +134,15 @@ describe('ShareSessionButtons', () => {
   describe('WhatsApp Button', () => {
     it('opens WhatsApp with correct URL', async () => {
       const user = userEvent.setup()
-      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+      const windowOpenSpy = vi
+        .spyOn(window, 'open')
+        .mockImplementation(() => null)
 
       render(
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const whatsappButton = screen.getByText('WhatsApp')
@@ -157,13 +159,15 @@ describe('ShareSessionButtons', () => {
 
     it('includes session name in WhatsApp message', async () => {
       const user = userEvent.setup()
-      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+      const windowOpenSpy = vi
+        .spyOn(window, 'open')
+        .mockImplementation(() => null)
 
       render(
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName="Epic Game Night"
-        />
+        />,
       )
 
       const whatsappButton = screen.getByText('WhatsApp')
@@ -194,7 +198,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const smsButton = screen.getByText('SMS')
@@ -222,7 +226,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const smsButton = screen.getByText('SMS')
@@ -247,7 +251,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const emailButton = screen.getByText('Email')
@@ -272,7 +276,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const emailButton = screen.getByText('Email')
@@ -290,7 +294,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const buttons = screen.getAllByRole('button')
@@ -310,7 +314,7 @@ describe('ShareSessionButtons', () => {
         <ShareSessionButtons
           joinCode={mockJoinCode}
           sessionName={mockSessionName}
-        />
+        />,
       )
 
       const copyButton = screen.getByText('Copy Link')

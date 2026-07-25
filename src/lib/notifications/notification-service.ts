@@ -26,8 +26,8 @@ interface NotificationConfig {
 }
 
 class NotificationService {
-  private enabled: boolean = true
-  private soundEnabled: boolean = true
+  private enabled = true
+  private soundEnabled = true
   private preferences: Record<NotificationType, boolean> = {
     [NotificationType.SESSION]: true,
     [NotificationType.GAME]: true,

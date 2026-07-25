@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useSocketContext } from './socket-context'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
 import { sessionKeys } from '../api/hooks/use-session'
+import { useSocketContext } from './socket-context'
 
 /**
  * Hook to connect to a session room and listen for real-time updates
@@ -48,7 +48,10 @@ export const useSessionSocket = (sessionId: string | undefined) => {
         console.log('Player joined:', data)
 
         if (!data?.playerId && !data?.player?.id) {
-          console.warn('Player joined event missing playerId, but still refreshing data:', data)
+          console.warn(
+            'Player joined event missing playerId, but still refreshing data:',
+            data,
+          )
         }
 
         // Always invalidate queries to refresh the player list
@@ -58,7 +61,9 @@ export const useSessionSocket = (sessionId: string | undefined) => {
         queryClient.invalidateQueries({
           queryKey: ['session-readiness', sessionId],
         })
-        queryClient.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+        queryClient.invalidateQueries({
+          queryKey: sessionKeys.detail(sessionId),
+        })
 
         // Notify about player joining
         if (data?.player?.name) {
@@ -95,7 +100,9 @@ export const useSessionSocket = (sessionId: string | undefined) => {
         queryClient.invalidateQueries({
           queryKey: ['session-readiness', sessionId],
         })
-        queryClient.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+        queryClient.invalidateQueries({
+          queryKey: sessionKeys.detail(sessionId),
+        })
 
         // Notify about player leaving
         if (data?.player?.name) {
@@ -202,7 +209,9 @@ export const useSessionSocket = (sessionId: string | undefined) => {
           throw new Error('Invalid status change event: missing status')
         }
 
-        queryClient.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+        queryClient.invalidateQueries({
+          queryKey: sessionKeys.detail(sessionId),
+        })
       } catch (error) {
         console.error('Error handling status change:', error)
         showToast.error('Failed to update session status. Please refresh.')
@@ -380,11 +389,20 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
       const errorMessage = data?.error || 'A session error occurred'
 
-      if (data?.code === 'UNAUTHORIZED' || data?.code === 'UnauthorizedException') {
+      if (
+        data?.code === 'UNAUTHORIZED' ||
+        data?.code === 'UnauthorizedException'
+      ) {
         showToast.error('Session access denied. Please rejoin.')
-      } else if (data?.code === 'NOT_FOUND' || data?.code === 'NotFoundException') {
+      } else if (
+        data?.code === 'NOT_FOUND' ||
+        data?.code === 'NotFoundException'
+      ) {
         showToast.error('Session not found. It may have ended.')
-      } else if (data?.code === 'FORBIDDEN' || data?.code === 'ForbiddenException') {
+      } else if (
+        data?.code === 'FORBIDDEN' ||
+        data?.code === 'ForbiddenException'
+      ) {
         showToast.error(`Access denied: ${errorMessage}`)
       } else {
         showToast.error(`Session error: ${errorMessage}`)

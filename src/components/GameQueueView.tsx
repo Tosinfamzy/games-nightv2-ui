@@ -1,7 +1,7 @@
 import type { Game } from '../lib/api/types'
 
 interface GameQueueViewProps {
-  games: Game[]
+  games: Array<Game>
   onSelectGame: (game: Game) => void
   isLoading?: boolean
 }

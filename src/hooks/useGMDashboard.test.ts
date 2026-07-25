@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { waitFor } from '@testing-library/react'
-import { useGMDashboard } from './useGMDashboard'
 import {
-  renderHookWithProviders,
-  createTestQueryClient,
   createMockSocketContext,
+  createTestQueryClient,
+  renderHookWithProviders,
 } from '../test/test-utils'
 import { mockDashboardData } from '../test/fixtures/dashboard.fixture'
 import { emitSocketEvent } from '../test/mocks/socket-mocks'
 import { gamesMasterService } from '../lib/api/services/games-master.service'
+import { useGMDashboard } from './useGMDashboard'
 
 // Mock the gamesMasterService
 vi.mock('../lib/api/services/games-master.service', () => ({

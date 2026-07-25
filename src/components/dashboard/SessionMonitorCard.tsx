@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
-import type { DashboardSession } from '../../lib/api/types'
 import OnlinePlayerCount from '../OnlinePlayerCount'
 import GameProgressCard from './GameProgressCard'
+import type { DashboardSession } from '../../lib/api/types'
 
 interface SessionMonitorCardProps {
   session: DashboardSession

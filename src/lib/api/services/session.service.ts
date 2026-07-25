@@ -106,8 +106,20 @@ export const sessionService = {
 
   joinSession: async (
     data: JoinSessionDTO,
-  ): Promise<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }> => {
-    return fetchAPI<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }>(`${BASE_PATH}/join`, {
+  ): Promise<{
+    session: Session
+    playerId: string
+    playerName: string
+    message: string
+    playerToken: string
+  }> => {
+    return fetchAPI<{
+      session: Session
+      playerId: string
+      playerName: string
+      message: string
+      playerToken: string
+    }>(`${BASE_PATH}/join`, {
       method: 'POST',
       body: JSON.stringify(data),
     })
@@ -115,8 +127,20 @@ export const sessionService = {
 
   rejoinSession: async (
     playerToken: string,
-  ): Promise<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }> => {
-    return fetchAPI<{ session: Session; playerId: string; playerName: string; message: string; playerToken: string }>(`${BASE_PATH}/rejoin`, {
+  ): Promise<{
+    session: Session
+    playerId: string
+    playerName: string
+    message: string
+    playerToken: string
+  }> => {
+    return fetchAPI<{
+      session: Session
+      playerId: string
+      playerName: string
+      message: string
+      playerToken: string
+    }>(`${BASE_PATH}/rejoin`, {
       method: 'POST',
       body: JSON.stringify({ playerToken }),
     })

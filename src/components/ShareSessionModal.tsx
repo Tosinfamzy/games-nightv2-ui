@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import QRCode from 'react-qr-code'
-import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
 import { fetchAPI } from '../lib/api/client'
 import { showToast, toastHelpers } from '../lib/toast'
-import type { UUID } from '../lib/api/types'
 import { ConfirmDialog } from './ConfirmDialog'
 import { ShareSessionButtons } from './ShareSessionButtons'
+import type { UUID } from '../lib/api/types'
 
 interface ShareSessionModalProps {
   sessionId: UUID
@@ -59,7 +59,7 @@ export default function ShareSessionModal({
 
     const modal = modalRef.current
     const focusableElements = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     )
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
@@ -90,9 +90,12 @@ export default function ShareSessionModal({
   // Regenerate join code mutation
   const regenerateCodeMutation = useMutation({
     mutationFn: async () => {
-      return fetchAPI<{ joinCode: string }>(`/sessions/${sessionId}/regenerate-code`, {
-        method: 'POST',
-      })
+      return fetchAPI<{ joinCode: string }>(
+        `/sessions/${sessionId}/regenerate-code`,
+        {
+          method: 'POST',
+        },
+      )
     },
     onSuccess: (data) => {
       setCurrentJoinCode(data.joinCode)
@@ -138,7 +141,9 @@ export default function ShareSessionModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 id="share-modal-title" className="text-2xl font-bold">Share Session</h2>
+          <h2 id="share-modal-title" className="text-2xl font-bold">
+            Share Session
+          </h2>
           <button
             ref={closeButtonRef}
             onClick={onClose}

@@ -48,7 +48,9 @@ test.describe('Join Session Flow', () => {
     await expect(submitButton).toBeEnabled()
   })
 
-  test('should only accept numeric input for session code', async ({ page }) => {
+  test('should only accept numeric input for session code', async ({
+    page,
+  }) => {
     const codeInput = page.getByLabel(/session code/i)
 
     // Try to enter letters
@@ -80,11 +82,13 @@ test.describe('Quick Join Flow', () => {
     // The code should be prefilled in the input or shown on page
     // Could be loading, error, or success state depending on if session exists
     const codeInput = page.locator('#joinCode')
-    if (await codeInput.count() > 0) {
+    if ((await codeInput.count()) > 0) {
       await expect(codeInput).toHaveValue('654321')
     } else {
       // If session lookup happens, the code is used for lookup
-      await expect(page.getByText(/654321|invalid|session/i).first()).toBeVisible()
+      await expect(
+        page.getByText(/654321|invalid|session/i).first(),
+      ).toBeVisible()
     }
   })
 })

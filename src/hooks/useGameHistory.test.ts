@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { waitFor } from '@testing-library/react'
 import {
-  useGameHistory,
-  usePlayerStats,
-  useLeaderboard,
-} from './useGameHistory'
-import {
-  renderHookWithProviders,
   createTestQueryClient,
+  renderHookWithProviders,
 } from '../test/test-utils'
 import { historyService } from '../lib/api/services'
+import {
+  useGameHistory,
+  useLeaderboard,
+  usePlayerStats,
+} from './useGameHistory'
 import type { GameResult, PlayerStats } from '../lib/api/types'
 
 // Mock the historyService
@@ -24,7 +24,7 @@ vi.mock('../lib/api/services', () => ({
 describe('useGameHistory', () => {
   let queryClient: ReturnType<typeof createTestQueryClient>
 
-  const mockGameResults: GameResult[] = [
+  const mockGameResults: Array<GameResult> = [
     {
       id: 'result-1',
       gameId: 'game-1',
@@ -55,7 +55,7 @@ describe('useGameHistory', () => {
     lastPlayedAt: '2025-12-14T15:30:00Z',
   }
 
-  const mockLeaderboard: PlayerStats[] = [
+  const mockLeaderboard: Array<PlayerStats> = [
     {
       playerId: 'player-1',
       playerName: 'Alice',

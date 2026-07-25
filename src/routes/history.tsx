@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import GameHistoryList from '../components/GameHistoryList'
 import Leaderboard from '../components/Leaderboard'

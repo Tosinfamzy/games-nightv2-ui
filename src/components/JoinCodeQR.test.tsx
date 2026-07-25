@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '../test/test-utils'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor } from '../test/test-utils'
 import JoinCodeQR from './JoinCodeQR'
 
 // Mock QRCode library
@@ -34,9 +34,7 @@ describe('JoinCodeQR', () => {
   })
 
   it('renders with join code and session name', async () => {
-    render(
-      <JoinCodeQR joinCode={mockJoinCode} sessionName={mockSessionName} />
-    )
+    render(<JoinCodeQR joinCode={mockJoinCode} sessionName={mockSessionName} />)
 
     expect(screen.getByText('Scan to Join')).toBeInTheDocument()
     expect(screen.getByText(mockSessionName)).toBeInTheDocument()
@@ -111,15 +109,22 @@ describe('JoinCodeQR', () => {
       const { showToast } = await import('../lib/toast')
 
       ;(QRCode.default.toCanvas as any).mockImplementation(
-        (_canvas: unknown, _url: string, _options: unknown, callback: (err: Error | null) => void) => {
+        (
+          _canvas: unknown,
+          _url: string,
+          _options: unknown,
+          callback: (err: Error | null) => void,
+        ) => {
           callback(new Error('QR generation failed'))
-        }
+        },
       )
 
       render(<JoinCodeQR joinCode={mockJoinCode} />)
 
       await waitFor(() => {
-        expect(showToast.error).toHaveBeenCalledWith('Failed to generate QR code')
+        expect(showToast.error).toHaveBeenCalledWith(
+          'Failed to generate QR code',
+        )
       })
     })
   })
@@ -190,7 +195,7 @@ describe('JoinCodeQR', () => {
 
       await waitFor(() => {
         expect(showToast.error).toHaveBeenCalledWith(
-          'Failed to generate QR code image'
+          'Failed to generate QR code image',
         )
       })
     })
@@ -202,7 +207,7 @@ describe('JoinCodeQR', () => {
       const mockToBlob = vi.fn((callback) => callback(mockBlob))
       global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
 
-      const createdLinks: HTMLAnchorElement[] = []
+      const createdLinks: Array<HTMLAnchorElement> = []
       const originalCreateElement = document.createElement.bind(document)
       document.createElement = vi.fn((tagName: string) => {
         const element = originalCreateElement(tagName)

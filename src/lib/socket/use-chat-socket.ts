@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { useSocketContext } from './socket-context'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
+import { useSocketContext } from './socket-context'
 
 export interface ChatMessage {
   id: string
@@ -20,7 +20,7 @@ export interface ChatMessageEvent {
 }
 
 export interface ChatHistoryEvent {
-  messages: ChatMessage[]
+  messages: Array<ChatMessage>
   hasMore: boolean
   timestamp: string
 }
@@ -39,7 +39,7 @@ export const useChatSocket = (
 ) => {
   const { chatSocket, isConnected } = useSocketContext()
   const hasJoinedRef = useRef(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<Array<ChatMessage>>([])
   const [hasMore, setHasMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { notifyNewMessage } = useNotifications()

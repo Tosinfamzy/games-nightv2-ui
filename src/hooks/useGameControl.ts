@@ -34,7 +34,7 @@ export const useGameControl = (gameId: UUID | undefined) => {
 
   // Game lifecycle mutations
   const startGameMutation = useMutation({
-    mutationFn: (teamIds?: string[]) => {
+    mutationFn: (teamIds?: Array<string>) => {
       if (!gameId) throw new Error('Game ID is required')
       return gameService.start(gameId, teamIds)
     },

@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import { useCopyToClipboard } from './useCopyToClipboard'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, renderHook } from '@testing-library/react'
 import * as toast from '../lib/toast'
+import { useCopyToClipboard } from './useCopyToClipboard'
 
 vi.mock('../lib/toast', () => ({
   showToast: {
@@ -53,7 +53,9 @@ describe('useCopyToClipboard', () => {
       await copyToClipboard('test text', 'Custom success message')
     })
 
-    expect(toast.showToast.success).toHaveBeenCalledWith('Custom success message')
+    expect(toast.showToast.success).toHaveBeenCalledWith(
+      'Custom success message',
+    )
   })
 
   it('should return true on successful copy', async () => {
@@ -113,7 +115,9 @@ describe('useCopyToClipboard', () => {
     })
 
     expect(copyResult).toBe(false)
-    expect(toast.showToast.error).toHaveBeenCalledWith('Failed to copy to clipboard')
+    expect(toast.showToast.error).toHaveBeenCalledWith(
+      'Failed to copy to clipboard',
+    )
   })
 
   it('should update state to error on failed copy', async () => {

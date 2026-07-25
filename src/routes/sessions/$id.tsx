@@ -229,11 +229,16 @@ function SessionDetailsPage() {
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4 sm:mb-6">
-          <Link to="/sessions" className="hover:text-gray-700 min-h-[44px] flex items-center">
+          <Link
+            to="/sessions"
+            className="hover:text-gray-700 min-h-[44px] flex items-center"
+          >
             Sessions
           </Link>
           <span>›</span>
-          <span className="text-gray-900 font-medium truncate">{session.name}</span>
+          <span className="text-gray-900 font-medium truncate">
+            {session.name}
+          </span>
         </nav>
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -264,7 +269,8 @@ function SessionDetailsPage() {
               {/* Mobile-only date and location */}
               <div className="sm:hidden mt-2 text-sm text-gray-600 space-y-1">
                 <div>
-                  <strong>Date:</strong> {new Date(session.date).toLocaleDateString()}
+                  <strong>Date:</strong>{' '}
+                  {new Date(session.date).toLocaleDateString()}
                 </div>
                 {session.location && (
                   <div>
@@ -288,7 +294,11 @@ function SessionDetailsPage() {
                     />
                   </svg>
                   <span className="text-sm font-medium text-purple-900">
-                    🎮 <span className="hidden sm:inline">You are the Games Master - You have full control over this session</span>
+                    🎮{' '}
+                    <span className="hidden sm:inline">
+                      You are the Games Master - You have full control over this
+                      session
+                    </span>
                     <span className="sm:hidden">Games Master</span>
                   </span>
                 </div>
@@ -427,7 +437,8 @@ function SessionDetailsPage() {
               to="/sessions"
               className="px-4 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 min-h-[44px] flex items-center text-sm sm:text-base"
             >
-              <span className="hidden sm:inline">←</span> Back<span className="hidden sm:inline"> to Sessions</span>
+              <span className="hidden sm:inline">←</span> Back
+              <span className="hidden sm:inline"> to Sessions</span>
             </Link>
           </div>
         </div>
@@ -437,7 +448,12 @@ function SessionDetailsPage() {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-1 sm:space-x-4 overflow-x-auto pb-px scrollbar-hide">
               {[
-                { id: 'overview', label: 'Overview', shortLabel: 'Home', icon: '📋' },
+                {
+                  id: 'overview',
+                  label: 'Overview',
+                  shortLabel: 'Home',
+                  icon: '📋',
+                },
                 {
                   id: 'players',
                   label: 'Players',
@@ -445,10 +461,25 @@ function SessionDetailsPage() {
                   icon: '👥',
                   count: players.length,
                 },
-                { id: 'games', label: 'Games', shortLabel: 'Games', icon: '🎮' },
-                { id: 'teams', label: 'Teams', shortLabel: 'Teams', icon: '🏆' },
+                {
+                  id: 'games',
+                  label: 'Games',
+                  shortLabel: 'Games',
+                  icon: '🎮',
+                },
+                {
+                  id: 'teams',
+                  label: 'Teams',
+                  shortLabel: 'Teams',
+                  icon: '🏆',
+                },
                 { id: 'chat', label: 'Chat', shortLabel: 'Chat', icon: '💬' },
-                { id: 'history', label: 'History', shortLabel: 'Hist.', icon: '📊' },
+                {
+                  id: 'history',
+                  label: 'History',
+                  shortLabel: 'Hist.',
+                  icon: '📊',
+                },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -460,7 +491,9 @@ function SessionDetailsPage() {
                   }`}
                 >
                   <span className="sm:hidden">{tab.icon}</span>
-                  <span className="hidden sm:inline">{tab.icon} {tab.label}</span>
+                  <span className="hidden sm:inline">
+                    {tab.icon} {tab.label}
+                  </span>
                   {tab.count !== undefined && (
                     <span className="ml-1 sm:ml-2 bg-gray-100 text-gray-600 py-0.5 px-1.5 sm:px-2 rounded-full text-xs">
                       {tab.count}
@@ -758,7 +791,10 @@ function OverviewTab({
                     Not Playing Yet
                   </h3>
                   <p className="text-sm text-gray-600">
-                    <span className="hidden sm:inline">You're viewing this session as a spectator. Join as a player to participate and mark yourself ready.</span>
+                    <span className="hidden sm:inline">
+                      You're viewing this session as a spectator. Join as a
+                      player to participate and mark yourself ready.
+                    </span>
                     <span className="sm:hidden">Join to participate!</span>
                   </p>
                 </div>
@@ -991,15 +1027,24 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
                     d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
                   />
                 </svg>
-                <span className="hidden sm:inline">{showAddPlayerForm ? 'Cancel' : '+ Add Player'}</span>
-                <span className="sm:hidden">{showAddPlayerForm ? '✕' : '+'}</span>
+                <span className="hidden sm:inline">
+                  {showAddPlayerForm ? 'Cancel' : '+ Add Player'}
+                </span>
+                <span className="sm:hidden">
+                  {showAddPlayerForm ? '✕' : '+'}
+                </span>
               </button>
             )}
           {(session.status === 'COMPLETED' ||
             session.status === 'CANCELLED') && (
             <div className="text-sm text-gray-500 italic">
-              <span className="hidden sm:inline">Player management disabled - session{' '}{session.status.toLowerCase()}</span>
-              <span className="sm:hidden">Session {session.status.toLowerCase()}</span>
+              <span className="hidden sm:inline">
+                Player management disabled - session{' '}
+                {session.status.toLowerCase()}
+              </span>
+              <span className="sm:hidden">
+                Session {session.status.toLowerCase()}
+              </span>
             </div>
           )}
         </div>

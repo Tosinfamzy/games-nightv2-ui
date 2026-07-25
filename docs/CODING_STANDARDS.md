@@ -31,11 +31,11 @@
 
 ### 1.1 Component Size Limits
 
-| Component Type | Max Lines | When to Split |
-|----------------|-----------|---------------|
-| Route/Page | 200 | Extract features to sub-components |
-| Feature | 150 | Extract logic to hooks, UI to components |
-| UI/Atomic | 100 | Rarely needs splitting |
+| Component Type | Max Lines | When to Split                            |
+| -------------- | --------- | ---------------------------------------- |
+| Route/Page     | 200       | Extract features to sub-components       |
+| Feature        | 150       | Extract logic to hooks, UI to components |
+| UI/Atomic      | 100       | Rarely needs splitting                   |
 
 ### 1.2 Component File Structure
 
@@ -97,6 +97,7 @@ export function GameDashboard({ sessionId, isHost }: GameDashboardProps) {
 ### 1.3 When to Extract Components
 
 **Extract when:**
+
 - Section has its own state
 - Section is reused elsewhere
 - Section is logically independent
@@ -133,19 +134,23 @@ function SessionPage() {
 
 ### 2.1 State Types & Solutions
 
-| State Type | Solution | Example |
-|------------|----------|---------|
-| Server/async data | TanStack Query | Games, sessions, players |
-| Forms | React Hook Form | Create game form |
-| Global UI | Context/Zustand | Theme, socket connections |
-| Local UI | useState | Modal open, active tab |
-| URL state | Router params | Session ID, game ID |
+| State Type        | Solution        | Example                   |
+| ----------------- | --------------- | ------------------------- |
+| Server/async data | TanStack Query  | Games, sessions, players  |
+| Forms             | React Hook Form | Create game form          |
+| Global UI         | Context/Zustand | Theme, socket connections |
+| Local UI          | useState        | Modal open, active tab    |
+| URL state         | Router params   | Session ID, game ID       |
 
 ### 2.2 TanStack Query Patterns
 
 ```typescript
 // Query with proper typing
-const { data: games, isLoading, error } = useQuery<Game[], Error>({
+const {
+  data: games,
+  isLoading,
+  error,
+} = useQuery<Game[], Error>({
   queryKey: ['games', 'session', sessionId],
   queryFn: () => gameService.findBySession(sessionId),
   staleTime: 30_000, // 30 seconds
@@ -158,7 +163,10 @@ const updatePlayerMutation = useMutation({
   onMutate: async (newData) => {
     await queryClient.cancelQueries({ queryKey: ['players', playerId] })
     const previous = queryClient.getQueryData(['players', playerId])
-    queryClient.setQueryData(['players', playerId], (old) => ({ ...old, ...newData }))
+    queryClient.setQueryData(['players', playerId], (old) => ({
+      ...old,
+      ...newData,
+    }))
     return { previous }
   },
 
@@ -208,6 +216,7 @@ function PlayerCard({ player }: { player: Player }) {
 ### 3.1 When to Create Hooks
 
 Create a custom hook when:
+
 - Logic is shared across 2+ components
 - Logic makes component hard to read
 - Logic is independently testable
@@ -252,7 +261,10 @@ export function useConfirmDialog() {
 
   const open = (config: ConfirmConfig) => setState({ isOpen: true, ...config })
   const close = () => setState((s) => ({ ...s, isOpen: false }))
-  const confirm = () => { state.onConfirm(); close() }
+  const confirm = () => {
+    state.onConfirm()
+    close()
+  }
 
   return { ...state, open, close, confirm }
 }
@@ -327,7 +339,11 @@ interface CardProps {
 }
 
 // Component
-export function PlayerCard({ player, onSelect, showStatus = true }: PlayerCardProps) {
+export function PlayerCard({
+  player,
+  onSelect,
+  showStatus = true,
+}: PlayerCardProps) {
   // ...
 }
 ```
@@ -537,9 +553,11 @@ describe('useGame', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(expect.objectContaining({
-      id: 'game-1',
-    }))
+    expect(result.current.data).toEqual(
+      expect.objectContaining({
+        id: 'game-1',
+      }),
+    )
   })
 })
 ```
@@ -619,4 +637,4 @@ function GameList() {
 
 ---
 
-*Last Updated: January 2026*
+_Last Updated: January 2026_

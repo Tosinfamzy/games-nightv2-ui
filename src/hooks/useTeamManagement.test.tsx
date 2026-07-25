@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { ReactNode } from 'react'
-import { useTeamManagement } from './useTeamManagement'
 import { teamService } from '../lib/api/services/team.service'
 import * as toast from '../lib/toast'
+import { useTeamManagement } from './useTeamManagement'
+import type { ReactNode } from 'react'
 
 vi.mock('../lib/api/services/team.service', () => ({
   teamService: {

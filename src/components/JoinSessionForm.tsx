@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { sessionService } from '../lib/api/services'
 import { showToast, toastHelpers } from '../lib/toast'
-import type { JoinSessionRequest, Session } from '../lib/api/types'
 import { usePlayer } from '../contexts/PlayerContext'
+import type { JoinSessionRequest, Session } from '../lib/api/types'
 
 interface JoinSessionFormProps {
   onJoinSuccess?: (session: Session) => void
@@ -75,7 +75,11 @@ export function JoinSessionForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4" aria-busy={joinSessionMutation.isPending}>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        aria-busy={joinSessionMutation.isPending}
+      >
         {!sessionPreview && (
           <div>
             <label

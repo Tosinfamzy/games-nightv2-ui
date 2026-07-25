@@ -1,5 +1,5 @@
 import { fetchAPI } from '../client'
-import type { PlayerResponseDto, PlayerListItemDto } from '../types/player.dto'
+import type { PlayerListItemDto, PlayerResponseDto } from '../types/player.dto'
 
 export interface Player {
   id: string

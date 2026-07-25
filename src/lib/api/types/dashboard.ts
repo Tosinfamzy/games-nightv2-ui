@@ -7,7 +7,7 @@ export interface GMDashboard {
   gamesMasterId: UUID
   gamesMasterName: string
   stats: DashboardStats
-  sessions: DashboardSession[]
+  sessions: Array<DashboardSession>
   lastUpdated: Date | string
 }
 
@@ -34,8 +34,8 @@ export interface DashboardSession {
   location: string
   scheduledFor: Date | string
   playersCount: number
-  players: DashboardPlayer[]
-  games: DashboardGame[]
+  players: Array<DashboardPlayer>
+  games: Array<DashboardGame>
   gamesInProgress: number
   gamesCompleted: number
 }

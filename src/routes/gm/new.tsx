@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { CreateGamesMasterForm } from '../../components/CreateGamesMasterForm'
 import { useGamesMaster } from '../../hooks/useGamesMaster'
-import { useEffect } from 'react'
 
 export const Route = createFileRoute('/gm/new')({
   component: NewGamesMasterPage,

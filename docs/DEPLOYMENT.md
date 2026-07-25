@@ -15,19 +15,19 @@ This guide covers deploying the Games Night UI to Vercel.
 
 Add these in Vercel project settings:
 
-| Variable | Value | Example |
-|----------|-------|---------|
+| Variable       | Value           | Example                                  |
+| -------------- | --------------- | ---------------------------------------- |
 | `VITE_API_URL` | Backend API URL | `https://games-night-api.up.railway.app` |
-| `VITE_WS_URL` | WebSocket URL | `wss://games-night-api.up.railway.app` |
+| `VITE_WS_URL`  | WebSocket URL   | `wss://games-night-api.up.railway.app`   |
 
 ### 3. GitHub Secrets (for CI/CD)
 
 Add these to repository secrets:
 
-| Secret | How to get it |
-|--------|---------------|
-| `VERCEL_TOKEN` | Vercel Settings → Tokens |
-| `VERCEL_ORG_ID` | Vercel Project Settings → General |
+| Secret              | How to get it                     |
+| ------------------- | --------------------------------- |
+| `VERCEL_TOKEN`      | Vercel Settings → Tokens          |
+| `VERCEL_ORG_ID`     | Vercel Project Settings → General |
 | `VERCEL_PROJECT_ID` | Vercel Project Settings → General |
 
 ## Deployment Triggers
@@ -48,22 +48,26 @@ npm run serve
 ## Vercel Configuration
 
 The `vercel.json` file configures:
+
 - SPA routing (all routes → index.html)
-- Asset caching (1 year for /assets/*)
+- Asset caching (1 year for /assets/\*)
 - Security headers
 
 ## Troubleshooting
 
 **Build failing?**
+
 ```bash
 # Test build locally first
 npm run build
 ```
 
 **API not connecting?**
+
 - Check `VITE_API_URL` is set correctly
 - Ensure backend allows CORS from your Vercel domain
 
 **Preview not deploying?**
+
 - Check GitHub Actions permissions
 - Verify `VERCEL_TOKEN` secret is set

@@ -1,8 +1,8 @@
-import type { ReactElement, ReactNode } from 'react'
 import { render, renderHook } from '@testing-library/react'
-import type { RenderOptions, RenderHookOptions } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { vi } from 'vitest'
+import type { RenderHookOptions, RenderOptions } from '@testing-library/react'
+import type { ReactElement, ReactNode } from 'react'
 
 // Create a test query client
 export function createTestQueryClient() {
@@ -52,9 +52,7 @@ function AllTheProviders({ children }: { children: ReactNode }) {
   const queryClient = createTestQueryClient()
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
 }
 
@@ -77,9 +75,7 @@ export function renderHookWithProviders<TResult, TProps = unknown>(
   const { queryClient = createTestQueryClient(), initialProps } = options
 
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
 
   return renderHook(hook, {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useGamesMaster } from '../hooks/useGamesMaster'
 import { useNavigate } from '@tanstack/react-router'
+import { useGamesMaster } from '../hooks/useGamesMaster'
 
 export function CreateGamesMasterForm() {
   const [name, setName] = useState('')

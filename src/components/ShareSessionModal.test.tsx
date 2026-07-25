@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -18,12 +18,17 @@ vi.mock('../lib/toast', () => ({
 
 // Mock the copy hook
 vi.mock('../hooks/useCopyToClipboard', () => ({
-  useCopyToClipboard: () => [vi.fn().mockResolvedValue(true), { success: true, error: null }],
+  useCopyToClipboard: () => [
+    vi.fn().mockResolvedValue(true),
+    { success: true, error: null },
+  ],
 }))
 
 // Mock react-qr-code
 vi.mock('react-qr-code', () => ({
-  default: ({ value }: { value: string }) => <div data-testid="qr-code">{value}</div>,
+  default: ({ value }: { value: string }) => (
+    <div data-testid="qr-code">{value}</div>
+  ),
 }))
 
 describe('ShareSessionModal', () => {
@@ -51,7 +56,7 @@ describe('ShareSessionModal', () => {
     return render(
       <QueryClientProvider client={queryClient}>
         <ShareSessionModal {...defaultProps} {...props} />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
   }
 
@@ -96,7 +101,9 @@ describe('ShareSessionModal', () => {
   it('should have copy link button for share link', () => {
     renderModal()
     // There are now multiple copy link buttons (original + social share buttons)
-    const copyLinkButtons = screen.getAllByRole('button', { name: /copy link/i })
+    const copyLinkButtons = screen.getAllByRole('button', {
+      name: /copy link/i,
+    })
     expect(copyLinkButtons.length).toBeGreaterThan(0)
   })
 
@@ -114,7 +121,9 @@ describe('ShareSessionModal', () => {
     const onClose = vi.fn()
     renderModal({ onClose })
 
-    const xButton = screen.getByRole('button', { name: /close share session modal/i })
+    const xButton = screen.getByRole('button', {
+      name: /close share session modal/i,
+    })
     await userEvent.click(xButton)
 
     expect(onClose).toHaveBeenCalledTimes(1)
@@ -132,6 +141,8 @@ describe('ShareSessionModal', () => {
 
   it('should show warning message for regenerate button', () => {
     renderModal({ isHost: true })
-    expect(screen.getByText(/this will invalidate the old join code/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/this will invalidate the old join code/i),
+    ).toBeInTheDocument()
   })
 })

@@ -1,10 +1,10 @@
 import { fetchAPI } from '../client'
+import { TeamFormationStrategy } from '../types/team.dto'
 import type {
-  TeamResponseDto,
   CreateTeamsDto,
   TeamFormationSuggestionsResponse,
+  TeamResponseDto,
 } from '../types/team.dto'
-import { TeamFormationStrategy } from '../types/team.dto'
 
 export interface Team {
   id: string
@@ -111,8 +111,8 @@ export const teamService = {
   createTeams: async (
     gameId: string,
     data: CreateTeamsDto,
-  ): Promise<Team[]> => {
-    const result = await fetchAPI<TeamResponseDto[]>(
+  ): Promise<Array<Team>> => {
+    const result = await fetchAPI<Array<TeamResponseDto>>(
       `/teams/game/${gameId}/create-teams`,
       {
         method: 'POST',
@@ -126,8 +126,8 @@ export const teamService = {
   rebalanceTeams: async (
     gameId: string,
     strategy?: TeamFormationStrategy,
-  ): Promise<Team[]> => {
-    const result = await fetchAPI<TeamResponseDto[]>(
+  ): Promise<Array<Team>> => {
+    const result = await fetchAPI<Array<TeamResponseDto>>(
       `/teams/game/${gameId}/rebalance`,
       {
         method: 'PUT',
@@ -143,8 +143,8 @@ export const teamService = {
   /**
    * Shuffle players randomly across all teams
    */
-  shufflePlayers: async (gameId: string): Promise<Team[]> => {
-    const result = await fetchAPI<TeamResponseDto[]>(
+  shufflePlayers: async (gameId: string): Promise<Array<Team>> => {
+    const result = await fetchAPI<Array<TeamResponseDto>>(
       `/teams/game/${gameId}/shuffle`,
       {
         method: 'PUT',
@@ -178,12 +178,15 @@ export const teamService = {
     playerId: string,
     fromTeamId: string,
     toTeamId: string,
-  ): Promise<Team[]> => {
-    const result = await fetchAPI<TeamResponseDto[]>(`/teams/swap-player`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId, fromTeamId, toTeamId }),
-    })
+  ): Promise<Array<Team>> => {
+    const result = await fetchAPI<Array<TeamResponseDto>>(
+      `/teams/swap-player`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId, fromTeamId, toTeamId }),
+      },
+    )
     return result.map(mapDto)
   },
 
@@ -199,7 +202,10 @@ export const teamService = {
   /**
    * Reassign a player to a different team (removes from current team if any)
    */
-  reassignPlayer: async (playerId: string, newTeamId: string): Promise<Team> => {
+  reassignPlayer: async (
+    playerId: string,
+    newTeamId: string,
+  ): Promise<Team> => {
     const result = await fetchAPI<TeamResponseDto>(`/teams/reassign-player`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

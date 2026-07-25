@@ -1,7 +1,7 @@
-import { useGameControl } from '../../hooks/useGameControl'
-import type { UUID, GameStatus } from '../../lib/api/types'
-import { ConfirmDialog } from '../ConfirmDialog'
 import { useState } from 'react'
+import { useGameControl } from '../../hooks/useGameControl'
+import { ConfirmDialog } from '../ConfirmDialog'
+import type { GameStatus, UUID } from '../../lib/api/types'
 
 interface GameControlPanelProps {
   gameId: UUID

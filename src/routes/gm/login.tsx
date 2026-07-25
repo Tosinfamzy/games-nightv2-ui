@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { RetrieveHostCode } from '../../components/RetrieveHostCode'
 import { useGamesMaster } from '../../hooks/useGamesMaster'
-import { useEffect } from 'react'
 
 export const Route = createFileRoute('/gm/login')({
   component: GamesMasterLoginPage,

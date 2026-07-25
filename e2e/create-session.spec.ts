@@ -11,12 +11,16 @@ test.describe('Create Session Flow', () => {
     await page.waitForURL(/\/gm\/new|\/sessions\/new/)
   })
 
-  test('should display the create session form when GM exists', async ({ page }) => {
+  test('should display the create session form when GM exists', async ({
+    page,
+  }) => {
     // First create a GM profile if needed
     if (page.url().includes('/gm/new')) {
       // Fill out GM creation form
       await page.getByLabel(/name/i).fill('Test Game Master')
-      await page.getByRole('button', { name: /create|register|submit/i }).click()
+      await page
+        .getByRole('button', { name: /create|register|submit/i })
+        .click()
 
       // Navigate back to create session
       await page.goto('/sessions/new')
@@ -35,7 +39,7 @@ test.describe('Create Session Form Validation', () => {
     const submitButton = page.getByRole('button', { name: /create session/i })
 
     // Check if submit button exists
-    if (await submitButton.count() > 0) {
+    if ((await submitButton.count()) > 0) {
       // Try clicking without filling required fields
       await submitButton.click()
 
@@ -50,7 +54,7 @@ test.describe('Create Session Form Validation', () => {
     const nameInput = page.getByLabel(/session name/i)
     const dateInput = page.getByLabel(/date/i)
 
-    if (await nameInput.count() > 0) {
+    if ((await nameInput.count()) > 0) {
       await nameInput.fill('Test Session')
 
       // Check that date is required
@@ -60,7 +64,9 @@ test.describe('Create Session Form Validation', () => {
 })
 
 test.describe('Session Creation Success', () => {
-  test('should show success message after creating session', async ({ page }) => {
+  test('should show success message after creating session', async ({
+    page,
+  }) => {
     await page.goto('/sessions/new')
 
     // This test assumes a GM is already set up
@@ -68,7 +74,7 @@ test.describe('Session Creation Success', () => {
     const successHeading = page.getByText(/session created/i)
 
     // If form is visible, try to create a session
-    const formVisible = await page.getByLabel(/session name/i).count() > 0
+    const formVisible = (await page.getByLabel(/session name/i).count()) > 0
 
     if (formVisible) {
       // Fill form with valid data
@@ -82,12 +88,12 @@ test.describe('Session Creation Success', () => {
 
       // Optional fields
       const descInput = page.getByLabel(/description/i)
-      if (await descInput.count() > 0) {
+      if ((await descInput.count()) > 0) {
         await descInput.fill('A test session created by E2E tests')
       }
 
       const locationInput = page.getByLabel(/location/i)
-      if (await locationInput.count() > 0) {
+      if ((await locationInput.count()) > 0) {
         await locationInput.fill('Test Location')
       }
     }
@@ -101,7 +107,7 @@ test.describe('Home Page to Create Session Navigation', () => {
     // Find and click the "Host a Session" or similar button
     const hostButton = page.getByRole('link', { name: /host.*session/i })
 
-    if (await hostButton.count() > 0) {
+    if ((await hostButton.count()) > 0) {
       await hostButton.click()
 
       // Should navigate to sessions/new or gm/new

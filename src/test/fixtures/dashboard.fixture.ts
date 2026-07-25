@@ -1,11 +1,11 @@
 import type {
-  GMDashboard,
-  DashboardSession,
   DashboardGame,
   DashboardPlayer,
+  DashboardSession,
+  GMDashboard,
 } from '../../lib/api/types'
 
-export const mockDashboardPlayers: DashboardPlayer[] = [
+export const mockDashboardPlayers: Array<DashboardPlayer> = [
   {
     id: 'player-1',
     name: 'Alice',
@@ -23,7 +23,7 @@ export const mockDashboardPlayers: DashboardPlayer[] = [
   },
 ]
 
-export const mockDashboardGames: DashboardGame[] = [
+export const mockDashboardGames: Array<DashboardGame> = [
   {
     id: 'game-1',
     name: 'Trivia Challenge',
@@ -50,7 +50,7 @@ export const mockDashboardGames: DashboardGame[] = [
   },
 ]
 
-export const mockDashboardSessions: DashboardSession[] = [
+export const mockDashboardSessions: Array<DashboardSession> = [
   {
     id: 'session-1',
     name: 'Friday Game Night',

@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { gameService } from '../lib/api/services/game.service'
-import { scoreService, type TeamScore } from '../lib/api/services/score.service'
-import { ConfirmDialog } from './ConfirmDialog'
-import type { Game } from '../lib/api/types'
-import GameTimer from './GameTimer'
-import TimerControls from './TimerControls'
+import { scoreService } from '../lib/api/services/score.service'
 import { useGameSocket } from '../lib/socket'
 import { toastHelpers } from '../lib/toast'
+import { ConfirmDialog } from './ConfirmDialog'
+import GameTimer from './GameTimer'
+import TimerControls from './TimerControls'
+import type { Game } from '../lib/api/types'
+import type { TeamScore } from '../lib/api/services/score.service'
 
 interface LiveGameViewProps {
   sessionId: string

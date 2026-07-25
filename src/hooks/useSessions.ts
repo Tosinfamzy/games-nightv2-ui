@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService } from '../lib/api/services'
 import type {
   CreateSessionDTO,
-  UpdateSessionDTO,
   Session,
+  UpdateSessionDTO,
 } from '../lib/api/types'
 
 const SESSIONS_KEY = 'sessions'

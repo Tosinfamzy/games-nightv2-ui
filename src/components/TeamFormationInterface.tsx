@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { TeamFormationStrategy } from '../lib/api/types/team.dto'
-import type { CreateTeamsDto } from '../lib/api/types/team.dto'
 import { teamService } from '../lib/api/services/team.service'
-import { toastHelpers, showToast } from '../lib/toast'
+import { showToast, toastHelpers } from '../lib/toast'
+import type { CreateTeamsDto } from '../lib/api/types/team.dto'
 
 interface Player {
   id: string
@@ -51,9 +51,9 @@ export function TeamFormationInterface({
   const [selectedGameForFormation, setSelectedGameForFormation] =
     useState<string>(selectedGame?.id || '')
   const [customizeNames, setCustomizeNames] = useState(false)
-  const [teamNames, setTeamNames] = useState<string[]>([])
+  const [teamNames, setTeamNames] = useState<Array<string>>([])
   const [customizeColors, setCustomizeColors] = useState(false)
-  const [teamColors, setTeamColors] = useState<string[]>([])
+  const [teamColors, setTeamColors] = useState<Array<string>>([])
 
   // Default colors matching backend
   const DEFAULT_COLORS = [

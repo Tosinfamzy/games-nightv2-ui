@@ -63,7 +63,10 @@ export function TeamCardSkeleton({ count = 2 }: { count?: number }) {
           {/* Player slots */}
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, j) => (
-              <div key={j} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+              <div
+                key={j}
+                className="flex items-center justify-between p-2 bg-gray-50 rounded"
+              >
                 <div className="h-4 bg-gray-200 rounded w-20" />
                 <div className="h-6 bg-gray-100 rounded w-16" />
               </div>
@@ -118,7 +121,9 @@ export function ChatMessageSkeleton({ count = 5 }: { count?: number }) {
           {/* Avatar */}
           <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0" />
           {/* Message bubble */}
-          <div className={`space-y-2 max-w-[70%] ${i % 2 === 0 ? '' : 'items-end'}`}>
+          <div
+            className={`space-y-2 max-w-[70%] ${i % 2 === 0 ? '' : 'items-end'}`}
+          >
             <div className="h-3 bg-gray-100 rounded w-16" />
             <div className="bg-gray-200 rounded-lg p-3 space-y-2">
               <div className="h-4 bg-gray-300 rounded w-48" />
@@ -136,7 +141,7 @@ export function ChatMessageSkeleton({ count = 5 }: { count?: number }) {
  */
 export function TableRowSkeleton({
   count = 5,
-  columns = 4
+  columns = 4,
 }: {
   count?: number
   columns?: number
