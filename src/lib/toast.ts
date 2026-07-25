@@ -1,4 +1,5 @@
 import { toast } from 'sonner'
+import { resolveErrorMessage } from './errors/error-codes'
 
 /**
  * Toast notification utility using Sonner
@@ -138,7 +139,9 @@ export const toastHelpers = {
    * Toast for async operation errors with context
    */
   operationError: (operation: string, error: unknown) => {
-    const message = getErrorMessage(error)
+    // Prefer the backend's stable error `code` (friendly copy / validation
+    // detail); fall back to the raw message for network/unknown errors.
+    const message = resolveErrorMessage(error, getErrorMessage(error))
     showToast.error(`Failed to ${operation}: ${message}`)
   },
 

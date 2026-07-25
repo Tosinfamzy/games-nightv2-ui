@@ -79,7 +79,8 @@ export async function fetchAPI<T>(
       response.status,
       data.code || 'UNKNOWN_ERROR',
       data.message || 'An unexpected error occurred',
-      data,
+      // The backend envelope's granular `details` (e.g. validation constraints).
+      data.details,
     )
   }
 
