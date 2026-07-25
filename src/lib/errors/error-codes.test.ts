@@ -26,6 +26,21 @@ describe('resolveErrorMessage', () => {
     ).toBe('Nope, bad')
   })
 
+  it('uses friendly copy for domain codes that have it', () => {
+    expect(resolveErrorMessage({ code: ErrorCode.EMAIL_TAKEN })).toMatch(
+      /already registered/i,
+    )
+  })
+
+  it('falls through to the specific backend message for state codes', () => {
+    expect(
+      resolveErrorMessage({
+        code: ErrorCode.GAME_INVALID_STATE,
+        message: 'Game is already completed',
+      }),
+    ).toBe('Game is already completed')
+  })
+
   it('handles a plain string error', () => {
     expect(resolveErrorMessage('boom')).toBe('boom')
   })
@@ -52,8 +67,9 @@ describe('resolveErrorMessage', () => {
 })
 
 describe('isAuthError', () => {
-  it('is true for UNAUTHORIZED', () => {
+  it('is true for UNAUTHORIZED and TOKEN_INVALID', () => {
     expect(isAuthError({ code: ErrorCode.UNAUTHORIZED })).toBe(true)
+    expect(isAuthError({ code: ErrorCode.TOKEN_INVALID })).toBe(true)
   })
   it('is false for other codes and non-coded errors', () => {
     expect(isAuthError({ code: ErrorCode.NOT_FOUND })).toBe(false)

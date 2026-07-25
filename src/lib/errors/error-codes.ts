@@ -16,6 +16,13 @@ export enum ErrorCode {
   RATE_LIMITED = 'RATE_LIMITED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   HTTP_ERROR = 'HTTP_ERROR',
+
+  // Domain-specific codes for the games-night flows.
+  EMAIL_TAKEN = 'EMAIL_TAKEN',
+  TOKEN_INVALID = 'TOKEN_INVALID',
+  SESSION_INVALID_STATE = 'SESSION_INVALID_STATE',
+  GAME_INVALID_STATE = 'GAME_INVALID_STATE',
+  ROUND_NOT_ACTIVE = 'ROUND_NOT_ACTIVE',
 }
 
 /** Friendly, user-facing copy per code. */
@@ -28,11 +35,18 @@ const CODE_MESSAGES: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.RATE_LIMITED]: "You're doing that too fast — give it a second.",
   [ErrorCode.INTERNAL_ERROR]:
     'Something went wrong on our end. Please try again.',
+  [ErrorCode.EMAIL_TAKEN]:
+    'That email is already registered — try signing in instead.',
+  [ErrorCode.TOKEN_INVALID]: 'Your session expired. Please rejoin.',
+  // SESSION_INVALID_STATE / GAME_INVALID_STATE / ROUND_NOT_ACTIVE intentionally
+  // fall through to the backend's specific message (e.g. "Game is already
+  // completed"), which is clearer than any generic copy.
 }
 
-/** Codes that mean the user should re-authenticate. */
+/** Codes that mean the user should re-authenticate / rejoin. */
 export const AUTH_ERROR_CODES: ReadonlySet<string> = new Set([
   ErrorCode.UNAUTHORIZED,
+  ErrorCode.TOKEN_INVALID,
 ])
 
 interface CodedError {
