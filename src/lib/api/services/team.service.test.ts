@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest'
-import { http, HttpResponse } from 'msw'
+import { describe, expect, it } from 'vitest'
+import { HttpResponse, http } from 'msw'
 import { server } from '../../../test/mocks/server'
-import { teamService } from './team.service'
 import { TeamFormationStrategy } from '../types/team.dto'
 import {
-  mockTeams,
+  createMockTeams,
   mockSuggestions,
   mockTeamStats,
-  createMockTeams,
+  mockTeams,
 } from '../../../test/fixtures/team.fixture'
+import { teamService } from './team.service'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const API_V1_URL = `${API_BASE_URL}/v1`

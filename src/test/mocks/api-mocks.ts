@@ -1,15 +1,15 @@
-import { http, HttpResponse } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { mockDashboardData } from '../fixtures/dashboard.fixture'
 import {
-  mockSessionData,
   mockActiveSessions,
+  mockSessionData,
 } from '../fixtures/session.fixture'
 import { mockGameData } from '../fixtures/game.fixture'
 import {
-  mockTeams,
+  DEFAULT_COLORS,
   mockSuggestions,
   mockTeamStats,
-  DEFAULT_COLORS,
+  mockTeams,
 } from '../fixtures/team.fixture'
 import type { CreateTeamsDto } from '../../lib/api/types/team.dto'
 

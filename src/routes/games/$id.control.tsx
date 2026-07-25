@@ -1,10 +1,10 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   GameControlPanel,
+  LiveLeaderboard,
+  LiveScoreEntry,
   RoundManager,
   TurnController,
-  LiveScoreEntry,
-  LiveLeaderboard,
 } from '../../components/game-control'
 
 function GameControlPage() {

@@ -5,12 +5,11 @@ interface ReadyCelebrationProps {
   trigger: boolean // External trigger to show celebration
 }
 
-export function ReadyCelebration({
-  isReady,
-  trigger,
-}: ReadyCelebrationProps) {
+export function ReadyCelebration({ isReady, trigger }: ReadyCelebrationProps) {
   const [show, setShow] = useState(false)
-  const [confetti, setConfetti] = useState<Array<{ id: number; left: string }>>([])
+  const [confetti, setConfetti] = useState<Array<{ id: number; left: string }>>(
+    [],
+  )
 
   useEffect(() => {
     if (isReady && trigger) {
@@ -58,9 +57,7 @@ export function ReadyCelebration({
             <h2 className="text-3xl font-bold text-green-600 mb-2">
               All Players Ready!
             </h2>
-            <p className="text-gray-600 text-lg">
-              The session can now begin!
-            </p>
+            <p className="text-gray-600 text-lg">The session can now begin!</p>
           </div>
         </div>
       </div>

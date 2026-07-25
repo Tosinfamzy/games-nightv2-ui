@@ -1,8 +1,8 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import {
+  LiveLeaderboard,
   LiveScoreEntry,
   RoundScorecard,
-  LiveLeaderboard,
 } from '../../components/game-control'
 import { useGameControl } from '../../hooks/useGameControl'
 

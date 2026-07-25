@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { teamService, type Team } from '../lib/api/services/team.service'
-import { playerService, type Player } from '../lib/api/services/player.service'
+import { teamService } from '../lib/api/services/team.service'
+import { playerService } from '../lib/api/services/player.service'
 import { useTeamManagement } from '../hooks/useTeamManagement'
 import { ConfirmDialog } from './ConfirmDialog'
 import EmptyState from './EmptyState'
 import { TeamCardSkeleton } from './LoadingSkeleton'
+import type { Player } from '../lib/api/services/player.service'
+import type { Team } from '../lib/api/services/team.service'
 
 interface TeamManagementPanelProps {
   gameId: string
@@ -183,7 +185,7 @@ export function TeamManagementPanel({
 
 interface TeamCardProps {
   team: Team
-  allTeams: Team[]
+  allTeams: Array<Team>
   getPlayerById: (playerId: string) => Player | undefined
   onReassignPlayer: (playerId: string, newTeamId: string) => void
   onDissolveTeam: () => void

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { historyService } from '../lib/api/services'
-import type { UUID, QueryHistoryParams } from '../lib/api/types'
+import type { QueryHistoryParams, UUID } from '../lib/api/types'
 
 const GAME_HISTORY_KEY = 'game-history'
 const PLAYER_STATS_KEY = 'player-stats'

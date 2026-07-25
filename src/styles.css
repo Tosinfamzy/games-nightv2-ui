@@ -106,13 +106,21 @@ code {
 
 /* Shake animation for errors */
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-4px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(4px);
   }
 }
@@ -183,20 +191,42 @@ code {
   animation: list-item-enter 0.2s ease-out forwards;
 }
 
-.stagger-item:nth-child(1) { animation-delay: 0ms; }
-.stagger-item:nth-child(2) { animation-delay: 50ms; }
-.stagger-item:nth-child(3) { animation-delay: 100ms; }
-.stagger-item:nth-child(4) { animation-delay: 150ms; }
-.stagger-item:nth-child(5) { animation-delay: 200ms; }
-.stagger-item:nth-child(6) { animation-delay: 250ms; }
-.stagger-item:nth-child(7) { animation-delay: 300ms; }
-.stagger-item:nth-child(8) { animation-delay: 350ms; }
-.stagger-item:nth-child(9) { animation-delay: 400ms; }
-.stagger-item:nth-child(10) { animation-delay: 450ms; }
+.stagger-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-item:nth-child(2) {
+  animation-delay: 50ms;
+}
+.stagger-item:nth-child(3) {
+  animation-delay: 100ms;
+}
+.stagger-item:nth-child(4) {
+  animation-delay: 150ms;
+}
+.stagger-item:nth-child(5) {
+  animation-delay: 200ms;
+}
+.stagger-item:nth-child(6) {
+  animation-delay: 250ms;
+}
+.stagger-item:nth-child(7) {
+  animation-delay: 300ms;
+}
+.stagger-item:nth-child(8) {
+  animation-delay: 350ms;
+}
+.stagger-item:nth-child(9) {
+  animation-delay: 400ms;
+}
+.stagger-item:nth-child(10) {
+  animation-delay: 450ms;
+}
 
 /* Button hover/active states */
 .btn-interactive {
-  transition: transform 0.1s ease-out, box-shadow 0.15s ease-out;
+  transition:
+    transform 0.1s ease-out,
+    box-shadow 0.15s ease-out;
 }
 
 .btn-interactive:hover:not(:disabled) {
@@ -211,7 +241,9 @@ code {
 
 /* Card hover effects */
 .card-hover {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
 }
 
 .card-hover:hover {

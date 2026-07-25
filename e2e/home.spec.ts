@@ -20,7 +20,9 @@ test.describe('Home Page', () => {
     await page.goto('/')
 
     // Get all focusable elements on the page
-    const focusableElements = page.locator('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    const focusableElements = page.locator(
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
     const count = await focusableElements.count()
 
     // Page should have focusable elements for keyboard navigation
@@ -46,7 +48,7 @@ test.describe('Navigation', () => {
           visibility: hidden !important;
           pointer-events: none !important;
         }
-      `
+      `,
     })
 
     // Find the join link and click
@@ -70,7 +72,7 @@ test.describe('Navigation', () => {
           visibility: hidden !important;
           pointer-events: none !important;
         }
-      `
+      `,
     })
 
     // Find a sessions link that's visible and scroll to it

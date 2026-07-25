@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { teamService, type Team } from '../lib/api/services/team.service'
-import { playerService, type Player } from '../lib/api/services/player.service'
+import { teamService } from '../lib/api/services/team.service'
+import { playerService } from '../lib/api/services/player.service'
 import { useTeamManagement } from '../hooks/useTeamManagement'
 import { ConfirmDialog } from './ConfirmDialog'
 import { QuickTeamActions } from './QuickTeamActions'
 import { VisualBalanceIndicator } from './VisualBalanceIndicator'
 import { TeamStatsCard } from './TeamStatsCard'
 import EmptyState from './EmptyState'
+import type { Player } from '../lib/api/services/player.service'
+import type { Team } from '../lib/api/services/team.service'
 
 interface EnhancedTeamManagementProps {
   gameId: string
@@ -95,7 +97,7 @@ export function EnhancedTeamManagement({
     return players.find((p) => p.id === playerId)
   }
 
-  const getTeamPlayers = (team: Team): Player[] => {
+  const getTeamPlayers = (team: Team): Array<Player> => {
     return team.playerIds
       .map((id) => getPlayerById(id))
       .filter((p): p is Player => p !== undefined)
@@ -206,7 +208,9 @@ export function EnhancedTeamManagement({
                         <div
                           key={player.id}
                           draggable
-                          onDragStart={() => handleDragStart(player.id, team.id)}
+                          onDragStart={() =>
+                            handleDragStart(player.id, team.id)
+                          }
                           className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm cursor-move transition-all"
                         >
                           <div className="flex items-center gap-3">
@@ -292,7 +296,9 @@ export function EnhancedTeamManagement({
                         : '⏳'}
                   </span>
                   <div>
-                    <div className="font-medium text-gray-900">{player.name}</div>
+                    <div className="font-medium text-gray-900">
+                      {player.name}
+                    </div>
                     {(player as any).skillLevel && (
                       <div className="text-xs text-gray-500">
                         Skill: {(player as any).skillLevel}/10

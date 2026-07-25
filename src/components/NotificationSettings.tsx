@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
-  notificationService,
   NotificationType,
+  notificationService,
 } from '../lib/notifications/notification-service'
 
 export function NotificationSettings() {
@@ -61,8 +61,7 @@ export function NotificationSettings() {
   const notificationTypeDescriptions: Record<NotificationType, string> = {
     [NotificationType.SESSION]:
       'Player joins/leaves, readiness changes, session ready',
-    [NotificationType.GAME]:
-      'Game started, rounds, turns, game completed',
+    [NotificationType.GAME]: 'Game started, rounds, turns, game completed',
     [NotificationType.TEAM]: 'Team creation, player assignments',
     [NotificationType.CHAT]: 'New chat messages when not viewing chat',
     [NotificationType.SYSTEM]: 'Connection status, errors, warnings',
@@ -196,9 +195,7 @@ export function NotificationSettings() {
       <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
         <h4 className="font-medium text-gray-900 mb-2">About Notifications</h4>
         <ul className="text-sm text-gray-600 space-y-1">
-          <li>
-            • Toast notifications appear in the corner of your screen
-          </li>
+          <li>• Toast notifications appear in the corner of your screen</li>
           <li>
             • Important events (session ready, your turn) play sounds if enabled
           </li>

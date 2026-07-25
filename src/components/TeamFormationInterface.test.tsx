@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../test/test-utils'
-import { TeamFormationInterface } from './TeamFormationInterface'
 import { TeamFormationStrategy } from '../lib/api/types/team.dto'
 import { teamService } from '../lib/api/services/team.service'
 import { mockSuggestions, mockTeams } from '../test/fixtures/team.fixture'
+import { TeamFormationInterface } from './TeamFormationInterface'
 
 vi.mock('../lib/api/services/team.service', () => ({
   teamService: {
@@ -158,7 +158,7 @@ describe('TeamFormationInterface', () => {
       renderWithProviders(<TeamFormationInterface {...defaultProps} />)
 
       // Get all radio inputs to select strategies
-      const radios = screen.getAllByRole('radio') as HTMLInputElement[]
+      const radios = screen.getAllByRole('radio') as Array<HTMLInputElement>
 
       // Find radios by their value attribute
       const automaticRadio = radios.find(
@@ -191,7 +191,7 @@ describe('TeamFormationInterface', () => {
       const user = userEvent.setup()
       renderWithProviders(<TeamFormationInterface {...defaultProps} />)
 
-      const radios = screen.getAllByRole('radio') as HTMLInputElement[]
+      const radios = screen.getAllByRole('radio') as Array<HTMLInputElement>
       const balancedRadio = radios.find(
         (r) => r.value === TeamFormationStrategy.BALANCED,
       )!
@@ -218,7 +218,7 @@ describe('TeamFormationInterface', () => {
       expect(screen.queryByText('Number of Teams')).not.toBeInTheDocument()
 
       // Select MANUAL strategy
-      const radios = screen.getAllByRole('radio') as HTMLInputElement[]
+      const radios = screen.getAllByRole('radio') as Array<HTMLInputElement>
       const manualRadio = radios.find(
         (r) => r.value === TeamFormationStrategy.MANUAL,
       )!
@@ -238,7 +238,7 @@ describe('TeamFormationInterface', () => {
       expect(screen.getByText('Customize team names')).toBeInTheDocument()
 
       // Select MANUAL strategy
-      const radios = screen.getAllByRole('radio') as HTMLInputElement[]
+      const radios = screen.getAllByRole('radio') as Array<HTMLInputElement>
       const manualRadio = radios.find(
         (r) => r.value === TeamFormationStrategy.MANUAL,
       )!

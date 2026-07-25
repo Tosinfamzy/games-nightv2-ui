@@ -12,7 +12,9 @@ class HistoryService {
   /**
    * Get game history with optional filters
    */
-  async getGameHistory(params?: QueryHistoryParams): Promise<GameResult[]> {
+  async getGameHistory(
+    params?: QueryHistoryParams,
+  ): Promise<Array<GameResult>> {
     const queryParams = new URLSearchParams()
 
     if (params?.sessionId) {
@@ -33,7 +35,7 @@ class HistoryService {
       ? `${this.basePath}/games?${queryString}`
       : `${this.basePath}/games`
 
-    return fetchAPI<GameResult[]>(url)
+    return fetchAPI<Array<GameResult>>(url)
   }
 
   /**
@@ -53,8 +55,8 @@ class HistoryService {
   /**
    * Get leaderboard (top players by win rate)
    */
-  async getLeaderboard(limit: number = 10): Promise<PlayerStats[]> {
-    return fetchAPI<PlayerStats[]>(
+  async getLeaderboard(limit: number = 10): Promise<Array<PlayerStats>> {
+    return fetchAPI<Array<PlayerStats>>(
       `${this.basePath}/leaderboard?limit=${limit}`,
     )
   }

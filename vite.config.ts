@@ -44,7 +44,10 @@ export default defineConfig({
         manualChunks: (id) => {
           // Don't manually chunk React - let Vite handle it for proper initialization order
           // Router and query (core SPA functionality)
-          if (id.includes('@tanstack/react-router') || id.includes('@tanstack/react-query')) {
+          if (
+            id.includes('@tanstack/react-router') ||
+            id.includes('@tanstack/react-query')
+          ) {
             // Skip devtools - they're dev-only and already lazy
             if (id.includes('devtools')) return undefined
             return 'router-query'

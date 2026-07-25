@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { playerService } from '../lib/api/services'
-import type { CreatePlayerDTO, UpdatePlayerDTO, Player } from '../lib/api/types'
+import type { CreatePlayerDTO, Player, UpdatePlayerDTO } from '../lib/api/types'
 
 const PLAYERS_KEY = 'players'
 

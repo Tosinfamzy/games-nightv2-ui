@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 import {
-  notificationService,
-  NotificationType,
   NotificationPriority,
+  NotificationType,
+  notificationService,
 } from '../lib/notifications/notification-service'
 
 export const useNotifications = () => {
@@ -78,15 +78,20 @@ export const useNotifications = () => {
     })
   }, [])
 
-  const notifyGameCompleted = useCallback((gameName: string, winner?: string) => {
-    notificationService.notify({
-      type: NotificationType.GAME,
-      priority: NotificationPriority.MEDIUM,
-      title: 'Game Completed',
-      message: winner ? `${gameName} won by ${winner}!` : `${gameName} has ended`,
-      playSound: true,
-    })
-  }, [])
+  const notifyGameCompleted = useCallback(
+    (gameName: string, winner?: string) => {
+      notificationService.notify({
+        type: NotificationType.GAME,
+        priority: NotificationPriority.MEDIUM,
+        title: 'Game Completed',
+        message: winner
+          ? `${gameName} won by ${winner}!`
+          : `${gameName} has ended`,
+        playSound: true,
+      })
+    },
+    [],
+  )
 
   const notifyTeamsCreated = useCallback((teamCount: number) => {
     notificationService.notify({
@@ -98,25 +103,31 @@ export const useNotifications = () => {
     })
   }, [])
 
-  const notifyTeamAssignment = useCallback((playerName: string, teamName: string) => {
-    notificationService.notify({
-      type: NotificationType.TEAM,
-      priority: NotificationPriority.LOW,
-      title: 'Team Assignment',
-      message: `${playerName} joined ${teamName}`,
-      playSound: false,
-    })
-  }, [])
+  const notifyTeamAssignment = useCallback(
+    (playerName: string, teamName: string) => {
+      notificationService.notify({
+        type: NotificationType.TEAM,
+        priority: NotificationPriority.LOW,
+        title: 'Team Assignment',
+        message: `${playerName} joined ${teamName}`,
+        playSound: false,
+      })
+    },
+    [],
+  )
 
-  const notifyNewMessage = useCallback((senderName: string, preview: string) => {
-    notificationService.notify({
-      type: NotificationType.CHAT,
-      priority: NotificationPriority.LOW,
-      title: `New message from ${senderName}`,
-      message: preview.substring(0, 50) + (preview.length > 50 ? '...' : ''),
-      playSound: false,
-    })
-  }, [])
+  const notifyNewMessage = useCallback(
+    (senderName: string, preview: string) => {
+      notificationService.notify({
+        type: NotificationType.CHAT,
+        priority: NotificationPriority.LOW,
+        title: `New message from ${senderName}`,
+        message: preview.substring(0, 50) + (preview.length > 50 ? '...' : ''),
+        playSound: false,
+      })
+    },
+    [],
+  )
 
   const notifyConnectionRestored = useCallback(() => {
     notificationService.notify({

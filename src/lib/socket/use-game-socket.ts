@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useSocketContext } from './socket-context'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
+import { useSocketContext } from './socket-context'
 
 /**
  * Hook to connect to a game room and listen for real-time updates
@@ -339,11 +339,20 @@ export const useGameSocket = (gameId: string | undefined) => {
 
       const errorMessage = data?.error || 'A game error occurred'
 
-      if (data?.code === 'UNAUTHORIZED' || data?.code === 'UnauthorizedException') {
+      if (
+        data?.code === 'UNAUTHORIZED' ||
+        data?.code === 'UnauthorizedException'
+      ) {
         showToast.error('Game access denied. Please rejoin the session.')
-      } else if (data?.code === 'NOT_FOUND' || data?.code === 'NotFoundException') {
+      } else if (
+        data?.code === 'NOT_FOUND' ||
+        data?.code === 'NotFoundException'
+      ) {
         showToast.error('Game not found. It may have ended.')
-      } else if (data?.code === 'FORBIDDEN' || data?.code === 'ForbiddenException') {
+      } else if (
+        data?.code === 'FORBIDDEN' ||
+        data?.code === 'ForbiddenException'
+      ) {
         showToast.error(`Access denied: ${errorMessage}`)
       } else if (data?.code === 'INVALID_STATE') {
         showToast.error(`Cannot perform action: ${errorMessage}`)

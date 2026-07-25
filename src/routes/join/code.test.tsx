@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '../../test/test-utils'
 
 // Mock TanStack Router
@@ -82,7 +82,7 @@ describe('Auto-Join Route (/join/:code)', () => {
     expect(screen.getByText(/Quick Join:/)).toBeInTheDocument()
     expect(screen.getAllByText('123456').length).toBeGreaterThan(0)
     expect(
-      screen.getByText(/has been auto-filled. Just enter your name to join!/)
+      screen.getByText(/has been auto-filled. Just enter your name to join!/),
     ).toBeInTheDocument()
   })
 
@@ -153,7 +153,9 @@ describe('Auto-Join Route - User Experience', () => {
   it('centers content vertically and horizontally', () => {
     render(<JoinWithCodePageContent />)
 
-    const mainContainer = screen.getByText(/Quick Join:/).closest('.min-h-screen')
+    const mainContainer = screen
+      .getByText(/Quick Join:/)
+      .closest('.min-h-screen')
     expect(mainContainer).toHaveClass('flex')
     expect(mainContainer).toHaveClass('items-center')
     expect(mainContainer).toHaveClass('justify-center')
@@ -163,7 +165,7 @@ describe('Auto-Join Route - User Experience', () => {
     render(<JoinWithCodePageContent />)
 
     expect(
-      screen.getByText(/Just enter your name to join!/)
+      screen.getByText(/Just enter your name to join!/),
     ).toBeInTheDocument()
   })
 })

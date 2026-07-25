@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TeamManagementPanel } from './TeamManagementPanel'
 import * as teamService from '../lib/api/services/team.service'
 import * as playerService from '../lib/api/services/player.service'
+import { TeamManagementPanel } from './TeamManagementPanel'
 
 // Mock services
 vi.mock('../lib/api/services/team.service')
@@ -128,7 +128,9 @@ describe('TeamManagementPanel', () => {
   it('should show message for non-host users', () => {
     renderPanel({ isHost: false })
 
-    expect(screen.getByText('Only the host can manage teams.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Only the host can manage teams.'),
+    ).toBeInTheDocument()
   })
 
   it('should display all teams with their players', async () => {

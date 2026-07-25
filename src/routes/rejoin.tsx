@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { sessionService } from '../lib/api/services'
 import { usePlayer } from '../contexts/PlayerContext'
@@ -104,7 +104,8 @@ function RejoinPage() {
           <div className="space-y-4">
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                No saved session found. You can either enter your player token to rejoin, or join a new session.
+                No saved session found. You can either enter your player token
+                to rejoin, or join a new session.
               </p>
             </div>
 
@@ -126,7 +127,8 @@ function RejoinPage() {
           <form onSubmit={handleManualRejoin} className="space-y-4">
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
               <p className="text-sm text-blue-800">
-                <strong>Lost your session?</strong> If you have your player token, enter it below to rejoin.
+                <strong>Lost your session?</strong> If you have your player
+                token, enter it below to rejoin.
               </p>
             </div>
 
@@ -147,7 +149,8 @@ function RejoinPage() {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Your token starts with "eyJ..." and was given to you when you joined
+                Your token starts with "eyJ..." and was given to you when you
+                joined
               </p>
             </div>
 
@@ -181,8 +184,8 @@ function RejoinPage() {
         {rejoinMutation.isError && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-800">
-              <strong>Failed to rejoin:</strong> Your session may have expired or the token is invalid.
-              Please try joining a new session.
+              <strong>Failed to rejoin:</strong> Your session may have expired
+              or the token is invalid. Please try joining a new session.
             </p>
           </div>
         )}

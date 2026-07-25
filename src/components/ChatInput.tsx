@@ -1,5 +1,6 @@
-import { useState, type KeyboardEvent } from 'react'
+import { useState } from 'react'
 import { showToast } from '../lib/toast'
+import type { KeyboardEvent } from 'react'
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void
@@ -77,8 +78,19 @@ export default function ChatInput({
           aria-label="Send message"
         >
           <span className="hidden sm:inline">Send</span>
-          <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          <svg
+            className="w-5 h-5 sm:hidden"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+            />
           </svg>
         </button>
       </div>

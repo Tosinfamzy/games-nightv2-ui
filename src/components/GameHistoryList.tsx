@@ -1,7 +1,7 @@
 import { useGameHistory } from '../hooks/useGameHistory'
-import type { UUID } from '../lib/api/types'
 import { GameCardSkeleton } from './LoadingSkeleton'
 import EmptyState from './EmptyState'
+import type { UUID } from '../lib/api/types'
 
 interface GameHistoryListProps {
   sessionId?: UUID

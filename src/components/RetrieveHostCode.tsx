@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useGamesMaster } from '../hooks/useGamesMaster'
 import { useNavigate } from '@tanstack/react-router'
+import { useGamesMaster } from '../hooks/useGamesMaster'
 
 export function RetrieveHostCode() {
   const [mode, setMode] = useState<'code' | 'name'>('code')

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useSocketContext } from '../lib/socket/socket-context'
 import type {
-  TimerTickEvent,
-  TurnStartedEvent,
-  TurnAdvancedEvent,
   TimerExpiredEvent,
+  TimerTickEvent,
+  TurnAdvancedEvent,
+  TurnStartedEvent,
 } from '../lib/api/types'
 
 /**

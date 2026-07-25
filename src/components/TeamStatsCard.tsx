@@ -6,7 +6,7 @@ type Player = BasePlayer & { skillLevel?: number }
 interface TeamStatsCardProps {
   teamName: string
   teamColor: string
-  players: Player[]
+  players: Array<Player>
   position?: number
   totalTeams?: number
 }
@@ -30,9 +30,16 @@ export function TeamStatsCard({
 
   // Get skill rating
   const getSkillRating = (skill: number) => {
-    if (skill >= 8) return { label: 'Elite', color: 'text-red-600', bg: 'bg-red-50' }
-    if (skill >= 6) return { label: 'Advanced', color: 'text-blue-600', bg: 'bg-blue-50' }
-    if (skill >= 4) return { label: 'Intermediate', color: 'text-yellow-600', bg: 'bg-yellow-50' }
+    if (skill >= 8)
+      return { label: 'Elite', color: 'text-red-600', bg: 'bg-red-50' }
+    if (skill >= 6)
+      return { label: 'Advanced', color: 'text-blue-600', bg: 'bg-blue-50' }
+    if (skill >= 4)
+      return {
+        label: 'Intermediate',
+        color: 'text-yellow-600',
+        bg: 'bg-yellow-50',
+      }
     return { label: 'Beginner', color: 'text-gray-600', bg: 'bg-gray-50' }
   }
 

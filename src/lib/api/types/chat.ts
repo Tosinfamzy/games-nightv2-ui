@@ -35,7 +35,7 @@ export interface ChatMessageEvent {
  * Chat history event payload (from WebSocket)
  */
 export interface ChatHistoryEvent {
-  messages: ChatMessage[]
+  messages: Array<ChatMessage>
   hasMore: boolean
   timestamp: string
 }

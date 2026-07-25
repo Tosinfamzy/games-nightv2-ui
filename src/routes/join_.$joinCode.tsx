@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { JoinSessionForm } from '../components/JoinSessionForm'
 import { sessionService } from '../lib/api/services'
 import { sessionKeys } from '../lib/api/hooks/use-session'
-import type { Session } from '../lib/api/types'
 import LoadingSkeleton from '../components/LoadingSkeleton'
+import type { Session } from '../lib/api/types'
 
 function AutoJoinPage() {
   const { joinCode } = Route.useParams()

@@ -1,7 +1,7 @@
-import {
-  TeamFormationStrategy,
-  type TeamFormationSuggestionsResponse,
-  type TeamSuggestion,
+import { TeamFormationStrategy } from '../../lib/api/types/team.dto'
+import type {
+  TeamFormationSuggestionsResponse,
+  TeamSuggestion,
 } from '../../lib/api/types/team.dto'
 import type { Team } from '../../lib/api/services/team.service'
 
@@ -20,7 +20,7 @@ export const mockTeam: Team = {
   updatedAt: new Date('2025-01-01T00:00:00Z').toISOString(),
 }
 
-export const mockTeams: Team[] = [
+export const mockTeams: Array<Team> = [
   {
     ...mockTeam,
     id: 'team-1',
@@ -37,7 +37,7 @@ export const mockTeams: Team[] = [
   },
 ]
 
-export const mockTeamsWithPlayers: Team[] = [
+export const mockTeamsWithPlayers: Array<Team> = [
   {
     ...mockTeam,
     id: 'team-1',
@@ -154,7 +154,7 @@ export function createMockTeam(overrides?: Partial<Team>): Team {
 export function createMockTeams(
   count: number,
   overrides?: Partial<Team>,
-): Team[] {
+): Array<Team> {
   return Array.from({ length: count }).map((_, i) =>
     createMockTeam({
       id: `team-${i + 1}`,
