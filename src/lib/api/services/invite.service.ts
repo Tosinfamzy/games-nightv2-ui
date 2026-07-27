@@ -55,6 +55,26 @@ export interface RsvpDTO {
   note?: string
 }
 
+/** Public event view behind a session's single shareable RSVP link. */
+export interface PublicRsvpView {
+  sessionId: string
+  sessionName: string
+  date: string
+  location?: string | null
+  description?: string | null
+  hostName?: string | null
+  goingHeadcount: number
+}
+
+/** A guest self-RSVPing via the shareable link (name required, no pre-invite). */
+export interface PublicRsvpDTO {
+  name: string
+  status: RsvpResponse
+  email?: string
+  plusOnes?: number
+  note?: string
+}
+
 export const inviteService = {
   // ----- Games-master guest-list management -----
   listBySession: (sessionId: string): Promise<Array<Invite>> => {
@@ -85,6 +105,18 @@ export const inviteService = {
 
   rsvp: (token: string, data: RsvpDTO): Promise<Invite> => {
     return fetchAPI<Invite>(`/invites/${token}/rsvp`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // ----- Open self-serve RSVP (single shareable session link) -----
+  getPublicView: (rsvpToken: string): Promise<PublicRsvpView> => {
+    return fetchAPI<PublicRsvpView>(`/rsvp/${rsvpToken}`)
+  },
+
+  selfRsvp: (rsvpToken: string, data: PublicRsvpDTO): Promise<Invite> => {
+    return fetchAPI<Invite>(`/rsvp/${rsvpToken}`, {
       method: 'POST',
       body: JSON.stringify(data),
     })

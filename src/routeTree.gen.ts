@@ -26,6 +26,7 @@ import { Route as SessionsIndexRouteImport } from './routes/sessions/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as SessionsNewRouteImport } from './routes/sessions/new'
 import { Route as SessionsIdRouteImport } from './routes/sessions/$id'
+import { Route as RsvpTokenRouteImport } from './routes/rsvp.$token'
 import { Route as JoinJoinCodeRouteImport } from './routes/join_.$joinCode'
 import { Route as JoinCodeRouteImport } from './routes/join/$code'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
@@ -122,6 +123,11 @@ const SessionsIdRoute = SessionsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => SessionsRoute,
 } as any)
+const RsvpTokenRoute = RsvpTokenRouteImport.update({
+  id: '/rsvp/$token',
+  path: '/rsvp/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JoinJoinCodeRoute = JoinJoinCodeRouteImport.update({
   id: '/join_/$joinCode',
   path: '/join/$joinCode',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/join/$code': typeof JoinCodeRoute
   '/join/$joinCode': typeof JoinJoinCodeRoute
+  '/rsvp/$token': typeof RsvpTokenRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
   '/games/': typeof GamesIndexRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/join/$code': typeof JoinCodeRoute
   '/join/$joinCode': typeof JoinJoinCodeRoute
+  '/rsvp/$token': typeof RsvpTokenRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
   '/games': typeof GamesIndexRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/join/$code': typeof JoinCodeRoute
   '/join_/$joinCode': typeof JoinJoinCodeRoute
+  '/rsvp/$token': typeof RsvpTokenRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
   '/games/': typeof GamesIndexRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/join/$code'
     | '/join/$joinCode'
+    | '/rsvp/$token'
     | '/sessions/$id'
     | '/sessions/new'
     | '/games/'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/join/$code'
     | '/join/$joinCode'
+    | '/rsvp/$token'
     | '/sessions/$id'
     | '/sessions/new'
     | '/games'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/join/$code'
     | '/join_/$joinCode'
+    | '/rsvp/$token'
     | '/sessions/$id'
     | '/sessions/new'
     | '/games/'
@@ -365,6 +377,7 @@ export interface RootRouteChildren {
   GmNewRoute: typeof GmNewRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JoinJoinCodeRoute: typeof JoinJoinCodeRoute
+  RsvpTokenRoute: typeof RsvpTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sessions/$id'
       preLoaderRoute: typeof SessionsIdRouteImport
       parentRoute: typeof SessionsRoute
+    }
+    '/rsvp/$token': {
+      id: '/rsvp/$token'
+      path: '/rsvp/$token'
+      fullPath: '/rsvp/$token'
+      preLoaderRoute: typeof RsvpTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/join_/$joinCode': {
       id: '/join_/$joinCode'
@@ -634,6 +654,7 @@ const rootRouteChildren: RootRouteChildren = {
   GmNewRoute: GmNewRoute,
   InviteTokenRoute: InviteTokenRoute,
   JoinJoinCodeRoute: JoinJoinCodeRoute,
+  RsvpTokenRoute: RsvpTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
