@@ -8,6 +8,7 @@ export { gameLibraryService } from './game-library.service'
 export { gamesMasterService } from './games-master.service'
 export { sessionManagementService } from './session-management.service'
 export { historyService } from './history.service'
+export { inviteService } from './invite.service'
 
 // Re-export types from services
 export type {

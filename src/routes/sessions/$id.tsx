@@ -18,6 +18,7 @@ import { SessionReadinessDashboard } from '../../components/SessionReadinessDash
 import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
 import { ManualTeamCreator } from '../../components/ManualTeamCreator'
 import SessionChat from '../../components/SessionChat'
+import { GuestList } from '../../components/GuestList'
 import GameHistoryList from '../../components/GameHistoryList'
 import PlayerStatusBadge from '../../components/PlayerStatusBadge'
 import OnlinePlayerCount from '../../components/OnlinePlayerCount'
@@ -43,7 +44,7 @@ function SessionDetailsPage() {
   const { id } = Route.useParams()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'players' | 'games' | 'teams' | 'chat' | 'history'
+    'overview' | 'players' | 'guests' | 'games' | 'teams' | 'chat' | 'history'
   >('overview')
   const [showManualTeamCreator, setShowManualTeamCreator] = useState(false)
   const [showQRCode, setShowQRCode] = useState(false)
@@ -462,6 +463,12 @@ function SessionDetailsPage() {
                   count: players.length,
                 },
                 {
+                  id: 'guests',
+                  label: 'Guests',
+                  shortLabel: 'Guests',
+                  icon: '✉️',
+                },
+                {
                   id: 'games',
                   label: 'Games',
                   shortLabel: 'Games',
@@ -526,6 +533,8 @@ function SessionDetailsPage() {
               isHost={isHost}
             />
           )}
+
+          {activeTab === 'guests' && <GuestList sessionId={id} />}
 
           {activeTab === 'games' && (
             <EnhancedGamesTab
