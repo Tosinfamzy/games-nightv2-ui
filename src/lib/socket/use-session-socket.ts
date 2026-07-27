@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
 import { sessionKeys } from '../api/hooks/use-session'
+import { inviteKeys } from '../api/hooks/use-invite'
 import { useSocketContext } from './socket-context'
 
 /**
@@ -79,6 +80,26 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     return () => {
       sessionsSocket.off('session:player-joined', handlePlayerJoined)
+    }
+  }, [sessionsSocket, sessionId, queryClient])
+
+  // Listen for guest-list / RSVP changes -> refresh the Guests tab live
+  useEffect(() => {
+    if (!sessionsSocket || !sessionId) return
+
+    const handleInvitesUpdated = () => {
+      queryClient.invalidateQueries({
+        queryKey: inviteKeys.session(sessionId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: inviteKeys.summary(sessionId),
+      })
+    }
+
+    sessionsSocket.on('session:invites-updated', handleInvitesUpdated)
+
+    return () => {
+      sessionsSocket.off('session:invites-updated', handleInvitesUpdated)
     }
   }, [sessionsSocket, sessionId, queryClient])
 
