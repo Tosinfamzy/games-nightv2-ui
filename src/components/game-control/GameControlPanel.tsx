@@ -100,9 +100,7 @@ export default function GameControlPanel({
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Teams</div>
-          <div className="text-2xl font-bold text-gray-900">
-            {teams.length}
-          </div>
+          <div className="text-2xl font-bold text-gray-900">{teams.length}</div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Players</div>

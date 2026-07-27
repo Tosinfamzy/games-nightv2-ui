@@ -95,7 +95,10 @@ function GuestRow({
         <p className="font-medium text-gray-900 truncate">
           {invite.name || 'Guest'}
           {invite.plusOnes > 0 && (
-            <span className="text-gray-500 font-normal"> +{invite.plusOnes}</span>
+            <span className="text-gray-500 font-normal">
+              {' '}
+              +{invite.plusOnes}
+            </span>
           )}
           {invite.playerId && (
             <span
