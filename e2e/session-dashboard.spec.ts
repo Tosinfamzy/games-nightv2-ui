@@ -7,10 +7,13 @@ test.describe('Session Dashboard', () => {
     // Wait for network to settle
     await page.waitForLoadState('networkidle')
 
-    // Page can show loading, empty state, error state, or session list
-    // Check for any valid state indicator (h1 or h2 heading, or state message)
+    // Page can show loading, empty state, error state, or session list.
+    // Match any of those — including the "Loading sessions..." indicator, which
+    // is what shows when the API is unavailable (e.g. in CI with no backend).
     const validContent = page
       .locator('h1, h2, [class*="empty"], button:has-text("Create Session")')
+      .or(page.getByText(/loading sessions/i))
+      .or(page.getByText(/failed to load|try again/i))
       .first()
     await expect(validContent).toBeVisible()
   })
