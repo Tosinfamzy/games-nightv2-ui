@@ -35,9 +35,6 @@ import { Route as GmLoginRouteImport } from './routes/gm/login'
 import { Route as GamesNewRouteImport } from './routes/games/new'
 import { Route as GamesIdRouteImport } from './routes/games/$id'
 import { Route as SessionsIdGameRouteImport } from './routes/sessions/$id_.game'
-import { Route as GamesIdScoreRouteImport } from './routes/games/$id.score'
-import { Route as GamesIdLiveRouteImport } from './routes/games/$id.live'
-import { Route as GamesIdControlRouteImport } from './routes/games/$id.control'
 
 const TeamsRoute = TeamsRouteImport.update({
   id: '/teams',
@@ -169,21 +166,6 @@ const SessionsIdGameRoute = SessionsIdGameRouteImport.update({
   path: '/$id/game',
   getParentRoute: () => SessionsRoute,
 } as any)
-const GamesIdScoreRoute = GamesIdScoreRouteImport.update({
-  id: '/score',
-  path: '/score',
-  getParentRoute: () => GamesIdRoute,
-} as any)
-const GamesIdLiveRoute = GamesIdLiveRouteImport.update({
-  id: '/live',
-  path: '/live',
-  getParentRoute: () => GamesIdRoute,
-} as any)
-const GamesIdControlRoute = GamesIdControlRouteImport.update({
-  id: '/control',
-  path: '/control',
-  getParentRoute: () => GamesIdRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -199,7 +181,7 @@ export interface FileRoutesByFullPath {
   '/sessions': typeof SessionsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/teams': typeof TeamsRoute
-  '/games/$id': typeof GamesIdRouteWithChildren
+  '/games/$id': typeof GamesIdRoute
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
@@ -211,9 +193,6 @@ export interface FileRoutesByFullPath {
   '/sessions/new': typeof SessionsNewRoute
   '/games/': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
-  '/games/$id/control': typeof GamesIdControlRoute
-  '/games/$id/live': typeof GamesIdLiveRoute
-  '/games/$id/score': typeof GamesIdScoreRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
 }
 export interface FileRoutesByTo {
@@ -228,7 +207,7 @@ export interface FileRoutesByTo {
   '/scoring': typeof ScoringRoute
   '/settings': typeof SettingsRoute
   '/teams': typeof TeamsRoute
-  '/games/$id': typeof GamesIdRouteWithChildren
+  '/games/$id': typeof GamesIdRoute
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
@@ -240,9 +219,6 @@ export interface FileRoutesByTo {
   '/sessions/new': typeof SessionsNewRoute
   '/games': typeof GamesIndexRoute
   '/sessions': typeof SessionsIndexRoute
-  '/games/$id/control': typeof GamesIdControlRoute
-  '/games/$id/live': typeof GamesIdLiveRoute
-  '/games/$id/score': typeof GamesIdScoreRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
 }
 export interface FileRoutesById {
@@ -260,7 +236,7 @@ export interface FileRoutesById {
   '/sessions': typeof SessionsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/teams': typeof TeamsRoute
-  '/games/$id': typeof GamesIdRouteWithChildren
+  '/games/$id': typeof GamesIdRoute
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
@@ -272,9 +248,6 @@ export interface FileRoutesById {
   '/sessions/new': typeof SessionsNewRoute
   '/games/': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
-  '/games/$id/control': typeof GamesIdControlRoute
-  '/games/$id/live': typeof GamesIdLiveRoute
-  '/games/$id/score': typeof GamesIdScoreRoute
   '/sessions/$id_/game': typeof SessionsIdGameRoute
 }
 export interface FileRouteTypes {
@@ -305,9 +278,6 @@ export interface FileRouteTypes {
     | '/sessions/new'
     | '/games/'
     | '/sessions/'
-    | '/games/$id/control'
-    | '/games/$id/live'
-    | '/games/$id/score'
     | '/sessions/$id/game'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -334,9 +304,6 @@ export interface FileRouteTypes {
     | '/sessions/new'
     | '/games'
     | '/sessions'
-    | '/games/$id/control'
-    | '/games/$id/live'
-    | '/games/$id/score'
     | '/sessions/$id/game'
   id:
     | '__root__'
@@ -365,9 +332,6 @@ export interface FileRouteTypes {
     | '/sessions/new'
     | '/games/'
     | '/sessions/'
-    | '/games/$id/control'
-    | '/games/$id/live'
-    | '/games/$id/score'
     | '/sessions/$id_/game'
   fileRoutesById: FileRoutesById
 }
@@ -576,53 +540,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SessionsIdGameRouteImport
       parentRoute: typeof SessionsRoute
     }
-    '/games/$id/score': {
-      id: '/games/$id/score'
-      path: '/score'
-      fullPath: '/games/$id/score'
-      preLoaderRoute: typeof GamesIdScoreRouteImport
-      parentRoute: typeof GamesIdRoute
-    }
-    '/games/$id/live': {
-      id: '/games/$id/live'
-      path: '/live'
-      fullPath: '/games/$id/live'
-      preLoaderRoute: typeof GamesIdLiveRouteImport
-      parentRoute: typeof GamesIdRoute
-    }
-    '/games/$id/control': {
-      id: '/games/$id/control'
-      path: '/control'
-      fullPath: '/games/$id/control'
-      preLoaderRoute: typeof GamesIdControlRouteImport
-      parentRoute: typeof GamesIdRoute
-    }
   }
 }
 
-interface GamesIdRouteChildren {
-  GamesIdControlRoute: typeof GamesIdControlRoute
-  GamesIdLiveRoute: typeof GamesIdLiveRoute
-  GamesIdScoreRoute: typeof GamesIdScoreRoute
-}
-
-const GamesIdRouteChildren: GamesIdRouteChildren = {
-  GamesIdControlRoute: GamesIdControlRoute,
-  GamesIdLiveRoute: GamesIdLiveRoute,
-  GamesIdScoreRoute: GamesIdScoreRoute,
-}
-
-const GamesIdRouteWithChildren =
-  GamesIdRoute._addFileChildren(GamesIdRouteChildren)
-
 interface GamesRouteChildren {
-  GamesIdRoute: typeof GamesIdRouteWithChildren
+  GamesIdRoute: typeof GamesIdRoute
   GamesNewRoute: typeof GamesNewRoute
   GamesIndexRoute: typeof GamesIndexRoute
 }
 
 const GamesRouteChildren: GamesRouteChildren = {
-  GamesIdRoute: GamesIdRouteWithChildren,
+  GamesIdRoute: GamesIdRoute,
   GamesNewRoute: GamesNewRoute,
   GamesIndexRoute: GamesIndexRoute,
 }

@@ -14,9 +14,7 @@ import { useSession } from '../../lib/api/hooks/use-session'
 import { useGamesMasterContext } from '../../contexts/GamesMasterContext'
 
 export const Route = createFileRoute('/sessions/$id_/game')({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { gameId: string } => ({
+  validateSearch: (search: Record<string, unknown>): { gameId: string } => ({
     gameId: typeof search.gameId === 'string' ? search.gameId : '',
   }),
   component: InSessionGamePage,
@@ -40,7 +38,9 @@ function InSessionGamePage() {
 
   const { data: session } = useSession(id)
   const { gm } = useGamesMasterContext()
-  const isHost = Boolean(gm?.id && session?.host.id && gm.id === session.host.id)
+  const isHost = Boolean(
+    gm?.id && session?.host.id && gm.id === session.host.id,
+  )
 
   // Real-time game-room updates (notifications + error toasts); the control and
   // scoring components self-subscribe for their own data.
@@ -81,7 +81,7 @@ function InSessionGamePage() {
 
         {isHost ? (
           /* HOST — full control layout */
-          (<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <GameControlPanel gameId={gameId} />
               <RoundManager gameId={gameId} />
@@ -94,14 +94,14 @@ function InSessionGamePage() {
                 <LiveLeaderboard gameId={gameId} showRoundBreakdown />
               </div>
             </div>
-          </div>)
+          </div>
         ) : (
           /* PLAYER — read-only live view (mobile-first) */
-          (<div className="max-w-2xl mx-auto space-y-6">
+          <div className="max-w-2xl mx-auto space-y-6">
             <GameTimer gameId={gameId} />
             <LiveLeaderboard gameId={gameId} showRoundBreakdown />
             <RoundScorecard gameId={gameId} />
-          </div>)
+          </div>
         )}
       </div>
     </div>
