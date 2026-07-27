@@ -28,6 +28,7 @@ import { Route as SessionsNewRouteImport } from './routes/sessions/new'
 import { Route as SessionsIdRouteImport } from './routes/sessions/$id'
 import { Route as JoinJoinCodeRouteImport } from './routes/join_.$joinCode'
 import { Route as JoinCodeRouteImport } from './routes/join/$code'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as GmNewRouteImport } from './routes/gm/new'
 import { Route as GmLoginRouteImport } from './routes/gm/login'
 import { Route as GamesNewRouteImport } from './routes/games/new'
@@ -131,6 +132,11 @@ const JoinCodeRoute = JoinCodeRouteImport.update({
   path: '/$code',
   getParentRoute: () => JoinRoute,
 } as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GmNewRoute = GmNewRouteImport.update({
   id: '/gm/new',
   path: '/gm/new',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/join/$code': typeof JoinCodeRoute
   '/join/$joinCode': typeof JoinJoinCodeRoute
   '/sessions/$id': typeof SessionsIdRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/join/$code': typeof JoinCodeRoute
   '/join/$joinCode': typeof JoinJoinCodeRoute
   '/sessions/$id': typeof SessionsIdRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/games/new': typeof GamesNewRoute
   '/gm/login': typeof GmLoginRoute
   '/gm/new': typeof GmNewRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/join/$code': typeof JoinCodeRoute
   '/join_/$joinCode': typeof JoinJoinCodeRoute
   '/sessions/$id': typeof SessionsIdRoute
@@ -270,6 +279,7 @@ export interface FileRouteTypes {
     | '/games/new'
     | '/gm/login'
     | '/gm/new'
+    | '/invite/$token'
     | '/join/$code'
     | '/join/$joinCode'
     | '/sessions/$id'
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/games/new'
     | '/gm/login'
     | '/gm/new'
+    | '/invite/$token'
     | '/join/$code'
     | '/join/$joinCode'
     | '/sessions/$id'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/games/new'
     | '/gm/login'
     | '/gm/new'
+    | '/invite/$token'
     | '/join/$code'
     | '/join_/$joinCode'
     | '/sessions/$id'
@@ -351,6 +363,7 @@ export interface RootRouteChildren {
   TeamsRoute: typeof TeamsRoute
   GmLoginRoute: typeof GmLoginRoute
   GmNewRoute: typeof GmNewRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   JoinJoinCodeRoute: typeof JoinJoinCodeRoute
 }
 
@@ -489,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinCodeRouteImport
       parentRoute: typeof JoinRoute
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gm/new': {
       id: '/gm/new'
       path: '/gm/new'
@@ -612,6 +632,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeamsRoute: TeamsRoute,
   GmLoginRoute: GmLoginRoute,
   GmNewRoute: GmNewRoute,
+  InviteTokenRoute: InviteTokenRoute,
   JoinJoinCodeRoute: JoinJoinCodeRoute,
 }
 export const routeTree = rootRouteImport
