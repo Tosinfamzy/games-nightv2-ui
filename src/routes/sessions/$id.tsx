@@ -534,7 +534,12 @@ function SessionDetailsPage() {
             />
           )}
 
-          {activeTab === 'guests' && <GuestList sessionId={id} />}
+          {activeTab === 'guests' && (
+            <GuestList
+              sessionId={id}
+              publicRsvpToken={session.publicRsvpToken}
+            />
+          )}
 
           {activeTab === 'games' && (
             <EnhancedGamesTab

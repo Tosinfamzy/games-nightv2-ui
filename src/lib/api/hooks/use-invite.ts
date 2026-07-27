@@ -5,6 +5,8 @@ import type {
   CreateInviteDTO,
   Invite,
   InviteSummary,
+  PublicRsvpDTO,
+  PublicRsvpView,
   RsvpDTO,
 } from '../services/invite.service'
 
@@ -15,6 +17,8 @@ export const inviteKeys = {
   summary: (sessionId: string) =>
     [...inviteKeys.all, 'summary', sessionId] as const,
   token: (token: string) => [...inviteKeys.all, 'token', token] as const,
+  publicView: (token: string) =>
+    [...inviteKeys.all, 'public-view', token] as const,
 }
 
 // ----- Games-master queries -----
@@ -45,6 +49,16 @@ export const useInviteByToken = (
   useQuery({
     queryKey: inviteKeys.token(token),
     queryFn: () => inviteService.getByToken(token),
+    enabled: Boolean(token),
+    retry: 1,
+  })
+
+export const usePublicRsvpView = (
+  token: string,
+): UseQueryResult<PublicRsvpView, Error> =>
+  useQuery({
+    queryKey: inviteKeys.publicView(token),
+    queryFn: () => inviteService.getPublicView(token),
     enabled: Boolean(token),
     retry: 1,
   })
@@ -85,6 +99,18 @@ export const useRsvp = (
     mutationFn: (data) => inviteService.rsvp(token, data),
     onSuccess: (invite) => {
       queryClient.setQueryData(inviteKeys.token(token), invite)
+    },
+  })
+}
+
+export const useSelfRsvp = (
+  token: string,
+): UseMutationResult<Invite, Error, PublicRsvpDTO> => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data) => inviteService.selfRsvp(token, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: inviteKeys.publicView(token) })
     },
   })
 }

@@ -16,6 +16,8 @@ export interface Session {
   location?: string
   status: SessionStatus
   joinCode: string
+  /** Token for the single shareable RSVP link (host-facing). */
+  publicRsvpToken?: string
   host: {
     id: string
     name: string

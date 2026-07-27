@@ -16,11 +16,54 @@ const STATUS_STYLES: Record<RsvpStatus, { label: string; className: string }> =
     PENDING: { label: 'Invited', className: 'bg-gray-100 text-gray-600' },
   }
 
+/** Display order for the grouped guest list. */
+const GROUP_ORDER: Array<{ status: RsvpStatus; heading: string }> = [
+  { status: 'GOING', heading: 'Going' },
+  { status: 'MAYBE', heading: 'Maybe' },
+  { status: 'PENDING', heading: 'Invited — no reply' },
+  { status: 'NOT_GOING', heading: "Can't make it" },
+]
+
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-lg bg-white border border-gray-200 px-3 py-2 text-center">
       <div className="text-2xl font-bold text-gray-900">{value}</div>
       <div className="text-xs text-gray-500">{label}</div>
+    </div>
+  )
+}
+
+/** One-link sharing: copy the open self-serve RSVP URL for the whole session. */
+function ShareLink({ publicRsvpToken }: { publicRsvpToken?: string }) {
+  if (!publicRsvpToken) return null
+  const url = `${window.location.origin}/rsvp/${publicRsvpToken}`
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url)
+      toastHelpers.copied('shareable RSVP link')
+    } catch {
+      showToast.error('Could not copy the link')
+    }
+  }
+
+  return (
+    <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 flex flex-col sm:flex-row sm:items-center gap-2">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-blue-900">
+          Shareable invite link
+        </p>
+        <p className="text-xs text-blue-700 truncate">{url}</p>
+        <p className="text-xs text-blue-600 mt-0.5">
+          Anyone with this link can RSVP themselves — drop it in the group chat.
+        </p>
+      </div>
+      <button
+        onClick={copy}
+        className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 min-h-[44px] flex-shrink-0"
+      >
+        Copy link
+      </button>
     </div>
   )
 }
@@ -52,12 +95,20 @@ function GuestRow({
         <p className="font-medium text-gray-900 truncate">
           {invite.name || 'Guest'}
           {invite.plusOnes > 0 && (
-            <span className="text-gray-500 font-normal">
-              {' '}
-              +{invite.plusOnes}
+            <span className="text-gray-500 font-normal"> +{invite.plusOnes}</span>
+          )}
+          {invite.playerId && (
+            <span
+              className="ml-1.5 text-green-600"
+              title="Checked in — joined the session"
+            >
+              ✓
             </span>
           )}
         </p>
+        {invite.email && (
+          <p className="text-xs text-gray-400 truncate">{invite.email}</p>
+        )}
         {invite.note && (
           <p className="text-sm text-gray-500 truncate">“{invite.note}”</p>
         )}
@@ -71,7 +122,7 @@ function GuestRow({
         <button
           onClick={copyLink}
           className="text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px] px-2"
-          title="Copy invite link"
+          title="Copy this guest's personal invite link"
         >
           Copy link
         </button>
@@ -87,7 +138,13 @@ function GuestRow({
   )
 }
 
-export function GuestList({ sessionId }: { sessionId: string }) {
+export function GuestList({
+  sessionId,
+  publicRsvpToken,
+}: {
+  sessionId: string
+  publicRsvpToken?: string
+}) {
   const { data: invites = [], isLoading } = useSessionInvites(sessionId)
   const { data: summary } = useInviteSummary(sessionId)
   const addInvite = useAddInvite(sessionId)
@@ -130,6 +187,9 @@ export function GuestList({ sessionId }: { sessionId: string }) {
         <StatCard label="Headcount" value={summary?.headcount ?? 0} />
       </div>
 
+      {/* Single shareable link */}
+      <ShareLink publicRsvpToken={publicRsvpToken} />
+
       {/* Add guest */}
       <form
         onSubmit={handleAdd}
@@ -158,24 +218,37 @@ export function GuestList({ sessionId }: { sessionId: string }) {
         </button>
       </form>
 
-      {/* Guest list */}
+      {/* Guest list, grouped by RSVP status */}
       {isLoading ? (
         <p className="text-gray-500 text-sm">Loading guest list…</p>
       ) : invites.length === 0 ? (
         <p className="text-gray-500 text-sm">
-          No guests yet. Add someone above, then share their invite link.
+          No guests yet. Share the link above, or add someone directly.
         </p>
       ) : (
-        <ul className="divide-y divide-gray-100">
-          {invites.map((invite) => (
-            <GuestRow
-              key={invite.id}
-              invite={invite}
-              onRemove={handleRemove}
-              removing={removeInvite.isPending}
-            />
-          ))}
-        </ul>
+        <div className="space-y-5">
+          {GROUP_ORDER.map(({ status, heading }) => {
+            const group = invites.filter((i) => i.rsvpStatus === status)
+            if (group.length === 0) return null
+            return (
+              <div key={status}>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                  {heading} ({group.length})
+                </h3>
+                <ul className="divide-y divide-gray-100">
+                  {group.map((invite) => (
+                    <GuestRow
+                      key={invite.id}
+                      invite={invite}
+                      onRemove={handleRemove}
+                      removing={removeInvite.isPending}
+                    />
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )
