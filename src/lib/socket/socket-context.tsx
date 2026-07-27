@@ -1,7 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { io } from 'socket.io-client'
 import { showToast } from '../toast'
+import {
+  ErrorSeverity,
+  classifyConnectError,
+  handleWebSocketError,
+} from '../utils/socket-error-handler'
 import { usePlayer } from '../../contexts/PlayerContext'
+import type { ProcessedError } from '../utils/socket-error-handler'
 import type { Socket } from 'socket.io-client'
 import type { ReactNode } from 'react'
 
@@ -17,6 +23,73 @@ const getApiUrl = () => {
 }
 
 const API_URL = getApiUrl()
+
+const REDIRECT_DELAY_MS = 3000
+
+/** Surface a processed error as a toast, and redirect if it requires re-auth. */
+function applyProcessedError(processed: ProcessedError): void {
+  if (processed.severity === ErrorSeverity.WARNING) {
+    showToast.warning(processed.message)
+  } else if (processed.severity === ErrorSeverity.INFO) {
+    showToast.info(processed.message)
+  } else {
+    showToast.error(processed.message)
+  }
+
+  if (processed.shouldRedirect && processed.redirectPath) {
+    const path = processed.redirectPath
+    // Delay so the user can read the toast before we navigate to rejoin.
+    setTimeout(() => {
+      window.location.href = path
+    }, REDIRECT_DELAY_MS)
+  }
+}
+
+/**
+ * Attach the shared lifecycle + error handlers to a namespace socket.
+ * `onConnectedChange` lets each socket update its own connection state.
+ */
+function attachHandlers(
+  socket: Socket,
+  label: string,
+  onConnectedChange: (connected: boolean) => void,
+): void {
+  socket.on('connect', () => {
+    onConnectedChange(true)
+  })
+
+  socket.on('disconnect', () => {
+    onConnectedChange(false)
+  })
+
+  // Transport/handshake failures (no guaranteed structured code).
+  socket.on('connect_error', (error: Error) => {
+    console.error(`${label} socket connect_error:`, error)
+    applyProcessedError(classifyConnectError(error, label))
+  })
+
+  // Server-pushed runtime errors from the global exception filter.
+  socket.on('exception', (payload: unknown) => {
+    console.error(`${label} socket exception:`, payload)
+    applyProcessedError(handleWebSocketError(payload, label))
+  })
+
+  socket.on('reconnect_failed', () => {
+    showToast.error(
+      `Unable to reconnect to ${label}. Please refresh the page.`,
+      10000,
+    )
+  })
+}
+
+const SOCKET_OPTIONS = {
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 30000,
+  randomizationFactor: 0.1,
+}
 
 export interface SocketContextValue {
   sessionsSocket: Socket | null
@@ -67,191 +140,21 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   useEffect(() => {
     // Only connect if we have a player token
     if (!playerToken) {
-      console.log('No player token available, skipping socket connections')
       return
     }
 
-    console.log('Creating socket connections with player token')
+    const auth = { playerToken }
+    const sessionSocket = io(`${API_URL}/sessions`, { ...SOCKET_OPTIONS, auth })
+    const gameSocket = io(`${API_URL}/games`, { ...SOCKET_OPTIONS, auth })
+    const chatSocket = io(`${API_URL}/chat`, { ...SOCKET_OPTIONS, auth })
 
-    // Create sessions namespace socket with authentication
-    const sessionSocket = io(`${API_URL}/sessions`, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 30000,
-      randomizationFactor: 0.1,
-      auth: {
-        playerToken,
-      },
+    // Sessions drives the top-level `isConnected` flag as well.
+    attachHandlers(sessionSocket, 'sessions', (connected) => {
+      setSessionsConnected(connected)
+      setIsConnected(connected)
     })
-
-    // Create games namespace socket with authentication
-    const gameSocket = io(`${API_URL}/games`, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 30000,
-      randomizationFactor: 0.1,
-      auth: {
-        playerToken,
-      },
-    })
-
-    // Create chat namespace socket with authentication
-    const chatSocket = io(`${API_URL}/chat`, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 30000,
-      randomizationFactor: 0.1,
-      auth: {
-        playerToken,
-      },
-    })
-
-    // Connection handlers for sessions socket
-    sessionSocket.on('connect', () => {
-      console.log('Sessions socket connected:', sessionSocket.id)
-      setSessionsConnected(true)
-      setIsConnected(true)
-    })
-
-    sessionSocket.on('disconnect', () => {
-      console.log('Sessions socket disconnected')
-      setSessionsConnected(false)
-      setIsConnected(false)
-    })
-
-    sessionSocket.on('connect_error', (error) => {
-      console.error('Sessions socket connection error:', error)
-
-      let message = 'Failed to connect to sessions. '
-      const errorMessage = error?.message?.toLowerCase() || ''
-
-      if (errorMessage.includes('cors')) {
-        message += 'Server configuration issue detected.'
-      } else if (
-        errorMessage.includes('unauthorized') ||
-        errorMessage.includes('invalid') ||
-        errorMessage.includes('expired') ||
-        errorMessage.includes('token')
-      ) {
-        message += 'Your session expired. Please rejoin.'
-        // Clear invalid token after short delay to allow user to see error
-        setTimeout(() => {
-          window.location.href = '/rejoin'
-        }, 3000)
-      } else if (errorMessage.includes('econnrefused')) {
-        message += 'Server is unreachable. Please check your connection.'
-      } else {
-        message += 'Retrying...'
-      }
-
-      showToast.error(message)
-    })
-
-    sessionSocket.on('reconnect_failed', () => {
-      console.error('Sessions socket reconnection failed')
-      showToast.error(
-        'Unable to reconnect to sessions. Please refresh the page.',
-        10000,
-      )
-    })
-
-    // Connection handlers for games socket
-    gameSocket.on('connect', () => {
-      console.log('Games socket connected:', gameSocket.id)
-      setGamesConnected(true)
-    })
-
-    gameSocket.on('disconnect', () => {
-      console.log('Games socket disconnected')
-      setGamesConnected(false)
-    })
-
-    gameSocket.on('connect_error', (error) => {
-      console.error('Games socket connection error:', error)
-
-      let message = 'Failed to connect to games. '
-      const errorMessage = error?.message?.toLowerCase() || ''
-
-      if (errorMessage.includes('cors')) {
-        message += 'Server configuration issue detected.'
-      } else if (
-        errorMessage.includes('unauthorized') ||
-        errorMessage.includes('invalid') ||
-        errorMessage.includes('expired') ||
-        errorMessage.includes('token')
-      ) {
-        message += 'Your session expired. Please rejoin.'
-        setTimeout(() => {
-          window.location.href = '/rejoin'
-        }, 3000)
-      } else if (errorMessage.includes('econnrefused')) {
-        message += 'Server is unreachable. Please check your connection.'
-      } else {
-        message += 'Retrying...'
-      }
-
-      showToast.error(message)
-    })
-
-    gameSocket.on('reconnect_failed', () => {
-      console.error('Games socket reconnection failed')
-      showToast.error(
-        'Unable to reconnect to games. Please refresh the page.',
-        10000,
-      )
-    })
-
-    // Connection handlers for chat socket
-    chatSocket.on('connect', () => {
-      console.log('Chat socket connected:', chatSocket.id)
-      setChatConnected(true)
-    })
-
-    chatSocket.on('disconnect', () => {
-      console.log('Chat socket disconnected')
-      setChatConnected(false)
-    })
-
-    chatSocket.on('connect_error', (error) => {
-      console.error('Chat socket connection error:', error)
-
-      let message = 'Failed to connect to chat. '
-      const errorMessage = error?.message?.toLowerCase() || ''
-
-      if (errorMessage.includes('cors')) {
-        message += 'Server configuration issue detected.'
-      } else if (
-        errorMessage.includes('unauthorized') ||
-        errorMessage.includes('invalid') ||
-        errorMessage.includes('expired') ||
-        errorMessage.includes('token')
-      ) {
-        message += 'Your session expired. Please rejoin.'
-        setTimeout(() => {
-          window.location.href = '/rejoin'
-        }, 3000)
-      } else if (errorMessage.includes('econnrefused')) {
-        message += 'Server is unreachable. Please check your connection.'
-      } else {
-        message += 'Retrying...'
-      }
-
-      showToast.error(message)
-    })
-
-    chatSocket.on('reconnect_failed', () => {
-      console.error('Chat socket reconnection failed')
-      showToast.error(
-        'Unable to reconnect to chat. Please refresh the page.',
-        10000,
-      )
-    })
+    attachHandlers(gameSocket, 'games', setGamesConnected)
+    attachHandlers(chatSocket, 'chat', setChatConnected)
 
     setSessionsSocket(sessionSocket)
     setGamesSocket(gameSocket)
@@ -259,7 +162,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     // Cleanup on unmount or token change
     return () => {
-      console.log('Disconnecting sockets (cleanup)')
       sessionSocket.disconnect()
       gameSocket.disconnect()
       chatSocket.disconnect()
@@ -267,18 +169,11 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   }, [playerToken]) // Reconnect when player token changes
 
   const reconnect = () => {
-    console.log('Manual reconnect triggered')
-    if (sessionsSocket) {
-      sessionsSocket.disconnect()
-      sessionsSocket.connect()
-    }
-    if (gamesSocket) {
-      gamesSocket.disconnect()
-      gamesSocket.connect()
-    }
-    if (chatSocket) {
-      chatSocket.disconnect()
-      chatSocket.connect()
+    for (const socket of [sessionsSocket, gamesSocket, chatSocket]) {
+      if (socket) {
+        socket.disconnect()
+        socket.connect()
+      }
     }
     showToast.info('Reconnecting...')
   }
