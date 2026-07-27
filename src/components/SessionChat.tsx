@@ -50,10 +50,7 @@ export default function SessionChat({
   // Handle WebSocket errors
   useEffect(() => {
     if (error) {
-      const processedError = handleWebSocketError({
-        error,
-        code: 'ChatError',
-      })
+      const processedError = handleWebSocketError(error, 'chat')
       console.error('Chat error:', processedError.message)
       // Error will be displayed in UI
     }

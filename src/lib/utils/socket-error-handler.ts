@@ -1,23 +1,17 @@
-/**
- * WebSocket error interface matching backend error format
- */
-export interface WebSocketError {
-  error: string
-  code: string
-}
+import { isAuthError, resolveErrorMessage } from '../errors/error-codes'
 
 /**
- * Error severity levels
+ * Processes WebSocket errors into a consistent, code-driven result the UI can
+ * act on. Branches on the backend's stable error `code` (via the shared
+ * error-codes helpers) rather than sniffing message strings.
  */
+
 export enum ErrorSeverity {
   ERROR = 'error',
   WARNING = 'warning',
   INFO = 'info',
 }
 
-/**
- * Processed error result
- */
 export interface ProcessedError {
   message: string
   severity: ErrorSeverity
@@ -25,147 +19,122 @@ export interface ProcessedError {
   redirectPath?: string
 }
 
+interface NormalizedError {
+  code?: string
+  message?: string
+  details?: unknown
+}
+
 /**
- * Handle WebSocket errors and return processed error information
- * Components can use this to display errors in their preferred way
+ * Normalize anything a socket hands us — the backend `exception` envelope
+ * ({ code, message, details }), the legacy gateway shape ({ error, code }),
+ * a raw Error, or a string — into a common shape.
  */
-export function handleWebSocketError(error: WebSocketError): ProcessedError {
-  console.error('WebSocket error:', error)
+function normalize(input: unknown): NormalizedError {
+  if (typeof input === 'string') return { message: input }
+  if (input instanceof Error) return { message: input.message }
+  if (input && typeof input === 'object') {
+    const o = input as Record<string, unknown>
+    return {
+      code: typeof o.code === 'string' ? o.code : undefined,
+      // Prefer the new `message`, fall back to the legacy `error` field.
+      message:
+        typeof o.message === 'string'
+          ? o.message
+          : typeof o.error === 'string'
+            ? o.error
+            : undefined,
+      details: o.details,
+    }
+  }
+  return {}
+}
 
-  switch (error.code) {
-    case 'NotFoundException':
-      return {
-        message: error.error || 'Resource not found',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
+/** Redirect target for errors that require the player to rejoin. */
+const REJOIN_PATH = '/rejoin'
 
-    case 'ForbiddenException':
-      return {
-        message: `Access denied: ${error.error}`,
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
+/**
+ * Process a server-pushed WebSocket error (the `exception` event, or a legacy
+ * `*:error` payload).
+ */
+export function handleWebSocketError(
+  input: unknown,
+  contextLabel = 'the server',
+): ProcessedError {
+  const normalized = normalize(input)
 
-    case 'UnauthorizedException':
-      return {
-        message: 'You are not authorized. Please log in again.',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: true,
-        redirectPath: '/login',
-      }
+  if (isAuthError(normalized)) {
+    return {
+      message: 'Your session expired. Please rejoin.',
+      severity: ErrorSeverity.ERROR,
+      shouldRedirect: true,
+      redirectPath: REJOIN_PATH,
+    }
+  }
 
-    case 'BadRequestException':
-      return {
-        message: error.error || 'Invalid request',
-        severity: ErrorSeverity.WARNING,
-        shouldRedirect: false,
-      }
-
-    case 'ConflictException':
-      return {
-        message: error.error || 'Conflict occurred',
-        severity: ErrorSeverity.WARNING,
-        shouldRedirect: false,
-      }
-
-    case 'InternalServerErrorException':
-      return {
-        message: 'An internal server error occurred. Please try again later.',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
-
-    default:
-      return {
-        message: error.error || 'An unknown error occurred',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
+  return {
+    message: resolveErrorMessage(
+      normalized,
+      `Something went wrong with ${contextLabel}.`,
+    ),
+    severity: ErrorSeverity.ERROR,
+    shouldRedirect: false,
   }
 }
 
 /**
- * Handle HTTP errors from REST API calls
+ * Classify a Socket.IO `connect_error` (a transport/handshake failure, which
+ * unlike a runtime `exception` carries no guaranteed structured code). We
+ * prefer a structured `code` if the server attached one via `error.data`, then
+ * fall back to the few transport signatures worth distinguishing for the user.
  */
-export function handleHTTPError(response: Response): ProcessedError {
-  console.error('HTTP error:', response.status, response.statusText)
-
-  switch (response.status) {
-    case 400:
-      return {
-        message: 'Invalid request',
-        severity: ErrorSeverity.WARNING,
-        shouldRedirect: false,
-      }
-
-    case 401:
-      return {
-        message: 'You are not authorized. Please log in again.',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: true,
-        redirectPath: '/login',
-      }
-
-    case 403:
-      return {
-        message: 'Access denied',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
-
-    case 404:
-      return {
-        message: 'Resource not found',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
-
-    case 409:
-      return {
-        message: 'Conflict occurred',
-        severity: ErrorSeverity.WARNING,
-        shouldRedirect: false,
-      }
-
-    case 500:
-    case 502:
-    case 503:
-      return {
-        message: 'Server error. Please try again later.',
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
-
-    default:
-      return {
-        message: `Request failed with status ${response.status}`,
-        severity: ErrorSeverity.ERROR,
-        shouldRedirect: false,
-      }
-  }
-}
-
-/**
- * Format error message for user display
- */
-export function formatErrorMessage(error: unknown): string {
-  if (typeof error === 'string') {
-    return error
-  }
-
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  if (typeof error === 'object' && error !== null) {
-    if ('error' in error && typeof error.error === 'string') {
-      return error.error
-    }
-    if ('message' in error && typeof error.message === 'string') {
-      return error.message
+export function classifyConnectError(
+  error: unknown,
+  contextLabel = 'the server',
+): ProcessedError {
+  const data = (error as { data?: unknown } | null)?.data
+  if (data && isAuthError(normalize(data))) {
+    return {
+      message: 'Your session expired. Please rejoin.',
+      severity: ErrorSeverity.ERROR,
+      shouldRedirect: true,
+      redirectPath: REJOIN_PATH,
     }
   }
 
-  return 'An unexpected error occurred'
+  const raw =
+    error instanceof Error ? error.message.toLowerCase() : String(error ?? '')
+
+  if (
+    raw.includes('econnrefused') ||
+    raw.includes('xhr poll error') ||
+    raw.includes('timeout')
+  ) {
+    return {
+      message: `Can't reach the server for ${contextLabel}. Check your connection.`,
+      severity: ErrorSeverity.ERROR,
+      shouldRedirect: false,
+    }
+  }
+
+  // Handshake auth rejections still surface as a message here (no code channel).
+  if (
+    raw.includes('unauthorized') ||
+    raw.includes('token') ||
+    raw.includes('expired') ||
+    raw.includes('invalid')
+  ) {
+    return {
+      message: 'Your session expired. Please rejoin.',
+      severity: ErrorSeverity.ERROR,
+      shouldRedirect: true,
+      redirectPath: REJOIN_PATH,
+    }
+  }
+
+  return {
+    message: `Reconnecting to ${contextLabel}…`,
+    severity: ErrorSeverity.WARNING,
+    shouldRedirect: false,
+  }
 }
