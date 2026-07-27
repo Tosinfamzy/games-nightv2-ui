@@ -68,9 +68,23 @@ function InSessionGamePage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {isLoading ? 'Loading game…' : (game?.name ?? 'Game')}
             </h1>
-            {session && (
-              <span className="text-sm text-gray-500">{session.name}</span>
-            )}
+            <div className="flex items-center gap-3">
+              {session && (
+                <span className="text-sm text-gray-500">{session.name}</span>
+              )}
+              {isHost && (
+                <Link
+                  to="/sessions/$id/tv"
+                  params={{ id }}
+                  search={{ gameId }}
+                  target="_blank"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 border border-indigo-200 rounded-lg px-3 py-1.5"
+                  title="Open the big-screen scoreboard on a TV or projector"
+                >
+                  📺 TV view
+                </Link>
+              )}
+            </div>
           </div>
           <p className="text-gray-600 mt-1 text-sm">
             {isHost

@@ -34,6 +34,7 @@ import { Route as GmNewRouteImport } from './routes/gm/new'
 import { Route as GmLoginRouteImport } from './routes/gm/login'
 import { Route as GamesNewRouteImport } from './routes/games/new'
 import { Route as GamesIdRouteImport } from './routes/games/$id'
+import { Route as SessionsIdTvRouteImport } from './routes/sessions/$id_.tv'
 import { Route as SessionsIdGameRouteImport } from './routes/sessions/$id_.game'
 
 const TeamsRoute = TeamsRouteImport.update({
@@ -161,6 +162,11 @@ const GamesIdRoute = GamesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => GamesRoute,
 } as any)
+const SessionsIdTvRoute = SessionsIdTvRouteImport.update({
+  id: '/$id_/tv',
+  path: '/$id/tv',
+  getParentRoute: () => SessionsRoute,
+} as any)
 const SessionsIdGameRoute = SessionsIdGameRouteImport.update({
   id: '/$id_/game',
   path: '/$id/game',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/games/': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
+  '/sessions/$id/tv': typeof SessionsIdTvRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/games': typeof GamesIndexRoute
   '/sessions': typeof SessionsIndexRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
+  '/sessions/$id/tv': typeof SessionsIdTvRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/games/': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
   '/sessions/$id_/game': typeof SessionsIdGameRoute
+  '/sessions/$id_/tv': typeof SessionsIdTvRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
     | '/games/'
     | '/sessions/'
     | '/sessions/$id/game'
+    | '/sessions/$id/tv'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/sessions'
     | '/sessions/$id/game'
+    | '/sessions/$id/tv'
   id:
     | '__root__'
     | '/'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/games/'
     | '/sessions/'
     | '/sessions/$id_/game'
+    | '/sessions/$id_/tv'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -533,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesIdRouteImport
       parentRoute: typeof GamesRoute
     }
+    '/sessions/$id_/tv': {
+      id: '/sessions/$id_/tv'
+      path: '/$id/tv'
+      fullPath: '/sessions/$id/tv'
+      preLoaderRoute: typeof SessionsIdTvRouteImport
+      parentRoute: typeof SessionsRoute
+    }
     '/sessions/$id_/game': {
       id: '/sessions/$id_/game'
       path: '/$id/game'
@@ -572,6 +591,7 @@ interface SessionsRouteChildren {
   SessionsNewRoute: typeof SessionsNewRoute
   SessionsIndexRoute: typeof SessionsIndexRoute
   SessionsIdGameRoute: typeof SessionsIdGameRoute
+  SessionsIdTvRoute: typeof SessionsIdTvRoute
 }
 
 const SessionsRouteChildren: SessionsRouteChildren = {
@@ -579,6 +599,7 @@ const SessionsRouteChildren: SessionsRouteChildren = {
   SessionsNewRoute: SessionsNewRoute,
   SessionsIndexRoute: SessionsIndexRoute,
   SessionsIdGameRoute: SessionsIdGameRoute,
+  SessionsIdTvRoute: SessionsIdTvRoute,
 }
 
 const SessionsRouteWithChildren = SessionsRoute._addFileChildren(
