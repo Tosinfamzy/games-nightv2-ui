@@ -47,6 +47,7 @@ function InviteRsvpPage() {
   const [name, setName] = useState('')
   const [plusOnes, setPlusOnes] = useState(0)
   const [note, setNote] = useState('')
+  const [editing, setEditing] = useState(false)
 
   // Prefill the name once the invite loads.
   useEffect(() => {
@@ -84,7 +85,10 @@ function InviteRsvpPage() {
         note: note.trim() || undefined,
       },
       {
-        onSuccess: () => showToast.success('Your RSVP is saved!'),
+        onSuccess: () => {
+          setEditing(false)
+          showToast.success('Your RSVP is saved!')
+        },
         onError: (e) => toastHelpers.operationError('save your RSVP', e),
       },
     )
@@ -112,74 +116,100 @@ function InviteRsvpPage() {
         </div>
 
         <div className="p-6 space-y-4">
-          {hasResponded && (
-            <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-800">
-              You responded:{' '}
-              <span className="font-semibold">
+          {hasResponded && !editing ? (
+            /* Confirmed state — clean summary, not the full form. */
+            <div className="text-center space-y-3 py-2">
+              <div className="text-5xl">
                 {invite.rsvpStatus === 'GOING'
-                  ? 'Going 🎉'
+                  ? '🎉'
                   : invite.rsvpStatus === 'MAYBE'
-                    ? 'Maybe'
-                    : "Can't make it"}
-              </span>
-              . You can change it below.
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your name
-            </label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              maxLength={80}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bringing anyone? (optional)
-            </label>
-            <input
-              type="number"
-              min={0}
-              max={10}
-              value={plusOnes}
-              onChange={(e) =>
-                setPlusOnes(Math.max(0, Math.min(10, Number(e.target.value))))
-              }
-              className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Note (optional)
-            </label>
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Anything to add?"
-              maxLength={280}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-2 pt-2">
-            {RESPONSES.map((r) => (
+                    ? '🤔'
+                    : '😢'}
+              </div>
+              <p className="text-xl font-bold text-gray-900">
+                {invite.rsvpStatus === 'GOING'
+                  ? "You're going!"
+                  : invite.rsvpStatus === 'MAYBE'
+                    ? 'You said maybe'
+                    : "You can't make it"}
+              </p>
+              <p className="text-gray-500 text-sm">
+                {invite.name
+                  ? `Thanks, ${invite.name}.`
+                  : 'Thanks for responding.'}
+                {invite.rsvpStatus === 'GOING' && invite.plusOnes > 0
+                  ? ` Bringing ${invite.plusOnes} guest${
+                      invite.plusOnes > 1 ? 's' : ''
+                    }.`
+                  : ''}
+              </p>
               <button
-                key={r.status}
-                onClick={() => submit(r.status)}
-                disabled={rsvp.isPending}
-                className={`rounded-lg text-white font-semibold py-3 min-h-[44px] disabled:opacity-50 ${r.style}`}
+                onClick={() => setEditing(true)}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px]"
               >
-                {r.label}
+                Change response
               </button>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your name
+                </label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  maxLength={80}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bringing anyone? (optional)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={plusOnes}
+                  onChange={(e) =>
+                    setPlusOnes(
+                      Math.max(0, Math.min(10, Number(e.target.value))),
+                    )
+                  }
+                  className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Note (optional)
+                </label>
+                <input
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Anything to add?"
+                  maxLength={280}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 pt-2">
+                {RESPONSES.map((r) => (
+                  <button
+                    key={r.status}
+                    onClick={() => submit(r.status)}
+                    disabled={rsvp.isPending}
+                    className={`rounded-lg text-white font-semibold py-3 min-h-[44px] disabled:opacity-50 ${r.style}`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
