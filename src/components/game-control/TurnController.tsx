@@ -29,16 +29,19 @@ export default function TurnController({
     return null
   }
 
+  const teams = game.teams ?? []
   const isInProgress = game.status === 'IN_PROGRESS'
-  const currentTeamIndex = game.teams.findIndex(
-    (t) => t.id === game.teams[0]?.id,
+  const currentTeamIndex = Math.max(
+    0,
+    teams.findIndex((t) => t.id === game.currentTurnTeamId),
   )
-  const currentTeam = game.teams[currentTeamIndex]
-  const nextTeamIndex = (currentTeamIndex + 1) % game.teams.length
-  const nextTeamName = game.teams[nextTeamIndex]?.name
+  const currentTeam = teams[currentTeamIndex]
+  const nextTeamIndex =
+    teams.length > 0 ? (currentTeamIndex + 1) % teams.length : 0
+  const nextTeamName = teams[nextTeamIndex]?.name
 
   // Check if game uses turn-based mechanics
-  const hasTurnBasedMechanics = game.teams.length > 1
+  const hasTurnBasedMechanics = teams.length > 1
 
   if (!hasTurnBasedMechanics) {
     return null // Don't show turn controller for single-team or non-turn-based games
@@ -89,7 +92,7 @@ export default function TurnController({
             <div className="mb-4">
               <div className="text-xs text-gray-600 mb-2">TURN ORDER</div>
               <div className="flex flex-wrap gap-2">
-                {game.teams.map((team, index) => (
+                {teams.map((team, index) => (
                   <div
                     key={team.id}
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -141,13 +144,13 @@ export default function TurnController({
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-gray-900">
-                {game.teams.length}
+                {teams.length}
               </div>
               <div className="text-xs text-gray-600">Total Teams</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">
-                {game.teams.reduce(
+                {teams.reduce(
                   (total, team) => total + team.playerIds.length,
                   0,
                 )}

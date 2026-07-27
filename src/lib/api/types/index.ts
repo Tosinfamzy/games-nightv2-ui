@@ -55,6 +55,8 @@ export interface Game {
   maxPlayers: number
   startTime?: string
   endTime?: string
+  /** Team whose turn it currently is (turn-based games). */
+  currentTurnTeamId?: string | null
   sessionId: UUID
   scores: Array<Score>
   teams: Array<Team>

@@ -51,7 +51,7 @@ export const useGameSocket = (gameId: string | undefined) => {
           )
         }
 
-        queryClient.invalidateQueries({ queryKey: ['scores', 'game', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game-scores', gameId] })
         queryClient.invalidateQueries({ queryKey: ['leaderboard', gameId] })
       } catch (error) {
         console.error('Error handling score submitted event:', error)
@@ -78,7 +78,7 @@ export const useGameSocket = (gameId: string | undefined) => {
           throw new Error('Invalid score updated event: missing scoreId')
         }
 
-        queryClient.invalidateQueries({ queryKey: ['scores', 'game', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game-scores', gameId] })
         queryClient.invalidateQueries({ queryKey: ['leaderboard', gameId] })
       } catch (error) {
         console.error('Error handling score updated event:', error)
@@ -100,7 +100,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleGameStarted = (data: any) => {
       try {
         console.log('Game started:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify about game starting
         if (data?.game?.name) {
@@ -126,7 +126,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleGamePaused = (data: any) => {
       try {
         console.log('Game paused:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling game paused event:', error)
         showToast.error('Failed to update game status. Please refresh.')
@@ -147,7 +147,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleGameResumed = (data: any) => {
       try {
         console.log('Game resumed:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling game resumed event:', error)
         showToast.error('Failed to update game status. Please refresh.')
@@ -168,7 +168,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleGameCompleted = (data: any) => {
       try {
         console.log('Game completed:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify about game completion
         if (data?.game?.name) {
@@ -194,7 +194,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleRoundStarted = (data: any) => {
       try {
         console.log('Round started:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify about new round
         if (data?.roundNumber) {
@@ -220,7 +220,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleRoundEnded = (data: any) => {
       try {
         console.log('Round ended:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling round ended event:', error)
         showToast.error('Failed to update round status. Please refresh.')
@@ -241,7 +241,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleStateChanged = (data: any) => {
       try {
         console.log('Game state changed:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling game state change:', error)
         showToast.error('Failed to update game state. Please refresh.')
@@ -290,7 +290,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleTurnStarted = (data: any) => {
       try {
         console.log('Turn started:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify when it's a team's turn
         if (data?.team?.name) {
@@ -316,7 +316,7 @@ export const useGameSocket = (gameId: string | undefined) => {
     const handleTurnAdvanced = (data: any) => {
       try {
         console.log('Turn advanced:', data)
-        queryClient.invalidateQueries({ queryKey: ['games', gameId] })
+        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling turn advanced event:', error)
         // Silent failure for turn events - not critical

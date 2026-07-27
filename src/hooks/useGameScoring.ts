@@ -83,15 +83,15 @@ export const useGameScoring = (gameId: UUID | undefined) => {
       queryClient.invalidateQueries({ queryKey: ['game', gameId] })
     }
 
-    // Subscribe to score-related events
+    // Subscribe to the events the backend actually broadcasts. The primary one
+    // is `game:score-submitted` (emitted on every score submit) — without it,
+    // other clients' leaderboards only refreshed on the 15s poll.
+    gamesSocket.on('game:score-submitted', handleScoreEvent)
     gamesSocket.on('game:score-updated', handleScoreEvent)
-    gamesSocket.on('game:score-added', handleScoreEvent)
-    gamesSocket.on('game:score-deleted', handleScoreEvent)
 
     return () => {
+      gamesSocket.off('game:score-submitted', handleScoreEvent)
       gamesSocket.off('game:score-updated', handleScoreEvent)
-      gamesSocket.off('game:score-added', handleScoreEvent)
-      gamesSocket.off('game:score-deleted', handleScoreEvent)
     }
   }, [gamesSocket, gameId, queryClient])
 

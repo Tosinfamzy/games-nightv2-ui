@@ -376,7 +376,7 @@ export function EnhancedGamesTab({
                           to: '/sessions/$id/game',
                           params: { id: sessionId },
                           search: { gameId: game.id },
-                        } as any)
+                        })
                       }}
                       disabled={game.status === 'completed'}
                       className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${

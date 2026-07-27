@@ -34,6 +34,7 @@ import { Route as GmNewRouteImport } from './routes/gm/new'
 import { Route as GmLoginRouteImport } from './routes/gm/login'
 import { Route as GamesNewRouteImport } from './routes/games/new'
 import { Route as GamesIdRouteImport } from './routes/games/$id'
+import { Route as SessionsIdGameRouteImport } from './routes/sessions/$id_.game'
 import { Route as GamesIdScoreRouteImport } from './routes/games/$id.score'
 import { Route as GamesIdLiveRouteImport } from './routes/games/$id.live'
 import { Route as GamesIdControlRouteImport } from './routes/games/$id.control'
@@ -163,6 +164,11 @@ const GamesIdRoute = GamesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => GamesRoute,
 } as any)
+const SessionsIdGameRoute = SessionsIdGameRouteImport.update({
+  id: '/$id_/game',
+  path: '/$id/game',
+  getParentRoute: () => SessionsRoute,
+} as any)
 const GamesIdScoreRoute = GamesIdScoreRouteImport.update({
   id: '/score',
   path: '/score',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/games/$id/control': typeof GamesIdControlRoute
   '/games/$id/live': typeof GamesIdLiveRoute
   '/games/$id/score': typeof GamesIdScoreRoute
+  '/sessions/$id/game': typeof SessionsIdGameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/games/$id/control': typeof GamesIdControlRoute
   '/games/$id/live': typeof GamesIdLiveRoute
   '/games/$id/score': typeof GamesIdScoreRoute
+  '/sessions/$id/game': typeof SessionsIdGameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/games/$id/control': typeof GamesIdControlRoute
   '/games/$id/live': typeof GamesIdLiveRoute
   '/games/$id/score': typeof GamesIdScoreRoute
+  '/sessions/$id_/game': typeof SessionsIdGameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/games/$id/control'
     | '/games/$id/live'
     | '/games/$id/score'
+    | '/sessions/$id/game'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/games/$id/control'
     | '/games/$id/live'
     | '/games/$id/score'
+    | '/sessions/$id/game'
   id:
     | '__root__'
     | '/'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/games/$id/control'
     | '/games/$id/live'
     | '/games/$id/score'
+    | '/sessions/$id_/game'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -557,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesIdRouteImport
       parentRoute: typeof GamesRoute
     }
+    '/sessions/$id_/game': {
+      id: '/sessions/$id_/game'
+      path: '/$id/game'
+      fullPath: '/sessions/$id/game'
+      preLoaderRoute: typeof SessionsIdGameRouteImport
+      parentRoute: typeof SessionsRoute
+    }
     '/games/$id/score': {
       id: '/games/$id/score'
       path: '/score'
@@ -624,12 +643,14 @@ interface SessionsRouteChildren {
   SessionsIdRoute: typeof SessionsIdRoute
   SessionsNewRoute: typeof SessionsNewRoute
   SessionsIndexRoute: typeof SessionsIndexRoute
+  SessionsIdGameRoute: typeof SessionsIdGameRoute
 }
 
 const SessionsRouteChildren: SessionsRouteChildren = {
   SessionsIdRoute: SessionsIdRoute,
   SessionsNewRoute: SessionsNewRoute,
   SessionsIndexRoute: SessionsIndexRoute,
+  SessionsIdGameRoute: SessionsIdGameRoute,
 }
 
 const SessionsRouteWithChildren = SessionsRoute._addFileChildren(
