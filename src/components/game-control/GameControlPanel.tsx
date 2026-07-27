@@ -63,6 +63,7 @@ export default function GameControlPanel({
     }
   }
 
+  const teams = game.teams ?? []
   const canPause = game.status === 'IN_PROGRESS'
   const canResume = game.status === 'PAUSED'
   const canComplete =
@@ -100,16 +101,13 @@ export default function GameControlPanel({
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Teams</div>
           <div className="text-2xl font-bold text-gray-900">
-            {game.teams.length}
+            {teams.length}
           </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Players</div>
           <div className="text-2xl font-bold text-gray-900">
-            {game.teams.reduce(
-              (total, team) => total + team.playerIds.length,
-              0,
-            )}
+            {teams.reduce((total, team) => total + team.playerIds.length, 0)}
           </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">

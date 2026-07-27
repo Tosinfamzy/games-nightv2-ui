@@ -68,7 +68,8 @@ export default function LiveScoreEntry({
     }
   }
 
-  if (game.teams.length === 0) {
+  const teams = game.teams ?? []
+  if (teams.length === 0) {
     return (
       <div
         className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
@@ -100,7 +101,7 @@ export default function LiveScoreEntry({
 
       {/* Score Input for Each Team */}
       <div className="space-y-3">
-        {game.teams.map((team) => {
+        {teams.map((team) => {
           const inputValue = scoreInputs[team.id] || ''
           const hasValue = inputValue && inputValue !== '-'
 
