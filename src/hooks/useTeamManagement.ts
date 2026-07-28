@@ -2,8 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { teamService } from '../lib/api/services/team.service'
 import { showToast } from '../lib/toast'
 
-export function useTeamManagement() {
+export function useTeamManagement(sessionId?: string) {
   const queryClient = useQueryClient()
+
+  // Refresh the session screen's team/player roster (sessionKeys.teams/players)
+  // after a mutation, so the read-only TeamDisplay updates without relying on
+  // a socket event.
+  const invalidateSessionDetail = () => {
+    if (sessionId) {
+      queryClient.invalidateQueries({
+        queryKey: ['sessions', 'detail', sessionId],
+      })
+    }
+  }
 
   const swapPlayerMutation = useMutation({
     mutationFn: ({
@@ -19,6 +30,7 @@ export function useTeamManagement() {
       showToast.success('Player swapped successfully')
       // Invalidate queries to refresh team data
       queryClient.invalidateQueries({ queryKey: ['teams'] })
+      invalidateSessionDetail()
       queryClient.invalidateQueries({
         queryKey: ['team', variables.fromTeamId],
       })
@@ -35,6 +47,7 @@ export function useTeamManagement() {
       showToast.success('Team dissolved successfully')
       // Invalidate all team-related queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: ['teams'] })
+      invalidateSessionDetail()
       queryClient.invalidateQueries({ queryKey: ['players'] })
     },
     onError: (error: Error) => {
@@ -54,6 +67,7 @@ export function useTeamManagement() {
       showToast.success('Player reassigned successfully')
       // Invalidate all team and player queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: ['teams'] })
+      invalidateSessionDetail()
       queryClient.invalidateQueries({ queryKey: ['team', variables.newTeamId] })
       queryClient.invalidateQueries({ queryKey: ['players'] })
     },

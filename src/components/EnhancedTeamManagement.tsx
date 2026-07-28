@@ -47,7 +47,7 @@ export function EnhancedTeamManagement({
     isDissolvingTeam,
     reassignPlayer,
     isReassigningPlayer,
-  } = useTeamManagement()
+  } = useTeamManagement(sessionId)
 
   const handleDragStart = (playerId: string, fromTeamId: string | null) => {
     setDraggedPlayer({ playerId, fromTeamId })

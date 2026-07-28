@@ -613,11 +613,12 @@ function SessionDetailsPage() {
                       <ManualTeamCreator
                         sessionId={id}
                         players={uiPlayers}
+                        teams={uiTeams}
                         onTeamCreated={() => {
                           setShowManualTeamCreator(false)
                           // Invalidate and refetch teams data
                           queryClient.invalidateQueries({
-                            queryKey: ['teams', 'session', id],
+                            queryKey: ['sessions', 'detail', id],
                           })
                         }}
                         onCancel={() => setShowManualTeamCreator(false)}
@@ -647,7 +648,7 @@ function SessionDetailsPage() {
                     onTeamsCreated={() => {
                       // Invalidate and refetch teams data
                       queryClient.invalidateQueries({
-                        queryKey: ['teams', 'session', id],
+                        queryKey: ['sessions', 'detail', id],
                       })
                     }}
                   />
@@ -658,7 +659,6 @@ function SessionDetailsPage() {
               {teams.length > 0 && (
                 <TeamDisplay
                   teams={uiTeams}
-                  sessionId={id}
                   unassignedPlayers={uiPlayers.filter(
                     (p) =>
                       !uiTeams.some((team) =>
