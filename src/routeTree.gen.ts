@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as ScoringRouteImport } from './routes/scoring'
@@ -34,11 +33,6 @@ import { Route as GamesIdRouteImport } from './routes/games/$id'
 import { Route as SessionsIdTvRouteImport } from './routes/sessions/$id_.tv'
 import { Route as SessionsIdGameRouteImport } from './routes/sessions/$id_.game'
 
-const TeamsRoute = TeamsRouteImport.update({
-  id: '/teams',
-  path: '/teams',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -167,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/scoring': typeof ScoringRoute
   '/sessions': typeof SessionsRouteWithChildren
   '/settings': typeof SettingsRoute
-  '/teams': typeof TeamsRoute
   '/games/$id': typeof GamesIdRoute
   '/games/new': typeof GamesNewRoute
   '/invite/$token': typeof InviteTokenRoute
@@ -191,7 +184,6 @@ export interface FileRoutesByTo {
   '/rejoin': typeof RejoinRoute
   '/scoring': typeof ScoringRoute
   '/settings': typeof SettingsRoute
-  '/teams': typeof TeamsRoute
   '/games/$id': typeof GamesIdRoute
   '/games/new': typeof GamesNewRoute
   '/invite/$token': typeof InviteTokenRoute
@@ -218,7 +210,6 @@ export interface FileRoutesById {
   '/scoring': typeof ScoringRoute
   '/sessions': typeof SessionsRouteWithChildren
   '/settings': typeof SettingsRoute
-  '/teams': typeof TeamsRoute
   '/games/$id': typeof GamesIdRoute
   '/games/new': typeof GamesNewRoute
   '/invite/$token': typeof InviteTokenRoute
@@ -246,7 +237,6 @@ export interface FileRouteTypes {
     | '/scoring'
     | '/sessions'
     | '/settings'
-    | '/teams'
     | '/games/$id'
     | '/games/new'
     | '/invite/$token'
@@ -270,7 +260,6 @@ export interface FileRouteTypes {
     | '/rejoin'
     | '/scoring'
     | '/settings'
-    | '/teams'
     | '/games/$id'
     | '/games/new'
     | '/invite/$token'
@@ -296,7 +285,6 @@ export interface FileRouteTypes {
     | '/scoring'
     | '/sessions'
     | '/settings'
-    | '/teams'
     | '/games/$id'
     | '/games/new'
     | '/invite/$token'
@@ -323,7 +311,6 @@ export interface RootRouteChildren {
   ScoringRoute: typeof ScoringRoute
   SessionsRoute: typeof SessionsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
-  TeamsRoute: typeof TeamsRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JoinJoinCodeRoute: typeof JoinJoinCodeRoute
   RsvpTokenRoute: typeof RsvpTokenRoute
@@ -331,13 +318,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/teams': {
-      id: '/teams'
-      path: '/teams'
-      fullPath: '/teams'
-      preLoaderRoute: typeof TeamsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -558,7 +538,6 @@ const rootRouteChildren: RootRouteChildren = {
   ScoringRoute: ScoringRoute,
   SessionsRoute: SessionsRouteWithChildren,
   SettingsRoute: SettingsRoute,
-  TeamsRoute: TeamsRoute,
   InviteTokenRoute: InviteTokenRoute,
   JoinJoinCodeRoute: JoinJoinCodeRoute,
   RsvpTokenRoute: RsvpTokenRoute,

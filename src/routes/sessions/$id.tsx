@@ -69,6 +69,15 @@ function SessionDetailsPage() {
   const { data: currentGm } = useCurrentGm()
   const isHost = Boolean(currentGm?.id && currentGm.id === session?.host.id)
 
+  // The game the team-management panel should target: the live one if any,
+  // else the most recent (was hardcoded to games[0]).
+  const activeGame =
+    games.find((g) =>
+      ['in_progress', 'round_in_progress', 'paused'].includes(
+        String(g.status).toLowerCase(),
+      ),
+    ) ?? games[games.length - 1]
+
   // Transform API data to UI-friendly format for components
   const uiPlayers = transformPlayers(players)
   const uiGames = transformGames(games)
@@ -671,7 +680,7 @@ function SessionDetailsPage() {
               {/* Enhanced Team Management (host only) */}
               {isHost && teams.length > 0 && games.length > 0 && (
                 <EnhancedTeamManagement
-                  gameId={games[0].id}
+                  gameId={(activeGame ?? games[0]).id}
                   sessionId={id}
                   isHost={isHost}
                 />

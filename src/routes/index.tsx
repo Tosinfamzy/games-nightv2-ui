@@ -121,10 +121,10 @@ function HomePage() {
                 Perfect for competitive matches and fair gameplay.
               </p>
               <Link
-                to="/teams"
+                to="/sessions/new"
                 className="text-orange-600 hover:text-orange-700 font-semibold"
               >
-                Manage Teams →
+                Host a session →
               </Link>
             </div>
 
