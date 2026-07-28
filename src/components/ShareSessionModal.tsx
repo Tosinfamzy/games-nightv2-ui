@@ -194,7 +194,7 @@ export default function ShareSessionModal({
                 type="text"
                 value={currentJoinCode}
                 readOnly
-                className="flex-1 px-4 py-3 text-2xl font-mono text-center border rounded-lg bg-gray-50 focus:outline-none"
+                className="flex-1 min-w-0 px-4 py-3 text-2xl font-mono text-center border rounded-lg bg-gray-50 focus:outline-none"
                 style={{ fontSize: '24px' }}
               />
               <button
@@ -230,7 +230,7 @@ export default function ShareSessionModal({
                 type="text"
                 value={shareableLink}
                 readOnly
-                className="flex-1 px-4 py-2 border rounded-lg bg-gray-50 text-sm focus:outline-none overflow-x-auto"
+                className="flex-1 min-w-0 px-4 py-2 border rounded-lg bg-gray-50 text-sm focus:outline-none"
               />
               <button
                 onClick={handleCopyLink}

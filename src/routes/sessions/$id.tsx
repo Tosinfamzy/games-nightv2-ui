@@ -395,54 +395,56 @@ function SessionDetailsPage() {
             </div>
           </div>
 
-          {/* Session Actions */}
-          <div className="flex flex-wrap gap-2">
-            {session.status === 'SCHEDULED' && (
-              <>
-                <StartSessionButton
-                  onStart={() => startSessionMutation.mutate(id)}
-                  isLoading={startSessionMutation.isPending}
-                  isReady={
-                    (readiness?.allReady || false) &&
-                    teams.length > 0 &&
-                    games.length > 0
-                  }
-                  readyToStart={{
-                    playersReady: readiness?.allReady || false,
-                    teamsFormed: teams.length > 0,
-                    gamesAvailable: games.length > 0,
-                  }}
-                />
+          {/* Session Actions — host only (lifecycle control + back to owner list) */}
+          {isHost && (
+            <div className="flex flex-wrap gap-2">
+              {session.status === 'SCHEDULED' && (
+                <>
+                  <StartSessionButton
+                    onStart={() => startSessionMutation.mutate(id)}
+                    isLoading={startSessionMutation.isPending}
+                    isReady={
+                      (readiness?.allReady || false) &&
+                      teams.length > 0 &&
+                      games.length > 0
+                    }
+                    readyToStart={{
+                      playersReady: readiness?.allReady || false,
+                      teamsFormed: teams.length > 0,
+                      gamesAvailable: games.length > 0,
+                    }}
+                  />
+                  <button
+                    onClick={() => setShowCancelConfirm(true)}
+                    disabled={cancelSessionMutation.isPending}
+                    className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
+                  >
+                    Cancel Session
+                  </button>
+                </>
+              )}
+
+              {session.status === 'IN_PROGRESS' && (
                 <button
-                  onClick={() => setShowCancelConfirm(true)}
-                  disabled={cancelSessionMutation.isPending}
-                  className="px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
+                  onClick={() => completeSessionMutation.mutate(id)}
+                  disabled={completeSessionMutation.isPending}
+                  className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
                 >
-                  Cancel Session
+                  {completeSessionMutation.isPending
+                    ? 'Completing...'
+                    : 'Complete Session'}
                 </button>
-              </>
-            )}
+              )}
 
-            {session.status === 'IN_PROGRESS' && (
-              <button
-                onClick={() => completeSessionMutation.mutate(id)}
-                disabled={completeSessionMutation.isPending}
-                className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
+              <Link
+                to="/sessions"
+                className="px-4 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 min-h-[44px] flex items-center text-sm sm:text-base"
               >
-                {completeSessionMutation.isPending
-                  ? 'Completing...'
-                  : 'Complete Session'}
-              </button>
-            )}
-
-            <Link
-              to="/sessions"
-              className="px-4 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 min-h-[44px] flex items-center text-sm sm:text-base"
-            >
-              <span className="hidden sm:inline">←</span> Back
-              <span className="hidden sm:inline"> to Sessions</span>
-            </Link>
-          </div>
+                <span className="hidden sm:inline">←</span> Back
+                <span className="hidden sm:inline"> to Sessions</span>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
@@ -462,18 +464,21 @@ function SessionDetailsPage() {
                   shortLabel: 'Players',
                   icon: '👥',
                   count: players.length,
+                  hostOnly: true,
                 },
                 {
                   id: 'guests',
                   label: 'Guests',
                   shortLabel: 'Guests',
                   icon: '✉️',
+                  hostOnly: true,
                 },
                 {
                   id: 'games',
                   label: 'Games',
                   shortLabel: 'Games',
                   icon: '🎮',
+                  hostOnly: true,
                 },
                 {
                   id: 'teams',
@@ -487,28 +492,32 @@ function SessionDetailsPage() {
                   label: 'History',
                   shortLabel: 'Hist.',
                   icon: '📊',
+                  hostOnly: true,
                 },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap min-h-[44px] ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <span className="sm:hidden">{tab.icon}</span>
-                  <span className="hidden sm:inline">
-                    {tab.icon} {tab.label}
-                  </span>
-                  {tab.count !== undefined && (
-                    <span className="ml-1 sm:ml-2 bg-gray-100 text-gray-600 py-0.5 px-1.5 sm:px-2 rounded-full text-xs">
-                      {tab.count}
+              ]
+                // Minimal player view: players see only overview, teams, chat.
+                .filter((tab) => isHost || !tab.hostOnly)
+                .map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`py-3 px-3 sm:px-4 border-b-2 font-medium text-sm whitespace-nowrap min-h-[44px] ${
+                      activeTab === tab.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="sm:hidden">{tab.icon}</span>
+                    <span className="hidden sm:inline">
+                      {tab.icon} {tab.label}
                     </span>
-                  )}
-                </button>
-              ))}
+                    {tab.count !== undefined && (
+                      <span className="ml-1 sm:ml-2 bg-gray-100 text-gray-600 py-0.5 px-1.5 sm:px-2 rounded-full text-xs">
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                ))}
             </nav>
           </div>
         </div>
@@ -558,89 +567,94 @@ function SessionDetailsPage() {
 
           {activeTab === 'teams' && (
             <div className="space-y-6">
-              {/* Session Readiness Dashboard */}
-              <SessionReadinessDashboard
-                sessionId={id}
-                players={uiPlayers}
-                teams={uiTeams}
-                games={uiGames}
-                sessionStatus={session.status}
-              />
-
-              {/* Manual Team Creation Section */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Manual Team Creation
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Create teams manually and assign players
-                    </p>
-                  </div>
-                  {!showManualTeamCreator &&
-                    session.status !== 'COMPLETED' &&
-                    session.status !== 'CANCELLED' && (
-                      <button
-                        onClick={() => setShowManualTeamCreator(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                      >
-                        + Create Team
-                      </button>
-                    )}
-                  {(session.status === 'COMPLETED' ||
-                    session.status === 'CANCELLED') && (
-                    <div className="text-sm text-gray-500 italic">
-                      Team creation disabled - session{' '}
-                      {session.status.toLowerCase()}
-                    </div>
-                  )}
-                </div>
-
-                {showManualTeamCreator && (
-                  <ManualTeamCreator
+              {/* Host-only: readiness admin, manual creation, auto formation. */}
+              {isHost && (
+                <>
+                  {/* Session Readiness Dashboard */}
+                  <SessionReadinessDashboard
                     sessionId={id}
                     players={uiPlayers}
-                    onTeamCreated={() => {
-                      setShowManualTeamCreator(false)
+                    teams={uiTeams}
+                    games={uiGames}
+                    sessionStatus={session.status}
+                  />
+
+                  {/* Manual Team Creation Section */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Manual Team Creation
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Create teams manually and assign players
+                        </p>
+                      </div>
+                      {!showManualTeamCreator &&
+                        session.status !== 'COMPLETED' &&
+                        session.status !== 'CANCELLED' && (
+                          <button
+                            onClick={() => setShowManualTeamCreator(true)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                          >
+                            + Create Team
+                          </button>
+                        )}
+                      {(session.status === 'COMPLETED' ||
+                        session.status === 'CANCELLED') && (
+                        <div className="text-sm text-gray-500 italic">
+                          Team creation disabled - session{' '}
+                          {session.status.toLowerCase()}
+                        </div>
+                      )}
+                    </div>
+
+                    {showManualTeamCreator && (
+                      <ManualTeamCreator
+                        sessionId={id}
+                        players={uiPlayers}
+                        onTeamCreated={() => {
+                          setShowManualTeamCreator(false)
+                          // Invalidate and refetch teams data
+                          queryClient.invalidateQueries({
+                            queryKey: ['teams', 'session', id],
+                          })
+                        }}
+                        onCancel={() => setShowManualTeamCreator(false)}
+                      />
+                    )}
+
+                    {!showManualTeamCreator && teams.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        <div className="text-4xl mb-2">🏆</div>
+                        <p className="text-lg font-medium mb-2">
+                          No teams created yet
+                        </p>
+                        <p className="text-sm">
+                          Create teams manually or use automated team formation
+                          below
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Enhanced Team Formation Interface */}
+                  <TeamFormationInterface
+                    sessionId={id}
+                    players={uiPlayers}
+                    teams={uiTeams}
+                    games={uiGamesWithTeamSize as any}
+                    onTeamsCreated={() => {
                       // Invalidate and refetch teams data
                       queryClient.invalidateQueries({
                         queryKey: ['teams', 'session', id],
                       })
                     }}
-                    onCancel={() => setShowManualTeamCreator(false)}
                   />
-                )}
+                </>
+              )}
 
-                {!showManualTeamCreator && teams.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <div className="text-4xl mb-2">🏆</div>
-                    <p className="text-lg font-medium mb-2">
-                      No teams created yet
-                    </p>
-                    <p className="text-sm">
-                      Create teams manually or use automated team formation
-                      below
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Enhanced Team Formation Interface */}
-              <TeamFormationInterface
-                sessionId={id}
-                players={uiPlayers}
-                teams={uiTeams}
-                games={uiGamesWithTeamSize as any}
-                onTeamsCreated={() => {
-                  // Invalidate and refetch teams data
-                  queryClient.invalidateQueries({
-                    queryKey: ['teams', 'session', id],
-                  })
-                }}
-              />
-
-              {/* Team Display */}
+              {/* Team Display — read-only roster, visible to everyone */}
               {teams.length > 0 && (
                 <TeamDisplay
                   teams={uiTeams}
@@ -654,13 +668,23 @@ function SessionDetailsPage() {
                 />
               )}
 
-              {/* Enhanced Team Management */}
-              {teams.length > 0 && games.length > 0 && (
+              {/* Enhanced Team Management (host only) */}
+              {isHost && teams.length > 0 && games.length > 0 && (
                 <EnhancedTeamManagement
                   gameId={games[0].id}
                   sessionId={id}
                   isHost={isHost}
                 />
+              )}
+
+              {!isHost && teams.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="text-4xl mb-2">🏆</div>
+                  <p className="text-lg font-medium">No teams yet</p>
+                  <p className="text-sm">
+                    Your games master will set up teams here.
+                  </p>
+                </div>
               )}
             </div>
           )}
