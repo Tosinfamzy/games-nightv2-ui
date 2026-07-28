@@ -13,7 +13,6 @@ export default function Header() {
   const navLinks = [
     { to: '/join', label: 'Join Session' },
     { to: '/rejoin', label: 'Rejoin' },
-    { to: '/games-master', label: 'Games Master' },
     { to: '/players', label: 'Players' },
     { to: '/sessions', label: 'Sessions' },
     { to: '/games', label: 'Games' },

@@ -99,6 +99,10 @@ jobs:
         run: npm run test:e2e -- --project=chromium
         env:
           CI: true
+          # The app requires a Clerk publishable key at boot; without it the
+          # dev server the E2E specs load would white-screen. Public value,
+          # stored as a repo variable.
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ vars.VITE_CLERK_PUBLISHABLE_KEY }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

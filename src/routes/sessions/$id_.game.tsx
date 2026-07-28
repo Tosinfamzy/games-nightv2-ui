@@ -11,7 +11,7 @@ import GameTimer from '../../components/GameTimer'
 import { useGameControl } from '../../hooks/useGameControl'
 import { useGameSocket } from '../../lib/socket/use-game-socket'
 import { useSession } from '../../lib/api/hooks/use-session'
-import { useGamesMasterContext } from '../../contexts/GamesMasterContext'
+import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
 
 export const Route = createFileRoute('/sessions/$id_/game')({
   validateSearch: (search: Record<string, unknown>): { gameId: string } => ({
@@ -37,9 +37,9 @@ function InSessionGamePage() {
   const { gameId } = Route.useSearch()
 
   const { data: session } = useSession(id)
-  const { gm } = useGamesMasterContext()
+  const { data: currentGm } = useCurrentGm()
   const isHost = Boolean(
-    gm?.id && session?.host.id && gm.id === session.host.id,
+    currentGm?.id && session?.host.id && currentGm.id === session.host.id,
   )
 
   // Real-time game-room updates (notifications + error toasts); the control and

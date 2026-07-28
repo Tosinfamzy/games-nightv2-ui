@@ -33,10 +33,10 @@ function HomePage() {
                 🚀 Host a Session
               </Link>
               <Link
-                to="/games-master"
+                to="/sessions"
                 className="inline-flex items-center px-8 py-4 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-900 transition-all transform hover:scale-105 shadow-lg text-lg border-2 border-white"
               >
-                🎯 GM Dashboard
+                📋 My Sessions
               </Link>
             </div>
           </div>
@@ -103,10 +103,10 @@ function HomePage() {
                 activity from one powerful dashboard with real-time updates.
               </p>
               <Link
-                to="/games-master"
+                to="/sessions"
                 className="text-purple-600 hover:text-purple-700 font-semibold"
               >
-                View Dashboard →
+                View Sessions →
               </Link>
             </div>
 
