@@ -4,16 +4,27 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'sonner'
+import { ClerkProvider } from '@clerk/clerk-react'
 import { SocketProvider } from './lib/socket'
 import { GamesMasterProvider, PlayerProvider } from './contexts'
 import { getErrorMessage, showToast } from './lib/toast'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { ClerkTokenBridge } from './components/ClerkTokenBridge'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals'
+
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as
+  | string
+  | undefined
+if (!clerkPublishableKey) {
+  throw new Error(
+    'Missing VITE_CLERK_PUBLISHABLE_KEY — set it in your environment (see .env.example)',
+  )
+}
 
 // Create a client
 const queryClient = new QueryClient({
@@ -61,17 +72,20 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <GamesMasterProvider>
-            <PlayerProvider>
-              <SocketProvider>
-                <RouterProvider router={router} />
-                <ReactQueryDevtools initialIsOpen={false} />
-                <Toaster position="top-right" richColors closeButton />
-              </SocketProvider>
-            </PlayerProvider>
-          </GamesMasterProvider>
-        </QueryClientProvider>
+        <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl="/">
+          <QueryClientProvider client={queryClient}>
+            <ClerkTokenBridge />
+            <GamesMasterProvider>
+              <PlayerProvider>
+                <SocketProvider>
+                  <RouterProvider router={router} />
+                  <ReactQueryDevtools initialIsOpen={false} />
+                  <Toaster position="top-right" richColors closeButton />
+                </SocketProvider>
+              </PlayerProvider>
+            </GamesMasterProvider>
+          </QueryClientProvider>
+        </ClerkProvider>
       </ErrorBoundary>
     </StrictMode>,
   )
