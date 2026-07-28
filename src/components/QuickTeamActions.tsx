@@ -29,7 +29,7 @@ export function QuickTeamActions({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams', 'game', gameId] })
       queryClient.invalidateQueries({
-        queryKey: ['teams', 'session', sessionId],
+        queryKey: ['sessions', 'detail', sessionId],
       })
       showToast.success('Players shuffled successfully!')
       setShowShuffleConfirm(false)
@@ -48,7 +48,7 @@ export function QuickTeamActions({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams', 'game', gameId] })
       queryClient.invalidateQueries({
-        queryKey: ['teams', 'session', sessionId],
+        queryKey: ['sessions', 'detail', sessionId],
       })
       showToast.success('Teams rebalanced successfully!')
       setShowRebalanceConfirm(false)

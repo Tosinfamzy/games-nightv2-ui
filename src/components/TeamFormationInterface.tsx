@@ -102,6 +102,10 @@ export function TeamFormationInterface({
         queryKey: ['games', selectedGameForFormation],
       })
       queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      // Refresh the session screen's team/player roster (sessionKeys.teams).
+      queryClient.invalidateQueries({
+        queryKey: ['sessions', 'detail', sessionId],
+      })
       queryClient.invalidateQueries({
         queryKey: ['session-readiness', sessionId],
       })
@@ -124,6 +128,9 @@ export function TeamFormationInterface({
     onSuccess: (teams) => {
       queryClient.invalidateQueries({
         queryKey: ['teams', 'game', selectedGameForFormation],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['sessions', 'detail', sessionId],
       })
       showToast.success(
         `${teams.length} teams rebalanced with ${selectedStrategy} strategy`,

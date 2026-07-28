@@ -12,6 +12,9 @@ interface Player {
 interface ManualTeamCreatorProps {
   sessionId: string
   players: Array<Player>
+  // Existing teams (with their rosters) so we can exclude already-assigned
+  // players from the "available" list.
+  teams?: Array<{ players?: Array<{ id: string }> }>
   onTeamCreated?: () => void
   onCancel?: () => void
 }
@@ -30,6 +33,7 @@ const TEAM_COLORS = [
 export function ManualTeamCreator({
   sessionId,
   players,
+  teams = [],
   onTeamCreated,
   onCancel,
 }: ManualTeamCreatorProps) {
@@ -43,11 +47,10 @@ export function ManualTeamCreator({
       return await sessionManagementService.createTeam(sessionId, teamData)
     },
     onSuccess: () => {
+      // The session-detail prefix covers the teams + players sub-queries the
+      // session screen actually renders from (sessionKeys.teams/players).
       queryClient.invalidateQueries({
-        queryKey: ['teams', 'session', sessionId],
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['players', 'session', sessionId],
+        queryKey: ['sessions', 'detail', sessionId],
       })
       onTeamCreated?.()
       // Reset form
@@ -78,10 +81,13 @@ export function ManualTeamCreator({
     )
   }
 
+  // Exclude players already on a team (by actual team membership, not by the
+  // 'playing' status which is unrelated to assignment).
+  const assignedPlayerIds = new Set(
+    teams.flatMap((team) => (team.players ?? []).map((p) => p.id)),
+  )
   const availablePlayers = players.filter(
-    (player) =>
-      // Only show players who aren't already assigned to teams
-      player.status !== 'playing',
+    (player) => !assignedPlayerIds.has(player.id),
   )
 
   return (
