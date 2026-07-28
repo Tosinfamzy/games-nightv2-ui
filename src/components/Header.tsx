@@ -20,7 +20,6 @@ export default function Header() {
     { to: '/players', label: 'Players', hostOnly: true },
     { to: '/sessions', label: 'Sessions', hostOnly: true },
     { to: '/games', label: 'Games', hostOnly: true },
-    { to: '/teams', label: 'Teams', hostOnly: true },
     { to: '/scoring', label: 'Live Scoring', hostOnly: true },
   ]
   const visibleLinks = navLinks.filter((link) => isSignedIn || !link.hostOnly)
