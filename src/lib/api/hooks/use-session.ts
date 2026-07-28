@@ -8,7 +8,9 @@ import type { PaginationParams } from '../types/common'
 export interface CreateSessionDTO {
   name: string
   description?: string
-  gamesMasterId: string
+  // Optional: when the host is authenticated via Clerk the backend derives the
+  // games master from the session token. Legacy callers may still pass it.
+  gamesMasterId?: string
   date: string
   location?: string
 }

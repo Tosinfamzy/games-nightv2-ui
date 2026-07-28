@@ -26,7 +26,7 @@ export enum SessionStatus {
 export interface CreateSessionDto {
   name: string
   description?: string
-  gamesMasterId: string
+  gamesMasterId?: string
 }
 
 export interface UpdateSessionDto {

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { SignInButton, useUser } from '@clerk/clerk-react'
 import { sessionService } from '../lib/api/services'
 import { showToast, toastHelpers } from '../lib/toast'
-import { useGamesMaster } from '../hooks/useGamesMaster'
 import { usePlayer } from '../contexts/PlayerContext'
 import type { CreateSessionResponse } from '../lib/api/services'
 import type { CreateSessionDTO, Session } from '../lib/api/types'
@@ -14,21 +13,13 @@ interface CreateSessionFormProps {
 
 export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
-  const { gm, isGM } = useGamesMaster()
+  const { isLoaded, isSignedIn, user } = useUser()
   const { setPlayer } = usePlayer()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
   const [location, setLocation] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
-
-  // Redirect to GM creation if no GM found
-  useEffect(() => {
-    if (!isGM) {
-      navigate({ to: '/gm/new' })
-    }
-  }, [isGM, navigate])
 
   const createSessionMutation = useMutation<
     CreateSessionResponse,
@@ -62,11 +53,6 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!gm) {
-      setFormError('Games Master profile not found. Please try again.')
-      return
-    }
-
     // Validate date is in future
     if (date) {
       const selectedDate = new Date(date)
@@ -80,19 +66,20 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
       }
     }
 
+    // No gamesMasterId: the backend derives the host from the Clerk session
+    // token (attached by fetchAPI), which also closes the create-as-anyone gap.
     const sessionData: CreateSessionDTO = {
       name,
       description,
       date: new Date(date).toISOString(),
       location: location || undefined,
-      gamesMasterId: gm.id,
     }
 
     createSessionMutation.mutate(sessionData)
   }
 
-  // Loading state while checking GM
-  if (!gm) {
+  // Loading state while Clerk resolves the session.
+  if (!isLoaded) {
     return (
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
         <div className="animate-pulse text-center">
@@ -103,6 +90,29 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
     )
   }
 
+  // Hosting requires a signed-in games master.
+  if (!isSignedIn) {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 text-center">
+        <h2 className="text-2xl font-bold mb-2">Sign in to host</h2>
+        <p className="text-gray-600 mb-6">
+          Create an account or sign in as a games master to start a session.
+        </p>
+        <SignInButton mode="modal">
+          <button className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 text-base font-medium">
+            Sign in to continue
+          </button>
+        </SignInButton>
+      </div>
+    )
+  }
+
+  const hostName =
+    user.fullName ??
+    user.primaryEmailAddress?.emailAddress ??
+    user.username ??
+    'Games Master'
+
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold mb-6 text-center">
@@ -111,16 +121,8 @@ export function CreateSessionForm({ onCreateSuccess }: CreateSessionFormProps) {
 
       {/* GM Info Display */}
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-blue-700">Hosting as</p>
-            <p className="font-bold text-blue-900">{gm.name}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-blue-600">Host Code</p>
-            <p className="font-mono font-bold text-blue-700">{gm.hostCode}</p>
-          </div>
-        </div>
+        <p className="text-sm text-blue-700">Hosting as</p>
+        <p className="font-bold text-blue-900">{hostName}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

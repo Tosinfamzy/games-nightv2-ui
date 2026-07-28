@@ -11,6 +11,18 @@ const getApiUrl = () => {
 
 const API_URL = getApiUrl()
 
+// Bridge to Clerk's session token. fetchAPI is a plain function (not a hook),
+// so ClerkTokenBridge (mounted under ClerkProvider) registers a getter here.
+// Clerk rotates short-lived tokens, so we fetch fresh per request rather than
+// caching one in localStorage. Null when signed out or before Clerk loads.
+let clerkTokenGetter: (() => Promise<string | null>) | null = null
+
+export function setClerkTokenGetter(
+  getter: (() => Promise<string | null>) | null,
+): void {
+  clerkTokenGetter = getter
+}
+
 // Custom error class for API errors
 export class APIError extends Error {
   constructor(
@@ -61,12 +73,24 @@ export async function fetchAPI<T>(
   const headers = new Headers(init.headers)
   headers.set('Content-Type', 'application/json')
 
-  // The host's only credential is the session-scoped player token (there is no
-  // games-master login). Send it (or a future GM auth token) as Bearer so the
-  // backend HostGuard can authorize host-only actions.
-  const token =
-    localStorage.getItem('auth_token') ??
-    localStorage.getItem('gn_player_token')
+  // Auth precedence: a signed-in games master's Clerk token (their real
+  // identity — authorizes session creation + cross-device host control), then
+  // the session-scoped player token (how in-session players, including a host
+  // on their own device, are authorized). Players never sign in, so they fall
+  // through to the player token.
+  let token: string | null = null
+  if (clerkTokenGetter) {
+    try {
+      token = await clerkTokenGetter()
+    } catch {
+      token = null
+    }
+  }
+  if (!token) {
+    token =
+      localStorage.getItem('auth_token') ??
+      localStorage.getItem('gn_player_token')
+  }
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
   }
