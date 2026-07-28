@@ -523,6 +523,10 @@ function SessionDetailsPage() {
               currentPlayer={players.find((p) => p.id === currentPlayerId)}
               onToggleReady={handleToggleMyReady}
               isTogglingReady={setPlayerReadyMutation.isPending}
+              isHost={isHost}
+              onShare={() => setShowShareModal(true)}
+              onManageGames={() => setActiveTab('games')}
+              onCreateTeams={() => setActiveTab('teams')}
             />
           )}
 
@@ -717,6 +721,10 @@ function OverviewTab({
   currentPlayer,
   onToggleReady,
   isTogglingReady,
+  isHost,
+  onShare,
+  onManageGames,
+  onCreateTeams,
 }: any) {
   const navigate = useNavigate()
 
@@ -855,8 +863,9 @@ function OverviewTab({
       <div>
         <h3 className="text-lg font-semibold mb-3">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link
-            to="/join"
+          <button
+            type="button"
+            onClick={onShare}
             className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
           >
             <div className="text-center">
@@ -866,23 +875,37 @@ function OverviewTab({
                 Send the join code to friends
               </p>
             </div>
-          </Link>
-          <button className="p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
-            <div className="text-center">
-              <span className="text-2xl mb-2 block">🎯</span>
-              <h4 className="font-medium">Manage Games</h4>
-              <p className="text-sm text-gray-600 mt-1">Add or remove games</p>
-            </div>
           </button>
-          <button className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
-            <div className="text-center">
-              <span className="text-2xl mb-2 block">🏆</span>
-              <h4 className="font-medium">Create Teams</h4>
-              <p className="text-sm text-gray-600 mt-1">
-                Organize players into teams
-              </p>
-            </div>
-          </button>
+          {isHost && (
+            <button
+              type="button"
+              onClick={onManageGames}
+              className="p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
+            >
+              <div className="text-center">
+                <span className="text-2xl mb-2 block">🎯</span>
+                <h4 className="font-medium">Manage Games</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  Add or remove games
+                </p>
+              </div>
+            </button>
+          )}
+          {isHost && (
+            <button
+              type="button"
+              onClick={onCreateTeams}
+              className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+            >
+              <div className="text-center">
+                <span className="text-2xl mb-2 block">🏆</span>
+                <h4 className="font-medium">Create Teams</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  Organize players into teams
+                </p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>
