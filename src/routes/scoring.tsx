@@ -1,12 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { HostOnly } from '../components/HostOnly'
 import { gameService } from '../lib/api/services/game.service'
 import { teamService } from '../lib/api/services/team.service'
 import { LiveScoreboard } from '../components/LiveScoreboard'
 
 export const Route = createFileRoute('/scoring')({
-  component: Scoring,
+  component: () => (
+    <HostOnly title="Live scoring">
+      <Scoring />
+    </HostOnly>
+  ),
 })
 
 function Scoring() {

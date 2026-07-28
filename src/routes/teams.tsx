@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
+import { HostOnly } from '../components/HostOnly'
 import { gameService } from '../lib/api/services/game.service'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { playerService } from '../lib/api/services/player.service'
@@ -13,7 +14,11 @@ import type {
 } from '../lib/api/services/team.service'
 
 export const Route = createFileRoute('/teams')({
-  component: Teams,
+  component: () => (
+    <HostOnly title="Teams">
+      <Teams />
+    </HostOnly>
+  ),
 })
 
 function Teams() {
