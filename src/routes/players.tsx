@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { HostOnly } from '../components/HostOnly'
 import { playerService } from '../lib/api/services/player.service'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { sessionService } from '../lib/api/services/session.service'
@@ -518,5 +519,9 @@ function PlayerManagementPage() {
 }
 
 export const Route = createFileRoute('/players')({
-  component: PlayerManagementPage,
+  component: () => (
+    <HostOnly title="Player management">
+      <PlayerManagementPage />
+    </HostOnly>
+  ),
 })
