@@ -1,10 +1,44 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useSessions } from '../../hooks/useSessions'
+import { SignInButton, SignedIn, SignedOut } from '@clerk/clerk-react'
+import { useMySessions } from '../../lib/api/hooks/use-my-sessions'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
 import EmptyState from '../../components/EmptyState'
 
 function SessionsPage() {
-  const { data: sessions, isLoading, error } = useSessions()
+  return (
+    <>
+      {/* The session list is a host view — scoped to your own sessions. */}
+      <SignedOut>
+        <SignInPrompt />
+      </SignedOut>
+      <SignedIn>
+        <MySessionsList />
+      </SignedIn>
+    </>
+  )
+}
+
+function SignInPrompt() {
+  return (
+    <div className="container mx-auto p-4">
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 text-center mt-8">
+        <h1 className="text-2xl font-bold mb-2">Your sessions</h1>
+        <p className="text-gray-600 mb-6">
+          Sign in as a games master to view and manage the sessions you host.
+          Looking to play? Use a join code or the invite link from your host.
+        </p>
+        <SignInButton mode="modal">
+          <button className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 font-medium">
+            Sign in
+          </button>
+        </SignInButton>
+      </div>
+    </div>
+  )
+}
+
+function MySessionsList() {
+  const { data: sessions, isLoading, error } = useMySessions()
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,7 +107,7 @@ function SessionsPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Game Sessions</h1>
+        <h1 className="text-2xl font-bold">Your Game Sessions</h1>
         <Link
           to="/sessions/new"
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 no-underline"

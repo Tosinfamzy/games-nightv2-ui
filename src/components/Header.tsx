@@ -5,20 +5,25 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
+  useAuth,
 } from '@clerk/clerk-react'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isSignedIn } = useAuth()
 
+  // Players (signed out) only need to join/rejoin. The management views are
+  // host-only, so they're hidden until a games master signs in.
   const navLinks = [
     { to: '/join', label: 'Join Session' },
     { to: '/rejoin', label: 'Rejoin' },
-    { to: '/players', label: 'Players' },
-    { to: '/sessions', label: 'Sessions' },
-    { to: '/games', label: 'Games' },
-    { to: '/teams', label: 'Teams' },
-    { to: '/scoring', label: 'Live Scoring' },
+    { to: '/players', label: 'Players', hostOnly: true },
+    { to: '/sessions', label: 'Sessions', hostOnly: true },
+    { to: '/games', label: 'Games', hostOnly: true },
+    { to: '/teams', label: 'Teams', hostOnly: true },
+    { to: '/scoring', label: 'Live Scoring', hostOnly: true },
   ]
+  const visibleLinks = navLinks.filter((link) => isSignedIn || !link.hostOnly)
 
   return (
     <header className="bg-white shadow">
@@ -34,7 +39,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {/* Desktop Navigation */}
             <div className="hidden lg:flex gap-4">
-              {navLinks.map((link) => (
+              {visibleLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
@@ -104,7 +109,7 @@ export default function Header() {
         {isMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 py-2">
             <div className="flex flex-col space-y-1">
-              {navLinks.map((link) => (
+              {visibleLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
