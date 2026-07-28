@@ -61,7 +61,12 @@ export async function fetchAPI<T>(
   const headers = new Headers(init.headers)
   headers.set('Content-Type', 'application/json')
 
-  const token = localStorage.getItem('auth_token')
+  // The host's only credential is the session-scoped player token (there is no
+  // games-master login). Send it (or a future GM auth token) as Bearer so the
+  // backend HostGuard can authorize host-only actions.
+  const token =
+    localStorage.getItem('auth_token') ??
+    localStorage.getItem('gn_player_token')
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
   }
