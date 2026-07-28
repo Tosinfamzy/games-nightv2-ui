@@ -71,10 +71,21 @@ export const useNotifications = () => {
     notificationService.notify({
       type: NotificationType.GAME,
       priority: NotificationPriority.HIGH,
-      title: "It's Your Turn!",
-      message: `${teamName}'s turn to play`,
+      title: "🎯 It's your turn!",
+      message: `Your team (${teamName}) is up — go!`,
       playSound: true,
       persist: true,
+    })
+  }, [])
+
+  // Fired for everyone NOT on the active team, so the room knows who's up.
+  const notifyTeamTurn = useCallback((teamName: string) => {
+    notificationService.notify({
+      type: NotificationType.GAME,
+      priority: NotificationPriority.LOW,
+      title: 'Now playing',
+      message: `${teamName}'s turn`,
+      playSound: false,
     })
   }, [])
 
@@ -157,6 +168,7 @@ export const useNotifications = () => {
     notifyGameStarted,
     notifyRoundStarted,
     notifyYourTurn,
+    notifyTeamTurn,
     notifyGameCompleted,
     notifyTeamsCreated,
     notifyTeamAssignment,

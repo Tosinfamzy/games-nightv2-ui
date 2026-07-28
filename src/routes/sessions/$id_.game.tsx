@@ -12,6 +12,7 @@ import { useGameControl } from '../../hooks/useGameControl'
 import { useGameSocket } from '../../lib/socket/use-game-socket'
 import { useSession } from '../../lib/api/hooks/use-session'
 import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
+import { usePlayer } from '../../contexts/PlayerContext'
 
 export const Route = createFileRoute('/sessions/$id_/game')({
   validateSearch: (search: Record<string, unknown>): { gameId: string } => ({
@@ -42,10 +43,19 @@ function InSessionGamePage() {
     currentGm?.id && session?.host.id && currentGm.id === session.host.id,
   )
 
+  const { game, isLoading } = useGameControl(gameId)
+
+  // Which team the current player is on — so the "it's your turn" alert only
+  // fires for them (everyone else gets a subtle "now playing").
+  const { player } = usePlayer()
+  const myTeamId =
+    player?.id != null
+      ? game?.teams?.find((t) => t.playerIds?.includes(player.id))?.id
+      : undefined
+
   // Real-time game-room updates (notifications + error toasts); the control and
   // scoring components self-subscribe for their own data.
-  useGameSocket(gameId)
-  const { game, isLoading } = useGameControl(gameId)
+  useGameSocket(gameId, { currentTeamId: myTeamId })
 
   if (!gameId) {
     return (
