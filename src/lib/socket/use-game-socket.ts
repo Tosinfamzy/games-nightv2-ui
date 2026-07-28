@@ -7,14 +7,19 @@ import { useSocketContext } from './socket-context'
 /**
  * Hook to connect to a game room and listen for real-time updates
  */
-export const useGameSocket = (gameId: string | undefined) => {
+export const useGameSocket = (
+  gameId: string | undefined,
+  options?: { currentTeamId?: string },
+) => {
   const { gamesSocket, isConnected } = useSocketContext()
   const queryClient = useQueryClient()
   const hasJoinedRef = useRef(false)
+  const currentTeamId = options?.currentTeamId
   const {
     notifyGameStarted,
     notifyRoundStarted,
     notifyYourTurn,
+    notifyTeamTurn,
     notifyGameCompleted,
   } = useNotifications()
 
@@ -292,9 +297,21 @@ export const useGameSocket = (gameId: string | undefined) => {
         console.log('Turn started:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
-        // Notify when it's a team's turn
-        if (data?.team?.name) {
-          notifyYourTurn(data.team.name)
+        // BE payload is { teamId, teamName } (not { team: { name } }).
+        const teamName: string | undefined = data?.teamName
+        const teamId: string | undefined = data?.teamId
+        if (!teamName) return
+
+        // Targeted: only the players on the active team get the prominent
+        // "it's your turn" alert; everyone else gets a subtle "now playing".
+        // On shared screens (no currentTeamId, e.g. the TV view) we stay silent
+        // since the turn is already shown on-screen.
+        if (currentTeamId) {
+          if (teamId === currentTeamId) {
+            notifyYourTurn(teamName)
+          } else {
+            notifyTeamTurn(teamName)
+          }
         }
       } catch (error) {
         console.error('Error handling turn started event:', error)
@@ -307,7 +324,14 @@ export const useGameSocket = (gameId: string | undefined) => {
     return () => {
       gamesSocket.off('game:turn-started', handleTurnStarted)
     }
-  }, [gamesSocket, gameId, queryClient])
+  }, [
+    gamesSocket,
+    gameId,
+    queryClient,
+    currentTeamId,
+    notifyYourTurn,
+    notifyTeamTurn,
+  ])
 
   // Listen for turn advanced events (timer)
   useEffect(() => {
