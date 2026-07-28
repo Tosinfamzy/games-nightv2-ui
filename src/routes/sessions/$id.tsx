@@ -9,7 +9,7 @@ import {
 import { useSessionFull } from '../../lib/api/hooks/use-session'
 import { useSessionSocket } from '../../lib/socket'
 import { usePlayer } from '../../contexts/PlayerContext'
-import { useGamesMasterContext } from '../../contexts/GamesMasterContext'
+import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { TeamDisplay } from '../../components/TeamDisplay'
@@ -64,9 +64,10 @@ function SessionDetailsPage() {
   const { player } = usePlayer()
   const currentPlayerId = player?.id
 
-  // Check if current user is the Games Master/host
-  const { gm } = useGamesMasterContext()
-  const isHost = gm?.id === session?.host.id
+  // Check if current user is the Games Master/host (the signed-in Clerk GM
+  // whose id matches this session's host).
+  const { data: currentGm } = useCurrentGm()
+  const isHost = Boolean(currentGm?.id && currentGm.id === session?.host.id)
 
   // Transform API data to UI-friendly format for components
   const uiPlayers = transformPlayers(players)

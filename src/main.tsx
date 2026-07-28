@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'sonner'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { SocketProvider } from './lib/socket'
-import { GamesMasterProvider, PlayerProvider } from './contexts'
+import { PlayerProvider } from './contexts'
 import { getErrorMessage, showToast } from './lib/toast'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { ClerkTokenBridge } from './components/ClerkTokenBridge'
@@ -75,15 +75,13 @@ if (rootElement && !rootElement.innerHTML) {
         <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl="/">
           <QueryClientProvider client={queryClient}>
             <ClerkTokenBridge />
-            <GamesMasterProvider>
-              <PlayerProvider>
-                <SocketProvider>
-                  <RouterProvider router={router} />
-                  <ReactQueryDevtools initialIsOpen={false} />
-                  <Toaster position="top-right" richColors closeButton />
-                </SocketProvider>
-              </PlayerProvider>
-            </GamesMasterProvider>
+            <PlayerProvider>
+              <SocketProvider>
+                <RouterProvider router={router} />
+                <ReactQueryDevtools initialIsOpen={false} />
+                <Toaster position="top-right" richColors closeButton />
+              </SocketProvider>
+            </PlayerProvider>
           </QueryClientProvider>
         </ClerkProvider>
       </ErrorBoundary>
