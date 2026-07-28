@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { JoinSessionForm } from '../components/JoinSessionForm'
 import { sessionService } from '../lib/api/services'
 import { sessionKeys } from '../lib/api/hooks/use-session'
+import { useCurrentGm } from '../lib/api/hooks/use-current-gm'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import type { Session } from '../lib/api/types'
 
@@ -10,6 +12,7 @@ function AutoJoinPage() {
   const { joinCode } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { data: currentGm } = useCurrentGm()
 
   // Fetch session details using join code
   const {
@@ -24,6 +27,22 @@ function AutoJoinPage() {
     },
     retry: 1,
   })
+
+  // A signed-in host opening their own session's join link should NOT re-join
+  // as a new anonymous player (that's the "showing up twice" bug). Send them
+  // straight into the session as host.
+  const isHostOfSession = Boolean(
+    currentGm?.id && session?.host?.id && currentGm.id === session.host.id,
+  )
+  useEffect(() => {
+    if (isHostOfSession && session) {
+      navigate({
+        to: '/sessions/$id',
+        params: { id: session.id },
+        replace: true,
+      })
+    }
+  }, [isHostOfSession, session, navigate])
 
   const handleJoinSuccess = (session: Session) => {
     // Invalidate players query to ensure it's fresh when we navigate
@@ -98,6 +117,19 @@ function AutoJoinPage() {
                 Browse active sessions
               </a>
             </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Host opening their own link: redirecting to the session (see effect above).
+  if (isHostOfSession) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <p className="text-gray-600">Opening your session…</p>
           </div>
         </div>
       </div>
