@@ -12,6 +12,7 @@ import { useGameControl } from '../../hooks/useGameControl'
 import { useGameSocket } from '../../lib/socket/use-game-socket'
 import { useSession } from '../../lib/api/hooks/use-session'
 import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
+import { useHostRealtimeToken } from '../../hooks/useHostRealtimeToken'
 import { usePlayer } from '../../contexts/PlayerContext'
 
 export const Route = createFileRoute('/sessions/$id_/game')({
@@ -42,6 +43,11 @@ function InSessionGamePage() {
   const isHost = Boolean(
     currentGm?.id && session?.host.id && currentGm.id === session.host.id,
   )
+
+  // A Clerk-only host (no player token in this browser) otherwise gets no live
+  // updates on their own control panel / TV board — mint a host token so the
+  // sockets connect.
+  useHostRealtimeToken(id)
 
   const { game, isLoading } = useGameControl(gameId)
 
