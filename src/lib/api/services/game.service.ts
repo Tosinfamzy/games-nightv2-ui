@@ -1,6 +1,16 @@
 import { fetchAPI } from '../client'
 import type { Game, GameResults, UUID } from '../types'
 
+export interface GameTimerStatus {
+  gameId: string
+  currentTurnTeamId: string | null
+  currentTurnTeamName: string | null
+  turnStartedAt: string | null
+  turnTimeLimit: number | null
+  remainingSeconds: number | null
+  isExpired: boolean
+}
+
 class GameService {
   private readonly basePath = '/games'
 
@@ -92,6 +102,10 @@ class GameService {
 
   async getStats(id: UUID): Promise<any> {
     return fetchAPI(`${this.basePath}/${id}/stats`)
+  }
+
+  async getTimer(id: UUID): Promise<GameTimerStatus> {
+    return fetchAPI<GameTimerStatus>(`${this.basePath}/${id}/timer`)
   }
 
   async cancel(id: UUID): Promise<Game> {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSocketContext } from '../lib/socket/socket-context'
+import { gameService } from '../lib/api/services/game.service'
 import type {
   TimerExpiredEvent,
   TimerTickEvent,
@@ -18,6 +19,37 @@ export const useGameTimer = (gameId: string | undefined) => {
   const [currentTeamName, setCurrentTeamName] = useState<string>('')
   const [isExpired, setIsExpired] = useState(false)
   const [autoAdvanced, setAutoAdvanced] = useState(false)
+
+  // Seed the timer from REST on mount so a refresh mid-turn shows the countdown
+  // immediately instead of a blank timer until the next socket tick. Functional
+  // updates only fill values a socket event hasn't already set (avoids clobber).
+  useEffect(() => {
+    if (!gameId) return
+    let cancelled = false
+    gameService
+      .getTimer(gameId)
+      .then((t) => {
+        if (cancelled || !t || !t.turnTimeLimit || !t.turnStartedAt) return
+        setTurnTimeLimit((prev) => prev ?? t.turnTimeLimit)
+        setTimeRemaining((prev) => (prev === null ? t.remainingSeconds : prev))
+        setCurrentTeamName((prev) => prev || t.currentTurnTeamName || '')
+        setIsExpired((prev) => prev || Boolean(t.isExpired))
+        setTurnEndsAt(
+          (prev) =>
+            prev ??
+            new Date(
+              new Date(t.turnStartedAt as string).getTime() +
+                (t.turnTimeLimit as number) * 1000,
+            ).toISOString(),
+        )
+      })
+      .catch(() => {
+        /* timer seed is best-effort; socket events still drive updates */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [gameId])
 
   // Listen for timer tick events
   useEffect(() => {
