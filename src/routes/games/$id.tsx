@@ -51,7 +51,7 @@ function GameDetailsPage() {
 
   const getActionButton = () => {
     switch (game.status) {
-      case GameStatus.NOT_STARTED:
+      case GameStatus.PENDING:
         return (
           <button
             onClick={() => handleGameAction(GameStatus.IN_PROGRESS)}

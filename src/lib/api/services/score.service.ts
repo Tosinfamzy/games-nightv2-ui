@@ -76,26 +76,24 @@ export const scoreService = {
     })
   },
 
-  // Submit score for a game (simplified interface)
+  // Submit a score for a game. Uses the dedicated submit endpoint (not the
+  // generic POST /scores) because only this path broadcasts
+  // game:score-submitted to other clients and enforces team/round ownership
+  // server-side.
   submitGameScore: (
     gameId: string,
     data: SubmitGameScoreDTO,
   ): Promise<Score> => {
-    return fetchAPI<Score>('/scores', {
+    return fetchAPI<Score>(`/scores/games/${gameId}/submit`, {
       method: 'POST',
-      body: JSON.stringify({
-        gameId,
-        teamId: data.teamId,
-        points: data.score,
-        isBonus: false,
-      }),
+      body: JSON.stringify({ teamId: data.teamId, score: data.score }),
     })
   },
 
-  // Update a score
+  // Update a score. Backend route is PUT /scores/:id (PATCH 404s).
   update: (id: string, data: UpdateScoreDTO): Promise<Score> => {
     return fetchAPI<Score>(`/scores/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     })
   },

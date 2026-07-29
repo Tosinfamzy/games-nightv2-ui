@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { useGameControl } from '../../hooks/useGameControl'
 import { ConfirmDialog } from '../ConfirmDialog'
+import {
+  canEndRound as canEndRoundOf,
+  canStartFirstRound as canStartFirstRoundOf,
+  canStartNextRound as canStartNextRoundOf,
+  isFinalRound,
+  isNotStarted,
+} from '../../lib/game-status'
+import { GameStatus } from '../../lib/api/types'
 import type { UUID } from '../../lib/api/types'
 
 interface RoundManagerProps {
@@ -42,12 +50,13 @@ export default function RoundManager({
     return null
   }
 
-  const isNotStarted = game.status === 'NOT_STARTED' && game.currentRound === 0
-  const isInProgress = game.status === 'IN_PROGRESS'
-  const canStartFirstRound = isNotStarted
-  const canAdvanceRound = isInProgress && game.currentRound < game.maxRounds
-  const canEndRound = isInProgress && game.currentRound > 0
-  const isLastRound = game.currentRound === game.maxRounds
+  const notStarted = isNotStarted(game.status)
+  const roundLive = game.status === GameStatus.ROUND_IN_PROGRESS
+  const roundEnded = game.status === GameStatus.ROUND_ENDED
+  const canStartFirstRound = canStartFirstRoundOf(game)
+  const canStartNextRound = canStartNextRoundOf(game)
+  const canEndRound = canEndRoundOf(game)
+  const isLastRound = isFinalRound(game)
   const roundProgress =
     game.maxRounds > 0 ? (game.currentRound / game.maxRounds) * 100 : 0
 
@@ -69,7 +78,7 @@ export default function RoundManager({
                 / {game.maxRounds}
               </span>
             </div>
-            {isLastRound && isInProgress && (
+            {isLastRound && roundLive && (
               <div className="text-sm text-orange-600 font-medium mt-1">
                 🏁 Final Round
               </div>
@@ -124,80 +133,97 @@ export default function RoundManager({
           </button>
         )}
 
-        {canAdvanceRound && (
+        {canStartNextRound && (
           <button
-            onClick={() => {
-              if (isLastRound) {
-                setShowFinalRoundConfirm(true)
-              } else {
-                nextRound()
-              }
-            }}
+            onClick={() => nextRound()}
             disabled={isAdvancingRound}
             className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors font-medium"
           >
             {isAdvancingRound
-              ? 'Advancing...'
-              : isLastRound
-                ? '🏁 Start Final Round'
-                : `➡️ Next Round (${game.currentRound + 1})`}
+              ? 'Starting...'
+              : `➡️ Start Round ${game.currentRound + 1}`}
           </button>
         )}
 
-        {canEndRound && game.currentRound < game.maxRounds && (
+        {canEndRound && (
           <button
-            onClick={() => setShowEndRoundConfirm(true)}
+            onClick={() =>
+              isLastRound
+                ? setShowFinalRoundConfirm(true)
+                : setShowEndRoundConfirm(true)
+            }
             disabled={isEndingRound}
-            className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors font-medium"
+            className={`w-full px-4 py-3 rounded-lg font-medium transition-colors disabled:cursor-not-allowed ${
+              isLastRound
+                ? 'bg-orange-500 text-white hover:bg-orange-600 disabled:bg-orange-300'
+                : 'border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 py-2'
+            }`}
           >
-            {isEndingRound ? 'Ending Round...' : '⏹ End Current Round'}
+            {isEndingRound
+              ? 'Ending Round...'
+              : isLastRound
+                ? '🏁 End Final Round & Complete Game'
+                : '⏹ End Current Round'}
           </button>
         )}
       </div>
 
       {/* Status Info */}
-      {isNotStarted && (
+      {notStarted && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-800 text-sm">
-            ℹ️ Start the first round to begin the game.
+            ℹ️ Start the game above, then start round 1 here.
           </p>
         </div>
       )}
 
-      {isInProgress &&
-        game.currentRound > 0 &&
-        game.currentRound < game.maxRounds && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-800 text-sm">
-              ✓ Round {game.currentRound} in progress.{' '}
-              {game.maxRounds - game.currentRound}{' '}
-              {game.maxRounds - game.currentRound === 1 ? 'round' : 'rounds'}{' '}
-              remaining.
-            </p>
-          </div>
-        )}
+      {canStartFirstRound && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-800 text-sm">
+            ▶ The game is running. Start round 1 to begin play.
+          </p>
+        </div>
+      )}
 
-      {isInProgress && isLastRound && (
+      {roundLive && !isLastRound && (
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-800 text-sm">
+            ✓ Round {game.currentRound} in progress. Enter scores, then end the
+            round. {game.maxRounds - game.currentRound}{' '}
+            {game.maxRounds - game.currentRound === 1 ? 'round' : 'rounds'}{' '}
+            remaining after this.
+          </p>
+        </div>
+      )}
+
+      {roundLive && isLastRound && (
         <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
           <p className="text-orange-800 text-sm font-medium">
-            🏁 This is the final round! Complete the game when all scoring is
-            done.
+            🏁 Final round in progress. Ending it completes the game.
           </p>
         </div>
       )}
 
-      {/* Final Round Confirmation Dialog */}
+      {roundEnded && (
+        <div className="mt-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+          <p className="text-indigo-800 text-sm">
+            ⏹ Round {game.currentRound} ended. Start the next round when ready.
+          </p>
+        </div>
+      )}
+
+      {/* Final Round End Confirmation Dialog */}
       <ConfirmDialog
         isOpen={showFinalRoundConfirm}
         onClose={() => setShowFinalRoundConfirm(false)}
         onConfirm={() => {
-          nextRound()
+          endRound()
           setShowFinalRoundConfirm(false)
         }}
-        title="Start Final Round"
-        message="This is the final round. After advancing, you can complete the game. Continue?"
-        confirmLabel="Start Final Round"
-        variant="info"
+        title="End Final Round & Complete Game"
+        message="This is the final round — ending it will complete the game and lock in the results. Make sure all scores are entered. Continue?"
+        confirmLabel="End & Complete"
+        variant="warning"
       />
 
       {/* End Round Confirmation Dialog */}

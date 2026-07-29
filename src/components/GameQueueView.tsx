@@ -33,8 +33,10 @@ export function GameQueueView({
     )
   }
 
-  const scheduledGames = games.filter((g) => g.status === 'NOT_STARTED')
-  const inProgressGames = games.filter((g) => g.status === 'IN_PROGRESS')
+  const scheduledGames = games.filter((g) => g.status === 'PENDING')
+  const inProgressGames = games.filter(
+    (g) => g.status === 'IN_PROGRESS' || g.status === 'ROUND_IN_PROGRESS',
+  )
   const completedGames = games.filter((g) => g.status === 'COMPLETED')
 
   const getStatusColor = (status: string) => {

@@ -139,9 +139,10 @@ function Scoring() {
                 <h3 className="text-sm font-medium text-gray-700">Status</h3>
                 <p
                   className={`text-lg font-semibold ${
-                    selectedGameData.status === 'IN_PROGRESS'
+                    selectedGameData.status === 'IN_PROGRESS' ||
+                    selectedGameData.status === 'ROUND_IN_PROGRESS'
                       ? 'text-green-600'
-                      : selectedGameData.status === 'NOT_STARTED'
+                      : selectedGameData.status === 'PENDING'
                         ? 'text-yellow-600'
                         : 'text-gray-600'
                   }`}

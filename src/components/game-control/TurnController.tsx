@@ -1,4 +1,5 @@
 import { useGameControl } from '../../hooks/useGameControl'
+import { isRoundLive } from '../../lib/game-status'
 import type { UUID } from '../../lib/api/types'
 
 interface TurnControllerProps {
@@ -30,7 +31,8 @@ export default function TurnController({
   }
 
   const teams = game.teams ?? []
-  const isInProgress = game.status === 'IN_PROGRESS'
+  // Turns are only taken while a round is actively being played.
+  const isInProgress = isRoundLive(game.status)
   const currentTeamIndex = Math.max(
     0,
     teams.findIndex((t) => t.id === game.currentTurnTeamId),

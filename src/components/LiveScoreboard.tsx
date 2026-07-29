@@ -97,9 +97,10 @@ export function LiveScoreboard({
           <div className="flex gap-2">
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${
-                gameStatus === 'IN_PROGRESS'
+                gameStatus === 'IN_PROGRESS' ||
+                gameStatus === 'ROUND_IN_PROGRESS'
                   ? 'bg-green-100 text-green-800'
-                  : gameStatus === 'NOT_STARTED'
+                  : gameStatus === 'PENDING'
                     ? 'bg-yellow-100 text-yellow-800'
                     : 'bg-gray-100 text-gray-800'
               }`}
@@ -111,7 +112,7 @@ export function LiveScoreboard({
 
         {/* Game Controls */}
         <div className="flex gap-3">
-          {gameStatus === 'NOT_STARTED' && (
+          {gameStatus === 'PENDING' && (
             <button
               onClick={() => onGameStateChange?.('start')}
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
@@ -207,8 +208,10 @@ export function LiveScoreboard({
         </div>
       </div>
 
-      {/* Score Input Panel */}
-      {showScoreInput && gameStatus === 'IN_PROGRESS' && (
+      {/* Score Input Panel — scores are only enterable during a live round,
+          matching the "Add Scores" toggle above (previously gated on
+          IN_PROGRESS, which the toggle never shows, so it was unreachable). */}
+      {showScoreInput && gameStatus === 'ROUND_IN_PROGRESS' && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold mb-4">
             Add Scores for Round {currentRound}

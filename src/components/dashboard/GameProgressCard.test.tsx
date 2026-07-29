@@ -93,12 +93,12 @@ describe('GameProgressCard', () => {
       expect(statusBadge).toHaveClass('text-blue-800')
     })
 
-    it('should display NOT_STARTED status with blue color', () => {
-      const game = createMockDashboardGame({ status: 'NOT_STARTED' })
+    it('should display PENDING status with blue color', () => {
+      const game = createMockDashboardGame({ status: 'PENDING' })
 
       render(<GameProgressCard game={game} sessionId={mockSessionId} />)
 
-      const statusBadge = screen.getByText('NOT_STARTED')
+      const statusBadge = screen.getByText('PENDING')
       expect(statusBadge).toHaveClass('bg-blue-100')
     })
 

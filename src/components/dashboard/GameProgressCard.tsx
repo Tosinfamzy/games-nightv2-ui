@@ -18,11 +18,16 @@ export default function GameProgressCard({
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
       case 'IN_PROGRESS':
+      case 'ROUND_IN_PROGRESS':
         return 'bg-green-100 text-green-800'
+      case 'ROUND_ENDED':
+        return 'bg-indigo-100 text-indigo-800'
       case 'COMPLETED':
         return 'bg-gray-100 text-gray-800'
       case 'SCHEDULED':
-      case 'NOT_STARTED':
+      case 'PENDING':
+      case 'READY_TO_START':
+      case 'WAITING_FOR_TEAMS':
         return 'bg-blue-100 text-blue-800'
       case 'PAUSED':
         return 'bg-yellow-100 text-yellow-800'
@@ -31,8 +36,10 @@ export default function GameProgressCard({
     }
   }
 
-  const isInProgress = game.status.toUpperCase() === 'IN_PROGRESS'
-  const isCompleted = game.status.toUpperCase() === 'COMPLETED'
+  const status = game.status.toUpperCase()
+  const isInProgress =
+    status === 'IN_PROGRESS' || status === 'ROUND_IN_PROGRESS'
+  const isCompleted = status === 'COMPLETED'
 
   return (
     <div

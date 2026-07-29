@@ -1,28 +1,44 @@
 import { useState } from 'react'
 import { useGameControl } from '../../hooks/useGameControl'
+import { useSessionTeams } from '../../lib/api/hooks/use-session'
 import { ConfirmDialog } from '../ConfirmDialog'
-import type { GameStatus, UUID } from '../../lib/api/types'
+import {
+  canComplete as canCompleteGame,
+  canPause as canPauseGame,
+  canResume as canResumeGame,
+  canStartGame,
+  isNotStarted,
+  prettyStatus,
+} from '../../lib/game-status'
+import { GameStatus } from '../../lib/api/types'
+import type { UUID } from '../../lib/api/types'
 
 interface GameControlPanelProps {
   gameId: UUID
+  /** Session the game belongs to — used to gather teams when starting. */
+  sessionId: UUID
   className?: string
 }
 
 export default function GameControlPanel({
   gameId,
+  sessionId,
   className = '',
 }: GameControlPanelProps) {
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
   const {
     game,
     isLoading,
+    startGame,
     pauseGame,
     resumeGame,
     completeGame,
+    isStarting,
     isPausing,
     isResuming,
     isCompleting,
   } = useGameControl(gameId)
+  const { data: sessionTeams = [] } = useSessionTeams(sessionId)
 
   if (isLoading) {
     return (
@@ -49,25 +65,28 @@ export default function GameControlPanel({
 
   const getStatusColor = (status: GameStatus): string => {
     switch (status) {
-      case 'IN_PROGRESS':
+      case GameStatus.IN_PROGRESS:
+      case GameStatus.ROUND_IN_PROGRESS:
         return 'bg-green-100 text-green-800'
-      case 'PAUSED':
+      case GameStatus.ROUND_ENDED:
+        return 'bg-indigo-100 text-indigo-800'
+      case GameStatus.PAUSED:
         return 'bg-yellow-100 text-yellow-800'
-      case 'COMPLETED':
+      case GameStatus.COMPLETED:
         return 'bg-gray-100 text-gray-800'
-      case 'CANCELLED':
+      case GameStatus.CANCELLED:
         return 'bg-red-100 text-red-800'
-      case 'NOT_STARTED':
       default:
         return 'bg-blue-100 text-blue-800'
     }
   }
 
   const teams = game.teams ?? []
-  const canPause = game.status === 'IN_PROGRESS'
-  const canResume = game.status === 'PAUSED'
-  const canComplete =
-    game.status === 'IN_PROGRESS' && game.currentRound === game.maxRounds
+  const showStart = canStartGame(game)
+  const showPause = canPauseGame(game)
+  const showResume = canResumeGame(game)
+  const showComplete = canCompleteGame(game)
+  const enoughTeams = sessionTeams.length >= 2
 
   return (
     <div
@@ -82,7 +101,7 @@ export default function GameControlPanel({
               game.status,
             )}`}
           >
-            {game.status.replace('_', ' ')}
+            {prettyStatus(game.status)}
           </span>
         </div>
         {game.description && (
@@ -121,7 +140,18 @@ export default function GameControlPanel({
 
       {/* Control Buttons */}
       <div className="flex flex-wrap gap-3">
-        {canPause && (
+        {showStart && (
+          <button
+            onClick={() => startGame(sessionTeams.map((t) => t.id))}
+            disabled={isStarting || !enoughTeams}
+            title={enoughTeams ? undefined : 'Form at least two teams to start'}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition-colors font-medium"
+          >
+            {isStarting ? 'Starting…' : '🎮 Start Game'}
+          </button>
+        )}
+
+        {showPause && (
           <button
             onClick={() => pauseGame()}
             disabled={isPausing}
@@ -131,7 +161,7 @@ export default function GameControlPanel({
           </button>
         )}
 
-        {canResume && (
+        {showResume && (
           <button
             onClick={() => resumeGame()}
             disabled={isResuming}
@@ -141,7 +171,7 @@ export default function GameControlPanel({
           </button>
         )}
 
-        {canComplete && (
+        {showComplete && (
           <button
             onClick={() => setShowCompleteConfirm(true)}
             disabled={isCompleting}
@@ -153,15 +183,17 @@ export default function GameControlPanel({
       </div>
 
       {/* Status Messages */}
-      {game.status === 'NOT_STARTED' && (
+      {isNotStarted(game.status) && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-800 text-sm">
-            ℹ️ Game not started yet. Start the first round to begin playing.
+            {enoughTeams
+              ? 'ℹ️ Ready to go. Start the game, then start round 1 below.'
+              : '⚠️ Form at least two teams in the session before starting this game.'}
           </p>
         </div>
       )}
 
-      {game.status === 'PAUSED' && (
+      {game.status === GameStatus.PAUSED && (
         <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-yellow-800 text-sm">
             ⏸ Game is paused. Resume when ready to continue.
@@ -169,11 +201,17 @@ export default function GameControlPanel({
         </div>
       )}
 
-      {game.status === 'COMPLETED' && (
+      {game.status === GameStatus.COMPLETED && (
         <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-green-800 text-sm font-medium">
             🎉 Game completed! Check the results to see who won.
           </p>
+        </div>
+      )}
+
+      {game.status === GameStatus.CANCELLED && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 text-sm">This game was cancelled.</p>
         </div>
       )}
 
