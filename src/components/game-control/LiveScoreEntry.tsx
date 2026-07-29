@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useGameControl } from '../../hooks/useGameControl'
 import { useGameScoring } from '../../hooks/useGameScoring'
+import { isRoundLive } from '../../lib/game-status'
 import type { UUID } from '../../lib/api/types'
 
 interface LiveScoreEntryProps {
@@ -35,6 +36,22 @@ export default function LiveScoreEntry({
 
   if (!game) {
     return null
+  }
+
+  // Scores are only accepted during a live round (backend rejects otherwise),
+  // so don't present an active entry form outside ROUND_IN_PROGRESS.
+  if (!isRoundLive(game.status)) {
+    return (
+      <div
+        className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
+      >
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Score entry</h3>
+        <p className="text-sm text-gray-600">
+          Start a round to enter scores. Points can only be recorded while a
+          round is in progress.
+        </p>
+      </div>
+    )
   }
 
   const handleScoreChange = (teamId: string, value: string) => {

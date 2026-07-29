@@ -7,6 +7,14 @@ import { toastHelpers } from '../lib/toast'
 import { ConfirmDialog } from './ConfirmDialog'
 import EmptyState from './EmptyState'
 
+// A game is "being played" (show Resume, not Play) for any live/paused state —
+// the collapsed status can be round_in_progress / round_ended / paused, not
+// just in_progress.
+const isActivePlayStatus = (status: string): boolean =>
+  ['in_progress', 'round_in_progress', 'round_ended', 'paused'].includes(
+    (status ?? '').toLowerCase(),
+  )
+
 interface Player {
   id: string
   name: string
@@ -389,14 +397,14 @@ export function EnhancedGamesTab({
                       className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
                         game.status === 'completed'
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : game.status === 'in_progress'
+                          : isActivePlayStatus(game.status)
                             ? 'bg-green-600 text-white hover:bg-green-700'
                             : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >
                       {game.status === 'completed'
                         ? '✓ Completed'
-                        : game.status === 'in_progress'
+                        : isActivePlayStatus(game.status)
                           ? '▶ Resume Game'
                           : '🎮 Play Game'}
                     </button>
