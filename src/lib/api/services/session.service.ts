@@ -83,6 +83,15 @@ export const sessionService = {
     })
   },
 
+  // Issue a session-scoped player token for the signed-in host, so a Clerk-only
+  // host (no join token in this browser) can open the real-time sockets.
+  getHostConnection: async (id: UUID): Promise<{ playerToken: string }> => {
+    return fetchAPI<{ playerToken: string }>(
+      `${BASE_PATH}/${id}/host-connection`,
+      { method: 'POST' },
+    )
+  },
+
   complete: async (id: UUID): Promise<Session> => {
     return fetchAPI<Session>(`${BASE_PATH}/${id}/complete`, {
       method: 'POST',

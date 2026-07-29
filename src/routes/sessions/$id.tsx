@@ -10,6 +10,7 @@ import { useSessionFull } from '../../lib/api/hooks/use-session'
 import { useSessionSocket } from '../../lib/socket'
 import { usePlayer } from '../../contexts/PlayerContext'
 import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
+import { useHostRealtimeToken } from '../../hooks/useHostRealtimeToken'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { TeamDisplay } from '../../components/TeamDisplay'
@@ -68,6 +69,10 @@ function SessionDetailsPage() {
   // whose id matches this session's host).
   const { data: currentGm } = useCurrentGm()
   const isHost = Boolean(currentGm?.id && currentGm.id === session?.host.id)
+
+  // A Clerk-only host with no player token here gets no live lobby updates —
+  // mint a host token so the session sockets connect.
+  useHostRealtimeToken(id)
 
   // The game the team-management panel should target: the live one if any,
   // else the most recent (was hardcoded to games[0]).
