@@ -18,6 +18,8 @@ export interface Session {
   joinCode: string
   /** Token for the single shareable RSVP link (host-facing). */
   publicRsvpToken?: string
+  /** Host-authored invite message: default share text + public RSVP greeting. */
+  inviteMessage?: string | null
   host: {
     id: string
     name: string

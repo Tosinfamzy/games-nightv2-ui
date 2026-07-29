@@ -116,6 +116,11 @@ function PublicRsvpPage() {
         </div>
 
         <div className="p-6 space-y-4">
+          {event.inviteMessage && !result && (
+            <blockquote className="rounded-lg bg-indigo-50 border-l-4 border-indigo-400 px-4 py-3 text-gray-700 text-sm whitespace-pre-wrap">
+              {event.inviteMessage}
+            </blockquote>
+          )}
           {result ? (
             /* Confirmation — with a personal link to edit later. */
             <div className="text-center space-y-3 py-2">
