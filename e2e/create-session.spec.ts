@@ -115,11 +115,12 @@ test.describe('Home Page to Create Session Navigation', () => {
     }
   })
 
-  test('should have accessible create session link', async ({ page }) => {
+  test('should surface an accessible host entry point', async ({ page }) => {
     await page.goto('/')
 
-    // Check that the link has proper accessible name
-    const hostLink = page.getByRole('link', { name: /host/i })
-    await expect(hostLink.first()).toBeVisible()
+    // Hosting starts with signing in (Clerk modal), so the home page's host
+    // entry point is a "Sign in to host" button with an accessible name.
+    const hostButton = page.getByRole('button', { name: /sign in to host/i })
+    await expect(hostButton.first()).toBeVisible()
   })
 })

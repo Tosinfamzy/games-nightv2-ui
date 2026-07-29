@@ -58,29 +58,20 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL(/\/join/)
   })
 
-  test('should navigate to sessions page', async ({ page }) => {
+  test('should offer a host sign-in path (not a public sessions link)', async ({
+    page,
+  }) => {
     await page.goto('/')
-
-    // Wait for page to fully load
     await page.waitForLoadState('networkidle')
 
-    // Hide any fixed overlays that might intercept clicks
-    await page.addStyleTag({
-      content: `
-        .fixed, [style*="position: fixed"], [style*="position:fixed"] {
-          display: none !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
-        }
-      `,
-    })
+    // Hosting is gated behind sign-in now: signed-out visitors get a
+    // "Sign in to host" affordance, not a link into the host-only sessions list.
+    const hostButton = page
+      .getByRole('button', { name: /sign in to host/i })
+      .first()
+    await expect(hostButton).toBeVisible()
 
-    // Find a sessions link that's visible and scroll to it
-    // Use the one in the main content area (not the header)
-    const sessionsLink = page.locator('a[href="/sessions"]').last()
-    await sessionsLink.scrollIntoViewIfNeeded()
-    await expect(sessionsLink).toBeVisible()
-    await sessionsLink.click({ force: true })
-    await expect(page).toHaveURL(/\/sessions/)
+    // And there's no anonymous link into the host-scoped sessions list.
+    await expect(page.locator('a[href="/sessions"]')).toHaveCount(0)
   })
 })
