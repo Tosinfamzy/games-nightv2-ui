@@ -54,7 +54,7 @@ export function useSessionManagement(sessionId: string) {
   const startSession = useMutation({
     mutationFn: () => sessionService.start(sessionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
       showToast.success('Session started!')
     },
   })
@@ -62,7 +62,7 @@ export function useSessionManagement(sessionId: string) {
   const completeSession = useMutation({
     mutationFn: () => sessionService.complete(sessionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
       showToast.success('Session completed!')
     },
   })
@@ -70,7 +70,7 @@ export function useSessionManagement(sessionId: string) {
   const cancelSession = useMutation({
     mutationFn: () => sessionService.cancel(sessionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
       showToast.info('Session cancelled')
     },
   })

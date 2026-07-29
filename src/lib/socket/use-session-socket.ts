@@ -298,7 +298,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
           queryKey: sessionKeys.teams(sessionId),
         })
         queryClient.invalidateQueries({
-          queryKey: ['players', 'session', sessionId],
+          queryKey: sessionKeys.players(sessionId),
         })
       } catch (error) {
         console.error('Error handling player assignment:', error)
@@ -358,7 +358,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
         }
 
         queryClient.invalidateQueries({
-          queryKey: ['players', 'session', sessionId],
+          queryKey: sessionKeys.players(sessionId),
         })
       } catch (error) {
         console.error('Error handling player online event:', error)
@@ -386,7 +386,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
         }
 
         queryClient.invalidateQueries({
-          queryKey: ['players', 'session', sessionId],
+          queryKey: sessionKeys.players(sessionId),
         })
       } catch (error) {
         console.error('Error handling player offline event:', error)

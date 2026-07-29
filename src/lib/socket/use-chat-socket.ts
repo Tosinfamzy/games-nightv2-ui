@@ -143,13 +143,14 @@ export const useChatSocket = (
         const errorMessage = data?.error || 'An unknown chat error occurred'
         setError(errorMessage)
 
-        // Show user-friendly error message
+        // Show user-friendly error message. Codes must match what the gateway
+        // actually emits (RATE_LIMITED / TOKEN_INVALID), not the old guesses.
         if (data?.code === 'MESSAGE_TOO_LONG') {
           showToast.error('Message is too long. Please shorten it.')
-        } else if (data?.code === 'RATE_LIMIT') {
+        } else if (data?.code === 'RATE_LIMITED') {
           showToast.error("Slow down! You're sending messages too quickly.")
-        } else if (data?.code === 'UNAUTHORIZED') {
-          showToast.error('You are not authorized to send messages.')
+        } else if (data?.code === 'TOKEN_INVALID') {
+          showToast.error('Your session expired — please rejoin to chat.')
         } else {
           showToast.error(`Chat error: ${errorMessage}`)
         }
@@ -218,6 +219,17 @@ export const useChatSocket = (
     },
     [chatSocket, sessionId],
   )
+
+  // Refetch history whenever the socket (re)connects, so messages sent during
+  // a transient disconnect aren't silently missed (chat has no polling
+  // fallback). Also covers the initial load.
+  const wasConnectedRef = useRef(false)
+  useEffect(() => {
+    if (isConnected && !wasConnectedRef.current && sessionId) {
+      loadHistory(50)
+    }
+    wasConnectedRef.current = isConnected
+  }, [isConnected, sessionId, loadHistory])
 
   // Load more messages (pagination)
   const loadMoreMessages = useCallback(() => {

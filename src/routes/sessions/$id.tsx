@@ -107,7 +107,7 @@ function SessionDetailsPage() {
   const startSessionMutation = useMutation({
     mutationFn: sessionService.start,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', id] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
     },
     onError: (error) => {
       toastHelpers.operationError('start session', error)
@@ -117,7 +117,7 @@ function SessionDetailsPage() {
   const completeSessionMutation = useMutation({
     mutationFn: sessionService.complete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', id] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
     },
     onError: (error) => {
       toastHelpers.operationError('complete session', error)
@@ -127,7 +127,7 @@ function SessionDetailsPage() {
   const cancelSessionMutation = useMutation({
     mutationFn: sessionService.cancel,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sessions', id] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
     },
     onError: (error) => {
       toastHelpers.operationError('cancel session', error)
