@@ -565,7 +565,9 @@ function SessionDetailsPage() {
           {activeTab === 'guests' && (
             <GuestList
               sessionId={id}
+              sessionName={session.name}
               publicRsvpToken={session.publicRsvpToken}
+              inviteMessage={session.inviteMessage}
             />
           )}
 

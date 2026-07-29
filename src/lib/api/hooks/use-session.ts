@@ -13,6 +13,11 @@ export interface CreateSessionDTO {
   gamesMasterId?: string
   date: string
   location?: string
+  /**
+   * Host-authored invite message (max 500 chars). Omit to leave unchanged on
+   * update; send an empty string to clear it.
+   */
+  inviteMessage?: string
 }
 
 export interface UpdateSessionDTO extends Partial<CreateSessionDTO> {

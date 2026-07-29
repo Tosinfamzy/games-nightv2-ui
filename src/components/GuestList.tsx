@@ -5,8 +5,12 @@ import {
   useRemoveInvite,
   useSessionInvites,
 } from '../lib/api/hooks/use-invite'
+import { useUpdateSession } from '../lib/api/hooks/use-session'
 import { showToast, toastHelpers } from '../lib/toast'
+import { ShareButtons } from './ShareButtons'
 import type { Invite, RsvpStatus } from '../lib/api/services/invite.service'
+
+const INVITE_MESSAGE_MAX = 500
 
 const STATUS_STYLES: Record<RsvpStatus, { label: string; className: string }> =
   {
@@ -33,37 +37,129 @@ function StatCard({ label, value }: { label: string; value: number }) {
   )
 }
 
-/** One-link sharing: copy the open self-serve RSVP URL for the whole session. */
-function ShareLink({ publicRsvpToken }: { publicRsvpToken?: string }) {
+/**
+ * One-link sharing for the whole session: a host-authored invite message plus
+ * the open self-serve RSVP URL, shareable via the native share sheet, WhatsApp,
+ * SMS, email, or copy. The message is saved on the session and also greets
+ * guests on the RSVP page.
+ */
+function InviteShareCard({
+  sessionId,
+  sessionName,
+  publicRsvpToken,
+  inviteMessage,
+}: {
+  sessionId: string
+  sessionName: string
+  publicRsvpToken?: string
+  inviteMessage?: string | null
+}) {
+  const updateSession = useUpdateSession()
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+
   if (!publicRsvpToken) return null
   const url = `${window.location.origin}/rsvp/${publicRsvpToken}`
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      toastHelpers.copied('shareable RSVP link')
-    } catch {
-      showToast.error('Could not copy the link')
-    }
+  const saved = (inviteMessage ?? '').trim()
+  // What actually gets shared: the host's message, or a friendly default.
+  const effectiveMessage =
+    saved || `You're invited to ${sessionName}! RSVP here:`
+
+  const startEditing = () => {
+    setDraft(saved)
+    setEditing(true)
+  }
+
+  const save = () => {
+    updateSession.mutate(
+      { id: sessionId, data: { inviteMessage: draft.trim() } },
+      {
+        onSuccess: () => {
+          setEditing(false)
+          showToast.success(
+            draft.trim() ? 'Invite message saved' : 'Invite message cleared',
+          )
+        },
+        onError: (error) =>
+          toastHelpers.operationError('save the invite message', error),
+      },
+    )
   }
 
   return (
-    <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 flex flex-col sm:flex-row sm:items-center gap-2">
-      <div className="min-w-0 flex-1">
+    <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-blue-900">
           Shareable invite link
         </p>
-        <p className="text-xs text-blue-700 truncate">{url}</p>
-        <p className="text-xs text-blue-600 mt-0.5">
-          Anyone with this link can RSVP themselves — drop it in the group chat.
-        </p>
+        {!editing && (
+          <button
+            onClick={startEditing}
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+          >
+            {saved ? 'Edit message' : 'Add a message'}
+          </button>
+        )}
       </div>
-      <button
-        onClick={copy}
-        className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 min-h-[44px] flex-shrink-0"
-      >
-        Copy link
-      </button>
+
+      {editing ? (
+        <div className="space-y-2">
+          <textarea
+            value={draft}
+            onChange={(e) =>
+              setDraft(e.target.value.slice(0, INVITE_MESSAGE_MAX))
+            }
+            rows={3}
+            placeholder={`You're invited to ${sessionName}! Bring snacks and your A-game 🎲`}
+            className="w-full rounded-lg border border-blue-200 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-blue-600">
+              {draft.length}/{INVITE_MESSAGE_MAX}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditing(false)}
+                className="text-gray-600 hover:text-gray-800 text-sm font-medium min-h-[44px] px-3"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={save}
+                disabled={updateSession.isPending}
+                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 min-h-[44px] disabled:opacity-50"
+              >
+                {updateSession.isPending ? 'Saving…' : 'Save message'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-blue-800 whitespace-pre-wrap">
+          “{effectiveMessage}”
+          {!saved && (
+            <span className="text-blue-500 italic">
+              {' '}
+              (default — tap to personalise)
+            </span>
+          )}
+        </p>
+      )}
+
+      <p className="text-xs text-blue-700 truncate">{url}</p>
+
+      {!editing && (
+        <ShareButtons
+          url={url}
+          message={effectiveMessage}
+          subject={`You're invited to ${sessionName}`}
+          copyLabel="RSVP link"
+        />
+      )}
+      <p className="text-xs text-blue-600">
+        Anyone with this link can RSVP themselves — drop it in the group chat.
+      </p>
     </div>
   )
 }
@@ -143,10 +239,14 @@ function GuestRow({
 
 export function GuestList({
   sessionId,
+  sessionName,
   publicRsvpToken,
+  inviteMessage,
 }: {
   sessionId: string
+  sessionName: string
   publicRsvpToken?: string
+  inviteMessage?: string | null
 }) {
   const { data: invites = [], isLoading } = useSessionInvites(sessionId)
   const { data: summary } = useInviteSummary(sessionId)
@@ -190,8 +290,13 @@ export function GuestList({
         <StatCard label="Headcount" value={summary?.headcount ?? 0} />
       </div>
 
-      {/* Single shareable link */}
-      <ShareLink publicRsvpToken={publicRsvpToken} />
+      {/* Single shareable link + host message */}
+      <InviteShareCard
+        sessionId={sessionId}
+        sessionName={sessionName}
+        publicRsvpToken={publicRsvpToken}
+        inviteMessage={inviteMessage}
+      />
 
       {/* Add guest */}
       <form

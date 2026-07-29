@@ -62,6 +62,8 @@ export interface PublicRsvpView {
   date: string
   location?: string | null
   description?: string | null
+  /** The host's invite message, shown as a greeting on the RSVP page. */
+  inviteMessage?: string | null
   hostName?: string | null
   goingHeadcount: number
 }
