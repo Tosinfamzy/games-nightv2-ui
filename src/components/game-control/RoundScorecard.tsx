@@ -14,6 +14,16 @@ export default function RoundScorecard({
   const { game, isLoading: isLoadingGame } = useGameControl(gameId)
   const { teamScores, isLoading: isLoadingScores } = useGameScoring(gameId)
 
+  // Render teams highest-total-first; badge the leader only when it's unique.
+  const rankedTeams = [...teamScores].sort(
+    (a, b) => b.totalPoints - a.totalPoints,
+  )
+  const maxPoints = rankedTeams[0]?.totalPoints
+  const leaderTeamId =
+    rankedTeams.filter((t) => t.totalPoints === maxPoints).length === 1
+      ? rankedTeams[0]?.teamId
+      : null
+
   if (isLoadingGame || isLoadingScores) {
     return (
       <div
@@ -85,8 +95,11 @@ export default function RoundScorecard({
               </tr>
             </thead>
             <tbody>
-              {teamScores.map((team, index) => {
-                const isFirst = index === 0
+              {rankedTeams.map((team) => {
+                // Leader is the team with the highest total — the API doesn't
+                // return teams pre-sorted, so index 0 wasn't the leader. Only
+                // badge a clear (untied) leader.
+                const isFirst = team.teamId === leaderTeamId
 
                 return (
                   <tr
