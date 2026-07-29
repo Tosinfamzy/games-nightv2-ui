@@ -23,6 +23,8 @@ interface Game {
   difficulty?: 'easy' | 'medium' | 'hard'
   category?: string
   status: 'scheduled' | 'in_progress' | 'completed'
+  /** The library template this session-game was created from. */
+  gameLibrary?: { id: string }
 }
 
 interface Team {
@@ -189,7 +191,12 @@ export function EnhancedGamesTab({
         game.description.toLowerCase().includes(gameFilter.toLowerCase()))
     const matchesCategory =
       !categoryFilter || (game as any).category === categoryFilter
-    const notAlreadyAdded = !sessionGames.some((sg) => sg.id === game.id)
+    // `game.id` is a GameLibrary id; `sg.id` is the session-Game id — those
+    // never match. Compare against the session game's library reference (with a
+    // name fallback), so already-added games are actually hidden.
+    const notAlreadyAdded = !sessionGames.some(
+      (sg) => sg.gameLibrary?.id === game.id || sg.name === game.name,
+    )
 
     return matchesSearch && matchesCategory && notAlreadyAdded
   })
