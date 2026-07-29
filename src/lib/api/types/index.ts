@@ -62,9 +62,20 @@ export interface Game {
   teams: Array<Team>
 }
 
+// Mirrors the backend GameStatus enum exactly. The lifecycle is:
+//   PENDING → (start) → IN_PROGRESS → (start-first-round) → ROUND_IN_PROGRESS
+//   → (end-round) → ROUND_ENDED → (next-round) → ROUND_IN_PROGRESS → … →
+//   (end final round) → COMPLETED. PAUSED/CANCELLED can interrupt.
+// (Previously the FE only knew NOT_STARTED/IN_PROGRESS/PAUSED/COMPLETED/
+// CANCELLED, so the control panel went blank during the round states and
+// "Start Round 1" was unreachable.)
 export enum GameStatus {
-  NOT_STARTED = 'NOT_STARTED',
+  PENDING = 'PENDING',
+  READY_TO_START = 'READY_TO_START',
   IN_PROGRESS = 'IN_PROGRESS',
+  ROUND_IN_PROGRESS = 'ROUND_IN_PROGRESS',
+  ROUND_ENDED = 'ROUND_ENDED',
+  WAITING_FOR_TEAMS = 'WAITING_FOR_TEAMS',
   PAUSED = 'PAUSED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',

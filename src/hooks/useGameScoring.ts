@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSocketContext } from '../lib/socket/socket-context'
 import { scoreService } from '../lib/api/services/score.service'
-import { showToast } from '../lib/toast'
+import { showToast, toastHelpers } from '../lib/toast'
 import type { UUID } from '../lib/api/types'
 import type { SubmitGameScoreDTO } from '../lib/api/services/score.service'
 
@@ -46,6 +46,9 @@ export const useGameScoring = (gameId: UUID | undefined) => {
       queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       showToast.success('Score submitted successfully')
     },
+    onError: (error) => {
+      toastHelpers.operationError('submit score', error)
+    },
   })
 
   // Update score mutation
@@ -57,6 +60,9 @@ export const useGameScoring = (gameId: UUID | undefined) => {
       queryClient.invalidateQueries({ queryKey: ['game-scores', gameId] })
       queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       showToast.success('Score updated')
+    },
+    onError: (error) => {
+      toastHelpers.operationError('update score', error)
     },
   })
 
