@@ -5,12 +5,9 @@ import {
   useRemoveInvite,
   useSessionInvites,
 } from '../lib/api/hooks/use-invite'
-import { useUpdateSession } from '../lib/api/hooks/use-session'
 import { showToast, toastHelpers } from '../lib/toast'
-import { ShareButtons } from './ShareButtons'
+import { InviteShareCard } from './InviteShareCard'
 import type { Invite, RsvpStatus } from '../lib/api/services/invite.service'
-
-const INVITE_MESSAGE_MAX = 500
 
 const STATUS_STYLES: Record<RsvpStatus, { label: string; className: string }> =
   {
@@ -33,132 +30,6 @@ function StatCard({ label, value }: { label: string; value: number }) {
     <div className="rounded-lg bg-white border border-gray-200 px-3 py-2 text-center">
       <div className="text-2xl font-bold text-gray-900">{value}</div>
       <div className="text-xs text-gray-500">{label}</div>
-    </div>
-  )
-}
-
-/**
- * One-link sharing for the whole session: a host-authored invite message plus
- * the open self-serve RSVP URL, shareable via the native share sheet, WhatsApp,
- * SMS, email, or copy. The message is saved on the session and also greets
- * guests on the RSVP page.
- */
-function InviteShareCard({
-  sessionId,
-  sessionName,
-  publicRsvpToken,
-  inviteMessage,
-}: {
-  sessionId: string
-  sessionName: string
-  publicRsvpToken?: string
-  inviteMessage?: string | null
-}) {
-  const updateSession = useUpdateSession()
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-
-  if (!publicRsvpToken) return null
-  const url = `${window.location.origin}/rsvp/${publicRsvpToken}`
-
-  const saved = (inviteMessage ?? '').trim()
-  // What actually gets shared: the host's message, or a friendly default.
-  const effectiveMessage =
-    saved || `You're invited to ${sessionName}! RSVP here:`
-
-  const startEditing = () => {
-    setDraft(saved)
-    setEditing(true)
-  }
-
-  const save = () => {
-    updateSession.mutate(
-      { id: sessionId, data: { inviteMessage: draft.trim() } },
-      {
-        onSuccess: () => {
-          setEditing(false)
-          showToast.success(
-            draft.trim() ? 'Invite message saved' : 'Invite message cleared',
-          )
-        },
-        onError: (error) =>
-          toastHelpers.operationError('save the invite message', error),
-      },
-    )
-  }
-
-  return (
-    <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-blue-900">
-          Shareable invite link
-        </p>
-        {!editing && (
-          <button
-            onClick={startEditing}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-          >
-            {saved ? 'Edit message' : 'Add a message'}
-          </button>
-        )}
-      </div>
-
-      {editing ? (
-        <div className="space-y-2">
-          <textarea
-            value={draft}
-            onChange={(e) =>
-              setDraft(e.target.value.slice(0, INVITE_MESSAGE_MAX))
-            }
-            rows={3}
-            placeholder={`You're invited to ${sessionName}! Bring snacks and your A-game 🎲`}
-            className="w-full rounded-lg border border-blue-200 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-blue-600">
-              {draft.length}/{INVITE_MESSAGE_MAX}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setEditing(false)}
-                className="text-gray-600 hover:text-gray-800 text-sm font-medium min-h-[44px] px-3"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={save}
-                disabled={updateSession.isPending}
-                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 min-h-[44px] disabled:opacity-50"
-              >
-                {updateSession.isPending ? 'Saving…' : 'Save message'}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <p className="text-sm text-blue-800 whitespace-pre-wrap">
-          “{effectiveMessage}”
-          {!saved && (
-            <span className="text-blue-500 italic">
-              {' '}
-              (default — tap to personalise)
-            </span>
-          )}
-        </p>
-      )}
-
-      <p className="text-xs text-blue-700 truncate">{url}</p>
-
-      {!editing && (
-        <ShareButtons
-          url={url}
-          message={effectiveMessage}
-          subject={`You're invited to ${sessionName}`}
-        />
-      )}
-      <p className="text-xs text-blue-600">
-        Anyone with this link can RSVP themselves — drop it in the group chat.
-      </p>
     </div>
   )
 }
