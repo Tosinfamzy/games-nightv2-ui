@@ -5,6 +5,7 @@ interface QueryErrorDisplayProps {
   onRetry?: () => void
   showBackButton?: boolean
   backTo?: string
+  title?: string
 }
 
 export function QueryErrorDisplay({
@@ -12,6 +13,7 @@ export function QueryErrorDisplay({
   onRetry,
   showBackButton = true,
   backTo = '/sessions',
+  title = 'Error Loading Data',
 }: QueryErrorDisplayProps) {
   return (
     <div className="container mx-auto p-6">
@@ -35,9 +37,7 @@ export function QueryErrorDisplay({
           </div>
 
           {/* Error Title */}
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Error Loading Data
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{title}</h2>
 
           {/* Error Message */}
           <p className="text-gray-600 mb-4">
