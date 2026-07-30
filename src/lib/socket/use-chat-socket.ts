@@ -119,7 +119,20 @@ export const useChatSocket = (
           throw new Error('Invalid history data: messages must be an array')
         }
 
-        setMessages(data.messages)
+        // Merge with what we already have (dedupe by id) and keep the list
+        // sorted oldest -> newest. This makes the initial load and "load older"
+        // pagination both correct — older pages prepend rather than replacing the
+        // list — and stays chronological regardless of the server's order.
+        setMessages((prev) => {
+          const byId = new Map<string, ChatMessage>()
+          for (const message of [...data.messages, ...prev]) {
+            byId.set(message.id, message)
+          }
+          return Array.from(byId.values()).sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          )
+        })
         setHasMore(data.hasMore)
       } catch (error) {
         console.error('Error handling chat history:', error)
