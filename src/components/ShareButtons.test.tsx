@@ -13,7 +13,7 @@ const MESSAGE = "You're invited! 🎲"
 describe('ShareButtons', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // No native share by default so the explicit channels always render.
+    // No native share by default so "Share invite" falls back to copy.
     Object.assign(navigator, { share: undefined })
   })
 
@@ -22,7 +22,7 @@ describe('ShareButtons', () => {
     vi.restoreAllMocks()
   })
 
-  it('prepends the host message to the link in the WhatsApp share text', () => {
+  it('includes the host message with the link in the WhatsApp text', () => {
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
     render(<ShareButtons url={URL} message={MESSAGE} />)
 
@@ -34,35 +34,34 @@ describe('ShareButtons', () => {
     expect(text).toBe(`${MESSAGE}\n\n${URL}`)
   })
 
-  it('shares only the bare URL when no message is given', () => {
-    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
-    render(<ShareButtons url={URL} />)
-
-    fireEvent.click(screen.getByText('WhatsApp'))
-
-    const text = decodeURIComponent(
-      (openSpy.mock.calls[0][0] as string).split('text=')[1],
-    )
-    expect(text).toBe(URL)
-  })
-
-  it('copies just the URL (not the message) to the clipboard', async () => {
+  it('copies the message AND link (not a bare url)', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { clipboard: { writeText } })
     render(<ShareButtons url={URL} message={MESSAGE} />)
 
-    fireEvent.click(screen.getByText('Copy link'))
-    // Await the post-copy "Copied!" re-render so the state update settles in act.
+    fireEvent.click(screen.getByText('Copy invite'))
     await screen.findByText('Copied!')
-    expect(writeText).toHaveBeenCalledWith(URL)
+    expect(writeText).toHaveBeenCalledWith(`${MESSAGE}\n\n${URL}`)
   })
 
-  it('shows the native Share button only when the Web Share API exists', () => {
-    const { rerender } = render(<ShareButtons url={URL} />)
-    expect(screen.queryByText('Share')).toBeNull()
+  it('"Share invite" falls back to copying the full invite without a share sheet', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText }, share: undefined })
+    render(<ShareButtons url={URL} message={MESSAGE} />)
 
-    Object.assign(navigator, { share: vi.fn().mockResolvedValue(undefined) })
-    rerender(<ShareButtons url={URL} message={MESSAGE} key="with-share" />)
-    expect(screen.getByText('Share')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Share invite'))
+    await screen.findByText('Copied!')
+    expect(writeText).toHaveBeenCalledWith(`${MESSAGE}\n\n${URL}`)
+  })
+
+  it('"Share invite" uses the native share sheet with message + link when available', () => {
+    const share = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { share })
+    render(<ShareButtons url={URL} message={MESSAGE} />)
+
+    fireEvent.click(screen.getByText('Share invite'))
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({ text: `${MESSAGE}\n\n${URL}` }),
+    )
   })
 })
