@@ -78,11 +78,11 @@ export interface PublicRsvpView {
   goingHeadcount: number
 }
 
-/** A guest self-RSVPing via the shareable link (name required, no pre-invite). */
+/** A guest self-RSVPing via the shareable link (name + email required). */
 export interface PublicRsvpDTO {
   name: string
   status: RsvpResponse
-  email?: string
+  email: string
   plusOnes?: number
   note?: string
 }
