@@ -29,6 +29,7 @@ import JoinCodeQR from '../../components/JoinCodeQR'
 import ShareSessionModal from '../../components/ShareSessionModal'
 import { SessionDetailSkeleton } from '../../components/LoadingSkeleton'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
+import { APIError } from '../../lib/api/client'
 import { SessionStatusBadge } from '../../components/SessionStatusBadge'
 import { StartSessionButton } from '../../components/StartSessionButton'
 import { ReadyCelebration } from '../../components/ReadyCelebration'
@@ -236,12 +237,23 @@ function SessionDetailsPage() {
   }
 
   if (isError || !session) {
+    // A signed-in games master who isn't the host — or anyone who isn't a member
+    // — hits the membership guard (403). That's not a failure to explain away
+    // with "Retry"; guide them to join instead.
+    const notAMember = error instanceof APIError && error.status === 403
     return (
       <QueryErrorDisplay
+        title={notAMember ? "You're not in this session" : 'Error Loading Data'}
         error={
-          error instanceof Error ? error : new Error('Failed to load session')
+          notAMember
+            ? new Error(
+                'Ask the host to send you their invite link, then tap "Join the game night" to get in.',
+              )
+            : error instanceof Error
+              ? error
+              : new Error('Failed to load session')
         }
-        onRetry={() => window.location.reload()}
+        onRetry={notAMember ? undefined : () => window.location.reload()}
         backTo="/sessions"
       />
     )

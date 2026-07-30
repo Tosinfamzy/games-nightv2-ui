@@ -69,37 +69,40 @@ export async function fetchAPI<T>(
     })
   }
 
-  // Add default headers and auth token
-  const headers = new Headers(init.headers)
-  headers.set('Content-Type', 'application/json')
-
   // Auth precedence: a signed-in games master's Clerk token (their real
   // identity — authorizes session creation + cross-device host control), then
   // the session-scoped player token (how in-session players, including a host
   // on their own device, are authorized). Players never sign in, so they fall
   // through to the player token.
-  let token: string | null = null
+  let clerkToken: string | null = null
   if (clerkTokenGetter) {
     try {
-      token = await clerkTokenGetter()
+      clerkToken = await clerkTokenGetter()
     } catch {
-      token = null
+      clerkToken = null
     }
   }
-  if (!token) {
-    token =
-      localStorage.getItem('auth_token') ??
-      localStorage.getItem('gn_player_token')
-  }
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
+  const playerToken = localStorage.getItem('gn_player_token')
+  const primaryToken =
+    clerkToken ?? localStorage.getItem('auth_token') ?? playerToken
+
+  const send = (bearer: string | null) => {
+    const headers = new Headers(init.headers)
+    headers.set('Content-Type', 'application/json')
+    if (bearer) headers.set('Authorization', `Bearer ${bearer}`)
+    return fetch(url, { ...init, headers })
   }
 
-  // Make the request
-  const response = await fetch(url, {
-    ...init,
-    headers,
-  })
+  let response = await send(primaryToken)
+
+  // A signed-in games master can also be a *guest* in someone else's session.
+  // Their Clerk (GM) identity is rejected by the session guards (403), but their
+  // session-scoped player token is valid. A 403 is thrown by a guard before the
+  // handler runs, so there's no side effect — it's safe to retry once with the
+  // player token.
+  if (response.status === 403 && playerToken && primaryToken !== playerToken) {
+    response = await send(playerToken)
+  }
 
   // Handle non-2xx responses
   if (!response.ok) {
