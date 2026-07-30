@@ -1,6 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { useInviteByToken, useRsvp } from '../lib/api/hooks/use-invite'
+import { inviteService } from '../lib/api/services/invite.service'
+import { usePlayer } from '../contexts/PlayerContext'
 import { showToast, toastHelpers } from '../lib/toast'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import type { RsvpResponse } from '../lib/api/services/invite.service'
@@ -41,6 +44,8 @@ function formatDate(iso: string): string {
 
 function InviteRsvpPage() {
   const { token } = Route.useParams()
+  const navigate = useNavigate()
+  const { setPlayer } = usePlayer()
   const { data: invite, isLoading, error } = useInviteByToken(token)
   const rsvp = useRsvp(token)
 
@@ -48,6 +53,28 @@ function InviteRsvpPage() {
   const [plusOnes, setPlusOnes] = useState(0)
   const [note, setNote] = useState('')
   const [editing, setEditing] = useState(false)
+
+  // Join the live session straight from the invite link — no join code.
+  const join = useMutation({
+    mutationFn: () =>
+      inviteService.joinViaInvite(token, name.trim() || undefined),
+    onSuccess: (res) => {
+      setPlayer(
+        {
+          id: res.playerId,
+          name: res.playerName,
+          email: '',
+          status: 'joined',
+          isOnline: true,
+          teams: [],
+        },
+        res.playerToken,
+      )
+      showToast.success(`You're in! Welcome, ${res.playerName}.`)
+      navigate({ to: '/sessions/$id', params: { id: res.session.id } })
+    },
+    onError: (e) => toastHelpers.operationError('join the game night', e),
+  })
 
   // Prefill the name once the invite loads.
   useEffect(() => {
@@ -116,6 +143,35 @@ function InviteRsvpPage() {
         </div>
 
         <div className="p-6 space-y-4">
+          {/* Games-night day: jump straight into the live session. */}
+          {session?.status === 'SCHEDULED' && (
+            <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-4">
+              <button
+                onClick={() => join.mutate()}
+                disabled={join.isPending}
+                className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 min-h-[48px] disabled:opacity-50"
+              >
+                {join.isPending ? 'Joining…' : '🎮 Join the game night'}
+              </button>
+              <p className="text-xs text-indigo-700 text-center mt-2">
+                Jump straight in — no code needed. Or RSVP below.
+              </p>
+            </div>
+          )}
+          {session?.status === 'IN_PROGRESS' && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 text-center">
+              🔴 The game night has already started — ask the host to let you
+              in.
+            </div>
+          )}
+          {(session?.status === 'COMPLETED' ||
+            session?.status === 'CANCELLED') && (
+            <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-sm text-gray-600 text-center">
+              This game night has{' '}
+              {session.status === 'CANCELLED' ? 'been cancelled' : 'ended'}.
+            </div>
+          )}
+
           {hasResponded && !editing ? (
             /* Confirmed state — clean summary, not the full form. */
             <div className="text-center space-y-3 py-2">
