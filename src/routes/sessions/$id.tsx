@@ -6,7 +6,7 @@ import {
   sessionManagementService,
   sessionService,
 } from '../../lib/api/services'
-import { useSessionFull } from '../../lib/api/hooks/use-session'
+import { sessionKeys, useSessionFull } from '../../lib/api/hooks/use-session'
 import { useSessionSocket } from '../../lib/socket'
 import { usePlayer } from '../../contexts/PlayerContext'
 import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
@@ -959,10 +959,14 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
   const [newPlayerName, setNewPlayerName] = useState('')
   const [playerToRemove, setPlayerToRemove] = useState<string | null>(null)
 
-  // Fetch session readiness status (now updates via WebSocket)
+  // Fetch session readiness status (updates via WebSocket). Mirror the parent
+  // observer's options — two observers on the same key with different staleTime
+  // is a footgun whose behavior depends on mount order.
   const { data: readiness } = useQuery({
     queryKey: ['session-readiness', session.id],
     queryFn: () => sessionManagementService.getSessionReadiness(session.id),
+    staleTime: Infinity,
+    refetchOnMount: true,
   })
 
   // Add player mutation
@@ -977,13 +981,13 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['players', 'session', session.id],
+        queryKey: sessionKeys.players(session.id),
       })
       queryClient.invalidateQueries({
         queryKey: ['session-readiness', session.id],
       })
       queryClient.invalidateQueries({
-        queryKey: ['sessions', session.id],
+        queryKey: sessionKeys.detail(session.id),
       })
       setShowAddPlayerForm(false)
       setNewPlayerName('')
@@ -998,13 +1002,13 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
     mutationFn: (playerId: string) => playerService.delete(playerId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['players', 'session', session.id],
+        queryKey: sessionKeys.players(session.id),
       })
       queryClient.invalidateQueries({
         queryKey: ['session-readiness', session.id],
       })
       queryClient.invalidateQueries({
-        queryKey: ['sessions', session.id],
+        queryKey: sessionKeys.detail(session.id),
       })
     },
     onError: (error) => {
@@ -1018,7 +1022,7 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
       playerService.update(playerId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['players', 'session', session.id],
+        queryKey: sessionKeys.players(session.id),
       })
       setEditingPlayer(null)
     },

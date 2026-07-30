@@ -2,6 +2,13 @@ import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Player } from '../lib/api/types'
 
+/**
+ * localStorage flag marking the current player token as a host-connection token
+ * (minted for a Clerk-only host to open sockets; it has no player record). Lets
+ * useAutoRejoin skip it instead of attempting — and on failure wiping — a rejoin.
+ */
+export const HOST_TOKEN_MARKER = 'gn_host_minted'
+
 interface PlayerContextValue {
   player: Player | null
   playerToken: string | null
@@ -58,6 +65,8 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
   const setPlayer = (p: Player, token?: string) => {
     setPlayerState(p)
     localStorage.setItem('gn_player', JSON.stringify(p))
+    // A real player record — no longer a bare host-minted token.
+    localStorage.removeItem(HOST_TOKEN_MARKER)
 
     if (token) {
       setPlayerTokenState(token)
@@ -65,9 +74,13 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
     }
   }
 
+  // Used only to give a Clerk-only host a realtime socket token (no player
+  // record). Mark it so useAutoRejoin doesn't treat it as an orphaned token and
+  // wipe it on a failed rejoin.
   const setPlayerToken = (token: string) => {
     setPlayerTokenState(token)
     localStorage.setItem('gn_player_token', token)
+    localStorage.setItem(HOST_TOKEN_MARKER, '1')
   }
 
   const clearPlayer = () => {
@@ -75,6 +88,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
     setPlayerTokenState(null)
     localStorage.removeItem('gn_player')
     localStorage.removeItem('gn_player_token')
+    localStorage.removeItem(HOST_TOKEN_MARKER)
   }
 
   return (
