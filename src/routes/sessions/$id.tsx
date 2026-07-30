@@ -11,6 +11,7 @@ import { useSessionSocket } from '../../lib/socket'
 import { usePlayer } from '../../contexts/PlayerContext'
 import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
 import { useHostRealtimeToken } from '../../hooks/useHostRealtimeToken'
+import { useTeamManagement } from '../../hooks/useTeamManagement'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
 import { QuickTeamSetup } from '../../components/QuickTeamSetup'
@@ -45,6 +46,11 @@ export const Route = createFileRoute('/sessions/$id')({
 function SessionDetailsPage() {
   const { id } = Route.useParams()
   const queryClient = useQueryClient()
+  const { dissolveTeam, isDissolvingTeam } = useTeamManagement(id)
+  const [teamToRemove, setTeamToRemove] = useState<{
+    id: string
+    name: string
+  } | null>(null)
   const [activeTab, setActiveTab] = useState<
     'overview' | 'players' | 'guests' | 'games' | 'teams' | 'chat' | 'history'
   >('overview')
@@ -690,7 +696,8 @@ function SessionDetailsPage() {
                 </>
               )}
 
-              {/* Team Display — read-only roster, visible to everyone */}
+              {/* Team roster — read-only for players; the host gets a Remove
+                  control on each card (wired to the dissolve endpoint). */}
               {teams.length > 0 && (
                 <TeamDisplay
                   teams={uiTeams}
@@ -700,6 +707,8 @@ function SessionDetailsPage() {
                         team.players.some((tp) => tp.id === p.id),
                       ),
                   )}
+                  isHost={isHost}
+                  onRemoveTeam={(team) => setTeamToRemove(team)}
                 />
               )}
 
@@ -749,6 +758,20 @@ function SessionDetailsPage() {
           title="Cancel Session"
           message="Are you sure you want to cancel this session? This action cannot be undone."
           confirmLabel="Cancel Session"
+          variant="danger"
+        />
+
+        {/* Remove Team Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={teamToRemove !== null}
+          onClose={() => setTeamToRemove(null)}
+          onConfirm={() => {
+            if (teamToRemove) dissolveTeam(teamToRemove.id)
+            setTeamToRemove(null)
+          }}
+          title={`Remove ${teamToRemove?.name ?? 'team'}?`}
+          message="The team is removed and its players go back to the unassigned pool — no one is removed from the session. You can re-create teams anytime."
+          confirmLabel={isDissolvingTeam ? 'Removing…' : 'Remove team'}
           variant="danger"
         />
 

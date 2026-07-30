@@ -20,18 +20,26 @@ interface Team {
 interface TeamDisplayProps {
   teams: Array<Team>
   unassignedPlayers: Array<Player>
+  /** Host only: show a "Remove" control on each team card. */
+  isHost?: boolean
+  /** Called when the host taps Remove on a team (parent confirms + dissolves). */
+  onRemoveTeam?: (team: { id: string; name: string }) => void
 }
 
 /**
- * Read-only roster of teams + unassigned players, shown to everyone (host and
- * players). All team management (create / rebalance / shuffle / reassign /
- * dissolve) lives in the host-only TeamFormationInterface + EnhancedTeamManagement,
- * which use the host-gated /teams/* endpoints. This component intentionally has
- * no mutations — its previous edit/delete/remove/drag controls called
- * non-existent or destructive endpoints (a single-player PUT replaced the whole
- * roster) and were reachable by non-host players.
+ * Roster of teams + unassigned players, shown to everyone (host and players).
+ * Read-only for players. For the host it exposes a single safe control —
+ * "Remove" — right on each team card (wired by the parent to the host-gated
+ * dissolve endpoint, which returns the team's players to the unassigned pool).
+ * All other management (create / rebalance / shuffle / reassign) lives in the
+ * host-only TeamFormationInterface + EnhancedTeamManagement.
  */
-export function TeamDisplay({ teams, unassignedPlayers }: TeamDisplayProps) {
+export function TeamDisplay({
+  teams,
+  unassignedPlayers,
+  isHost = false,
+  onRemoveTeam,
+}: TeamDisplayProps) {
   const getTeamBalance = (team: Team) => {
     if (!team.players?.length)
       return { label: 'No players', color: 'text-gray-600' }
@@ -91,14 +99,40 @@ export function TeamDisplay({ teams, unassignedPlayers }: TeamDisplayProps) {
                   backgroundColor: team.color ? `${team.color}15` : '#f8fafc',
                 }}
               >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                    style={{ backgroundColor: team.color || '#6B7280' }}
-                  />
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {team.name}
-                  </h3>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div
+                      className="w-4 h-4 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                      style={{ backgroundColor: team.color || '#6B7280' }}
+                    />
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {team.name}
+                    </h3>
+                  </div>
+                  {isHost && onRemoveTeam && (
+                    <button
+                      onClick={() =>
+                        onRemoveTeam({ id: team.id, name: team.name })
+                      }
+                      className="flex-shrink-0 inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-red-600 min-h-[44px] px-2"
+                      title="Remove this team — its players return to the unassigned pool"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
 
