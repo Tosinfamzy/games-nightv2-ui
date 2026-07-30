@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { sessionService } from '../lib/api/services'
-import { usePlayer } from '../contexts/PlayerContext'
+import { HOST_TOKEN_MARKER, usePlayer } from '../contexts/PlayerContext'
 import { showToast } from '../lib/toast'
 
 /**
@@ -51,6 +51,14 @@ export function useAutoRejoin() {
   useEffect(() => {
     // Only attempt once per app session
     if (attemptedRef.current) {
+      return
+    }
+
+    // A host-connection token (minted for a Clerk-only host to open sockets) has
+    // no player record to rejoin; useHostRealtimeToken owns it. Attempting a
+    // rejoin here would, on failure, clearPlayer() and wipe the host's realtime
+    // token — so skip it.
+    if (localStorage.getItem(HOST_TOKEN_MARKER) === '1') {
       return
     }
 
