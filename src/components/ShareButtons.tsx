@@ -1,114 +1,95 @@
 import { useState } from 'react'
-import { showToast, toastHelpers } from '../lib/toast'
+import { showToast } from '../lib/toast'
 
 interface ShareButtonsProps {
   /** The link to share. */
   url: string
-  /** Host-authored message prepended to the link in the share text. */
+  /** Host-authored message included with the link in everything shared/copied. */
   message?: string
-  /** Subject line used for the email share. */
+  /** Title used by the native share sheet. */
   subject?: string
-  /** Label shown for the copied toast (e.g. "invite link"). */
-  copyLabel?: string
-}
-
-/** Detect iOS so the SMS `body` uses the platform's separator. */
-function smsSeparator(): '&' | '?' {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent) ? '&' : '?'
 }
 
 /**
- * Share a link across the channels people actually use for game-night invites:
- * the native share sheet (→ iMessage/anything) when available, plus explicit
- * WhatsApp / SMS / Email / Copy fallbacks. The host's message is prepended to
- * the link so the recipient sees the invitation, not a bare URL.
+ * Share an invite across the channels people actually use for game nights.
+ * Everything shared — the native share sheet, WhatsApp, and Copy — includes the
+ * host's message AND the link (not a bare URL), so the custom message actually
+ * travels with the invite. "Share invite" uses the OS share sheet when available
+ * (→ iMessage / Mail / anything) and falls back to copying the full invite on
+ * desktops without it, so it always does something.
  */
-export function ShareButtons({
-  url,
-  message,
-  subject,
-  copyLabel = 'link',
-}: ShareButtonsProps) {
+export function ShareButtons({ url, message, subject }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
 
   const trimmed = message?.trim()
-  const shareText = trimmed ? `${trimmed}\n\n${url}` : url
+  // The full invite: message + link. This is what gets shared/copied everywhere.
+  const inviteText = trimmed ? `${trimmed}\n\n${url}` : url
   const canNativeShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
-  const handleNativeShare = async () => {
+  const copyInvite = async (): Promise<boolean> => {
     try {
-      await navigator.share({
-        title: subject || 'You’re invited',
-        text: trimmed || undefined,
-        url,
-      })
-    } catch (error) {
-      // AbortError = the user dismissed the sheet; not worth a toast.
-      if ((error as { name?: string })?.name !== 'AbortError') {
-        showToast.error('Could not open the share sheet')
-      }
+      await navigator.clipboard.writeText(inviteText)
+      setCopied(true)
+      showToast.success('Invite copied — paste it into any chat')
+      setTimeout(() => setCopied(false), 2000)
+      return true
+    } catch {
+      showToast.error('Could not copy the invite')
+      return false
     }
   }
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      toastHelpers.copied(copyLabel)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      showToast.error('Could not copy the link')
+  const handleShare = async () => {
+    if (canNativeShare) {
+      try {
+        await navigator.share({
+          title: subject || 'You’re invited',
+          text: inviteText,
+        })
+        return
+      } catch (error) {
+        // AbortError = the user dismissed the sheet; anything else → copy.
+        if ((error as { name?: string })?.name === 'AbortError') return
+      }
     }
+    await copyInvite()
   }
 
   const handleWhatsApp = () => {
     window.open(
-      `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+      `https://wa.me/?text=${encodeURIComponent(inviteText)}`,
       '_blank',
       'noopener,noreferrer',
     )
   }
 
-  const handleSMS = () => {
-    window.location.href = `sms:${smsSeparator()}body=${encodeURIComponent(shareText)}`
-  }
-
-  const handleEmail = () => {
-    const subjectLine = encodeURIComponent(subject || 'You’re invited')
-    const body = encodeURIComponent(
-      trimmed ? `${trimmed}\n\nRSVP here: ${url}` : `RSVP here: ${url}`,
-    )
-    window.location.href = `mailto:?subject=${subjectLine}&body=${body}`
-  }
-
   const btn =
-    'flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] rounded-lg font-medium text-sm transition-colors'
+    'flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg font-medium text-sm transition-colors'
 
   return (
     <div className="flex flex-wrap gap-2">
-      {canNativeShare && (
-        <button
-          type="button"
-          onClick={handleNativeShare}
-          className={`${btn} bg-indigo-600 text-white hover:bg-indigo-700`}
+      {/* Primary: OS share sheet, or copy the full invite as a fallback. */}
+      <button
+        type="button"
+        onClick={handleShare}
+        className={`${btn} bg-indigo-600 text-white hover:bg-indigo-700`}
+      >
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-            />
-          </svg>
-          <span>Share</span>
-        </button>
-      )}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+          />
+        </svg>
+        <span>Share invite</span>
+      </button>
 
       <button
         type="button"
@@ -123,55 +104,13 @@ export function ShareButtons({
 
       <button
         type="button"
-        onClick={handleSMS}
-        className={`${btn} bg-blue-500 text-white hover:bg-blue-600`}
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-          />
-        </svg>
-        <span>SMS</span>
-      </button>
-
-      <button
-        type="button"
-        onClick={handleEmail}
-        className={`${btn} bg-purple-500 text-white hover:bg-purple-600`}
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-          />
-        </svg>
-        <span>Email</span>
-      </button>
-
-      <button
-        type="button"
-        onClick={handleCopy}
+        onClick={copyInvite}
         className={`${btn} bg-gray-100 text-gray-700 hover:bg-gray-200`}
       >
         {copied ? (
           <span className="text-green-600">Copied!</span>
         ) : (
-          <span>Copy link</span>
+          <span>Copy invite</span>
         )}
       </button>
     </div>

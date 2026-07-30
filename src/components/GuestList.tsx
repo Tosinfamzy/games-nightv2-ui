@@ -154,7 +154,6 @@ function InviteShareCard({
           url={url}
           message={effectiveMessage}
           subject={`You're invited to ${sessionName}`}
-          copyLabel="RSVP link"
         />
       )}
       <p className="text-xs text-blue-600">

@@ -52,7 +52,6 @@ function NewSessionPage() {
                     url={`${window.location.origin}/rsvp/${createdSession.publicRsvpToken}`}
                     message={`You're invited to ${createdSession.name}! RSVP here:`}
                     subject={`You're invited to ${createdSession.name}`}
-                    copyLabel="invite link"
                   />
                 </div>
                 <button
