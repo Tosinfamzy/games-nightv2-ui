@@ -11,7 +11,9 @@ export const useGameSocket = (
   gameId: string | undefined,
   options?: { currentTeamId?: string },
 ) => {
-  const { gamesSocket, isConnected } = useSocketContext()
+  // Gate on the /games namespace's own connection, not the top-level flag (which
+  // only tracks /sessions) — a partial outage shouldn't cross-wire namespaces.
+  const { gamesSocket, gamesConnected: isConnected } = useSocketContext()
   const queryClient = useQueryClient()
   const hasJoinedRef = useRef(false)
   const currentTeamId = options?.currentTeamId

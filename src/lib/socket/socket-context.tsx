@@ -54,8 +54,15 @@ function attachHandlers(
   label: string,
   onConnectedChange: (connected: boolean) => void,
 ): void {
+  // socket.io retries with backoff (reconnectionAttempts: Infinity), re-emitting
+  // `connect_error` on every attempt. Show the transient "reconnecting" toast
+  // only once per disconnect episode (reset on the next successful connect) so a
+  // sustained outage doesn't produce an endless toast storm across namespaces.
+  let connectErrorNotified = false
+
   socket.on('connect', () => {
     onConnectedChange(true)
+    connectErrorNotified = false
   })
 
   socket.on('disconnect', () => {
@@ -65,7 +72,13 @@ function attachHandlers(
   // Transport/handshake failures (no guaranteed structured code).
   socket.on('connect_error', (error: Error) => {
     console.error(`${label} socket connect_error:`, error)
-    applyProcessedError(classifyConnectError(error, label))
+    const processed = classifyConnectError(error, label)
+    // A structured auth rejection redirects and must always be surfaced;
+    // otherwise throttle to one toast per episode.
+    if (processed.shouldRedirect || !connectErrorNotified) {
+      connectErrorNotified = true
+      applyProcessedError(processed)
+    }
   })
 
   // Server-pushed runtime errors from the global exception filter.

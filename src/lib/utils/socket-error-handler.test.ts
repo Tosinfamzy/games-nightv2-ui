@@ -57,9 +57,13 @@ describe('classifyConnectError', () => {
     expect(r.redirectPath).toBe('/rejoin')
   })
 
-  it('redirects on a handshake auth message (no code channel)', () => {
+  it('does NOT redirect on an auth-looking message without a structured code', () => {
+    // Only a structured error.data.code redirects. A bare message that merely
+    // contains "token"/"invalid" (e.g. socket.io's own "Invalid namespace") must
+    // not yank the user to /rejoin on a benign transport hiccup.
     const r = classifyConnectError(new Error('Unauthorized: Invalid token'))
-    expect(r.shouldRedirect).toBe(true)
+    expect(r.shouldRedirect).toBe(false)
+    expect(r.severity).toBe(ErrorSeverity.WARNING)
   })
 
   it('defaults to a soft reconnecting warning', () => {

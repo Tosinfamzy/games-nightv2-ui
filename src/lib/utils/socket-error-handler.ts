@@ -117,21 +117,12 @@ export function classifyConnectError(
     }
   }
 
-  // Handshake auth rejections still surface as a message here (no code channel).
-  if (
-    raw.includes('unauthorized') ||
-    raw.includes('token') ||
-    raw.includes('expired') ||
-    raw.includes('invalid')
-  ) {
-    return {
-      message: 'Your session expired. Please rejoin.',
-      severity: ErrorSeverity.ERROR,
-      shouldRedirect: true,
-      redirectPath: REJOIN_PATH,
-    }
-  }
-
+  // Anything else is a transient transport failure. We deliberately do NOT
+  // string-sniff for auth ("token"/"invalid"/"expired"/"unauthorized") here:
+  // socket.io emits its own messages (e.g. "Invalid namespace") that would match
+  // and yank the user to /rejoin on a benign hiccup. A genuine auth rejection
+  // arrives with a structured `error.data.code` (handled above), which is the
+  // only signal we redirect on.
   return {
     message: `Reconnecting to ${contextLabel}…`,
     severity: ErrorSeverity.WARNING,
