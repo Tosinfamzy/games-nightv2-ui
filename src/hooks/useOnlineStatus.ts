@@ -30,12 +30,14 @@ export const useOnlineStatus = () => {
   const allSocketsConnected =
     sessionsConnected && gamesConnected && chatConnected
 
-  // Only consider socket status if we should be connected (have player token)
-  // If not in a session, don't show as "offline" just because sockets aren't connected
-  const socketsOffline = shouldBeConnected && !allSocketsConnected
+  // Base "offline" on the primary /sessions channel, not on all three being up.
+  // Requiring every namespace meant one flapping socket (e.g. /chat on a page
+  // with no chat) pinned the offline banner open forever. If /sessions is
+  // connected we're online enough; games/chat degrade quietly.
+  const socketsOffline = shouldBeConnected && !sessionsConnected
 
   return {
-    isOnline: isOnline && (!shouldBeConnected || allSocketsConnected),
+    isOnline: isOnline && (!shouldBeConnected || sessionsConnected),
     isOffline: !isOnline || socketsOffline,
     networkOnline: isOnline,
     socketsStatus: {

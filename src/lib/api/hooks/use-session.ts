@@ -1,9 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sessionService } from '../services/session.service'
+import { useSocketContext } from '../../socket/socket-context'
 import type { CreateSessionResponse } from '../services/session.service'
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import type { Game, Player, Session, SessionLeaderboard, Team } from '../types'
 import type { PaginationParams } from '../types/common'
+
+/**
+ * Poll fallback for lobby data: while the /sessions socket is live, rely on its
+ * real-time events (no polling). When it's down — the phase where a frozen lobby
+ * hurts most — fall back to a periodic refetch so who's-joined / teams / games
+ * still update without a manual refresh.
+ */
+const LOBBY_POLL_MS = 15000
+function useLobbyRefetchInterval(): number | false {
+  const { sessionsConnected } = useSocketContext()
+  return sessionsConnected ? false : LOBBY_POLL_MS
+}
 
 export interface CreateSessionDTO {
   name: string
@@ -44,6 +57,7 @@ export const useSession = (id: string): UseQueryResult<Session, Error> => {
     queryKey: sessionKeys.detail(id),
     queryFn: () => sessionService.getById(id),
     enabled: Boolean(id),
+    refetchInterval: useLobbyRefetchInterval(),
   })
 }
 
@@ -117,6 +131,7 @@ export const useSessionGames = (
     queryKey: sessionKeys.games(sessionId),
     queryFn: () => sessionService.getGames(sessionId),
     enabled: Boolean(sessionId),
+    refetchInterval: useLobbyRefetchInterval(),
   })
 }
 
@@ -127,6 +142,7 @@ export const useSessionTeams = (
     queryKey: sessionKeys.teams(sessionId),
     queryFn: () => sessionService.getTeams(sessionId),
     enabled: Boolean(sessionId),
+    refetchInterval: useLobbyRefetchInterval(),
   })
 }
 
@@ -137,6 +153,7 @@ export const useSessionPlayers = (
     queryKey: sessionKeys.players(sessionId),
     queryFn: () => sessionService.getPlayers(sessionId),
     enabled: Boolean(sessionId),
+    refetchInterval: useLobbyRefetchInterval(),
   })
 }
 

@@ -37,7 +37,9 @@ export const useChatSocket = (
   sessionId: string | undefined,
   playerId: string | undefined,
 ) => {
-  const { chatSocket, isConnected } = useSocketContext()
+  // Gate on the /chat namespace's own connection, and drive the reconnect-
+  // backfill (below) off it too, so chat isn't tied to the /sessions socket.
+  const { chatSocket, chatConnected: isConnected } = useSocketContext()
   const hasJoinedRef = useRef(false)
   const [messages, setMessages] = useState<Array<ChatMessage>>([])
   const [hasMore, setHasMore] = useState(false)

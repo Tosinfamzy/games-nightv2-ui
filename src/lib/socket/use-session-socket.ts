@@ -10,7 +10,8 @@ import { useSocketContext } from './socket-context'
  * Hook to connect to a session room and listen for real-time updates
  */
 export const useSessionSocket = (sessionId: string | undefined) => {
-  const { sessionsSocket, isConnected } = useSocketContext()
+  // Gate on the /sessions namespace's own connection flag explicitly.
+  const { sessionsSocket, sessionsConnected: isConnected } = useSocketContext()
   const queryClient = useQueryClient()
   const hasJoinedRef = useRef(false)
   const {
