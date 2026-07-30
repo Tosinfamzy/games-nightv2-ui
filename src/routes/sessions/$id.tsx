@@ -13,6 +13,7 @@ import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
 import { useHostRealtimeToken } from '../../hooks/useHostRealtimeToken'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { TeamFormationInterface } from '../../components/TeamFormationInterface'
+import { QuickTeamSetup } from '../../components/QuickTeamSetup'
 import { TeamDisplay } from '../../components/TeamDisplay'
 import { EnhancedTeamManagement } from '../../components/EnhancedTeamManagement'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
@@ -586,6 +587,24 @@ function SessionDetailsPage() {
               {/* Host-only: readiness admin, manual creation, auto formation. */}
               {isHost && (
                 <>
+                  {/* Fast path: one-tap balanced split before any teams exist.
+                      The full formation interface stays below for fine-tuning. */}
+                  {teams.length === 0 &&
+                    uiPlayers.length >= 2 &&
+                    session.status !== 'COMPLETED' &&
+                    session.status !== 'CANCELLED' && (
+                      <QuickTeamSetup
+                        sessionId={id}
+                        gameId={(activeGame ?? games[0])?.id}
+                        playerCount={uiPlayers.length}
+                        onCreated={() =>
+                          queryClient.invalidateQueries({
+                            queryKey: ['sessions', 'detail', id],
+                          })
+                        }
+                      />
+                    )}
+
                   {/* Session Readiness Dashboard */}
                   <SessionReadinessDashboard
                     sessionId={id}
