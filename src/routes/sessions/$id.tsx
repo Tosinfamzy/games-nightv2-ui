@@ -40,21 +40,46 @@ import {
 } from '../../lib/utils/data-transforms'
 import { showToast, toastHelpers } from '../../lib/toast'
 
+type SessionTab =
+  | 'overview'
+  | 'players'
+  | 'guests'
+  | 'games'
+  | 'teams'
+  | 'chat'
+  | 'history'
+
+const SESSION_TABS: Array<SessionTab> = [
+  'overview',
+  'players',
+  'guests',
+  'games',
+  'teams',
+  'chat',
+  'history',
+]
+
 export const Route = createFileRoute('/sessions/$id')({
+  // Allow deep-linking to a tab, e.g. /sessions/:id?tab=guests.
+  validateSearch: (search: Record<string, unknown>): { tab?: SessionTab } => {
+    const tab = search.tab
+    return typeof tab === 'string' && SESSION_TABS.includes(tab as SessionTab)
+      ? { tab: tab as SessionTab }
+      : {}
+  },
   component: SessionDetailsPage,
 })
 
 function SessionDetailsPage() {
   const { id } = Route.useParams()
+  const { tab } = Route.useSearch()
   const queryClient = useQueryClient()
   const { dissolveTeam, isDissolvingTeam } = useTeamManagement(id)
   const [teamToRemove, setTeamToRemove] = useState<{
     id: string
     name: string
   } | null>(null)
-  const [activeTab, setActiveTab] = useState<
-    'overview' | 'players' | 'guests' | 'games' | 'teams' | 'chat' | 'history'
-  >('overview')
+  const [activeTab, setActiveTab] = useState<SessionTab>(tab ?? 'overview')
   const [showManualTeamCreator, setShowManualTeamCreator] = useState(false)
   const [showQRCode, setShowQRCode] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
@@ -944,6 +969,23 @@ function OverviewTab({
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-medium text-gray-900 mb-2">Session Stats</h4>
             <div className="space-y-1 text-sm text-gray-600">
+              {session.date && (
+                <div>When: {new Date(session.date).toLocaleString()}</div>
+              )}
+              {session.location && (
+                <div>
+                  Where:{' '}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(session.location)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-700 underline"
+                    title="Open in Maps"
+                  >
+                    {session.location}
+                  </a>
+                </div>
+              )}
               <div>Players joined: {players.length}</div>
               <div>Status: {session.status}</div>
               <div>

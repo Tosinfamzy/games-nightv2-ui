@@ -111,7 +111,15 @@ function PublicRsvpPage() {
             </p>
           )}
           {event.location && (
-            <p className="text-blue-100 text-sm mt-1">📍 {event.location}</p>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-100 text-sm mt-1 inline-flex items-center gap-1 underline decoration-blue-200/60 hover:decoration-blue-100"
+              title="Open in Maps"
+            >
+              📍 {event.location}
+            </a>
           )}
           {event.goingHeadcount > 0 && (
             <p className="text-blue-100 text-sm mt-2">

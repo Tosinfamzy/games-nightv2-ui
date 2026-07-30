@@ -138,7 +138,15 @@ function InviteRsvpPage() {
             </p>
           )}
           {session?.location && (
-            <p className="text-blue-100 text-sm mt-1">📍 {session.location}</p>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(session.location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-100 text-sm mt-1 inline-flex items-center gap-1 underline decoration-blue-200/60 hover:decoration-blue-100"
+              title="Open in Maps"
+            >
+              📍 {session.location}
+            </a>
           )}
         </div>
 
