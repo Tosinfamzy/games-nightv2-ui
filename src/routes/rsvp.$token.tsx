@@ -75,11 +75,16 @@ function PublicRsvpPage() {
       showToast.error('Please enter your name first')
       return
     }
+    const trimmedEmail = email.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      showToast.error('Please add your email so we can send you a reminder')
+      return
+    }
     selfRsvp.mutate(
       {
         name: trimmed,
         status,
-        email: email.trim() || undefined,
+        email: trimmedEmail,
         plusOnes: status === 'GOING' ? plusOnes : 0,
         note: note.trim() || undefined,
       },
@@ -170,15 +175,19 @@ function PublicRsvpPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email (optional)
+                  Email
                 </label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
+                  required
                   placeholder="you@example.com"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  So the host can send you a reminder before the day.
+                </p>
               </div>
 
               <div>
