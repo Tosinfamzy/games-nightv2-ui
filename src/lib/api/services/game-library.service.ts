@@ -16,31 +16,9 @@ export interface GameLibraryItem {
   updatedAt: string
 }
 
-export interface CreateGameLibraryItemDTO {
-  name: string
-  description: string
-  minPlayers: number
-  maxPlayers: number
-  estimatedDuration: number
-  difficulty: 'Easy' | 'Medium' | 'Hard'
-  categories: Array<string>
-  equipment?: string
-  rules?: string
-}
-
-export interface UpdateGameLibraryItemDTO {
-  name?: string
-  description?: string
-  minPlayers?: number
-  maxPlayers?: number
-  estimatedDuration?: number
-  difficulty?: 'Easy' | 'Medium' | 'Hard'
-  categories?: Array<string>
-  equipment?: string
-  rules?: string
-  isActive?: boolean
-}
-
+// The game library is a shared, server-managed catalog. It is read-only over
+// the API (create/update/activate/deactivate/delete were removed backend-side,
+// as no per-tenant ownership exists), so only read methods live here.
 export const gameLibraryService = {
   // Get all games in library
   getAll: (): Promise<Array<GameLibraryItem>> => {
@@ -55,45 +33,5 @@ export const gameLibraryService = {
   // Get a specific game
   getById: (id: string): Promise<GameLibraryItem> => {
     return fetchAPI<GameLibraryItem>(`/game-library/${id}`)
-  },
-
-  // Create a new game
-  create: (data: CreateGameLibraryItemDTO): Promise<GameLibraryItem> => {
-    return fetchAPI<GameLibraryItem>('/game-library', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  },
-
-  // Update a game
-  update: (
-    id: string,
-    data: UpdateGameLibraryItemDTO,
-  ): Promise<GameLibraryItem> => {
-    return fetchAPI<GameLibraryItem>(`/game-library/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    })
-  },
-
-  // Delete a game
-  delete: (id: string): Promise<void> => {
-    return fetchAPI<void>(`/game-library/${id}`, {
-      method: 'DELETE',
-    })
-  },
-
-  // Toggle active status
-  activate: (id: string): Promise<GameLibraryItem> => {
-    return fetchAPI<GameLibraryItem>(`/game-library/${id}/activate`, {
-      method: 'PATCH',
-    })
-  },
-
-  // Deactivate game
-  deactivate: (id: string): Promise<GameLibraryItem> => {
-    return fetchAPI<GameLibraryItem>(`/game-library/${id}/deactivate`, {
-      method: 'PATCH',
-    })
   },
 }
