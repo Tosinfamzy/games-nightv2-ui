@@ -1,6 +1,16 @@
 import { fetchAPI } from '../client'
+import type { Session } from '../types'
 
 export type RsvpStatus = 'PENDING' | 'GOING' | 'MAYBE' | 'NOT_GOING'
+
+/** Result of joining a session (shared by join-by-code and join-via-invite). */
+export interface JoinResult {
+  session: Session
+  playerId: string
+  playerName: string
+  message: string
+  playerToken: string
+}
 
 /** The three states a guest can actually respond with. */
 export type RsvpResponse = Exclude<RsvpStatus, 'PENDING'>
@@ -109,6 +119,17 @@ export const inviteService = {
     return fetchAPI<Invite>(`/invites/${token}/rsvp`, {
       method: 'POST',
       body: JSON.stringify(data),
+    })
+  },
+
+  /**
+   * Join the live session straight from an invite link — no join code. The guest
+   * is checked in against their RSVP. Only works while the session is joinable.
+   */
+  joinViaInvite: (token: string, name?: string): Promise<JoinResult> => {
+    return fetchAPI<JoinResult>(`/invites/${token}/join`, {
+      method: 'POST',
+      body: JSON.stringify(name ? { name } : {}),
     })
   },
 
