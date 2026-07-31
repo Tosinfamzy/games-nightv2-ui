@@ -65,16 +65,6 @@ export function JoinSessionForm({
         {sessionPreview ? 'Enter Your Name' : 'Join Game Session'}
       </h2>
 
-      {!sessionPreview && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-700">
-            <strong>Demo Mode:</strong> Try joining with code{' '}
-            <code className="bg-blue-100 px-1 rounded">123456</code> or{' '}
-            <code className="bg-blue-100 px-1 rounded">999999</code>
-          </p>
-        </div>
-      )}
-
       <form
         onSubmit={handleSubmit}
         className="space-y-4"

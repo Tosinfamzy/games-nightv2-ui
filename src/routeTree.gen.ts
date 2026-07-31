@@ -14,7 +14,6 @@ import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as RejoinRouteImport } from './routes/rejoin'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as HistoryRouteImport } from './routes/history'
-import { Route as GamesRouteImport } from './routes/games'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SessionsIndexRouteImport } from './routes/sessions/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
@@ -52,11 +51,6 @@ const HistoryRoute = HistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GamesRoute = GamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -68,9 +62,9 @@ const SessionsIndexRoute = SessionsIndexRouteImport.update({
   getParentRoute: () => SessionsRoute,
 } as any)
 const GamesIndexRoute = GamesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => GamesRoute,
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SessionsNewRoute = SessionsNewRouteImport.update({
   id: '/new',
@@ -98,9 +92,9 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesIdRoute = GamesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => GamesRoute,
+  id: '/games/$id',
+  path: '/games/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SessionsIdTvRoute = SessionsIdTvRouteImport.update({
   id: '/$id_/tv',
@@ -115,7 +109,6 @@ const SessionsIdGameRoute = SessionsIdGameRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/games': typeof GamesRouteWithChildren
   '/history': typeof HistoryRoute
   '/join': typeof JoinRoute
   '/rejoin': typeof RejoinRoute
@@ -127,7 +120,7 @@ export interface FileRoutesByFullPath {
   '/rsvp/$token': typeof RsvpTokenRoute
   '/sessions/$id': typeof SessionsIdRoute
   '/sessions/new': typeof SessionsNewRoute
-  '/games/': typeof GamesIndexRoute
+  '/games': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
   '/sessions/$id/tv': typeof SessionsIdTvRoute
@@ -152,7 +145,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/games': typeof GamesRouteWithChildren
   '/history': typeof HistoryRoute
   '/join': typeof JoinRoute
   '/rejoin': typeof RejoinRoute
@@ -173,7 +165,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/games'
     | '/history'
     | '/join'
     | '/rejoin'
@@ -185,7 +176,7 @@ export interface FileRouteTypes {
     | '/rsvp/$token'
     | '/sessions/$id'
     | '/sessions/new'
-    | '/games/'
+    | '/games'
     | '/sessions/'
     | '/sessions/$id/game'
     | '/sessions/$id/tv'
@@ -209,7 +200,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/games'
     | '/history'
     | '/join'
     | '/rejoin'
@@ -229,15 +219,16 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  GamesRoute: typeof GamesRouteWithChildren
   HistoryRoute: typeof HistoryRoute
   JoinRoute: typeof JoinRoute
   RejoinRoute: typeof RejoinRoute
   SessionsRoute: typeof SessionsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
+  GamesIdRoute: typeof GamesIdRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JoinJoinCodeRoute: typeof JoinJoinCodeRoute
   RsvpTokenRoute: typeof RsvpTokenRoute
+  GamesIndexRoute: typeof GamesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -277,13 +268,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/games': {
-      id: '/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof GamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -300,10 +284,10 @@ declare module '@tanstack/react-router' {
     }
     '/games/': {
       id: '/games/'
-      path: '/'
-      fullPath: '/games/'
+      path: '/games'
+      fullPath: '/games'
       preLoaderRoute: typeof GamesIndexRouteImport
-      parentRoute: typeof GamesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/sessions/new': {
       id: '/sessions/new'
@@ -342,10 +326,10 @@ declare module '@tanstack/react-router' {
     }
     '/games/$id': {
       id: '/games/$id'
-      path: '/$id'
+      path: '/games/$id'
       fullPath: '/games/$id'
       preLoaderRoute: typeof GamesIdRouteImport
-      parentRoute: typeof GamesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/sessions/$id_/tv': {
       id: '/sessions/$id_/tv'
@@ -363,18 +347,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface GamesRouteChildren {
-  GamesIdRoute: typeof GamesIdRoute
-  GamesIndexRoute: typeof GamesIndexRoute
-}
-
-const GamesRouteChildren: GamesRouteChildren = {
-  GamesIdRoute: GamesIdRoute,
-  GamesIndexRoute: GamesIndexRoute,
-}
-
-const GamesRouteWithChildren = GamesRoute._addFileChildren(GamesRouteChildren)
 
 interface SessionsRouteChildren {
   SessionsIdRoute: typeof SessionsIdRoute
@@ -398,15 +370,16 @@ const SessionsRouteWithChildren = SessionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GamesRoute: GamesRouteWithChildren,
   HistoryRoute: HistoryRoute,
   JoinRoute: JoinRoute,
   RejoinRoute: RejoinRoute,
   SessionsRoute: SessionsRouteWithChildren,
   SettingsRoute: SettingsRoute,
+  GamesIdRoute: GamesIdRoute,
   InviteTokenRoute: InviteTokenRoute,
   JoinJoinCodeRoute: JoinJoinCodeRoute,
   RsvpTokenRoute: RsvpTokenRoute,
+  GamesIndexRoute: GamesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
