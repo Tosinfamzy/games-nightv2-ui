@@ -21,10 +21,12 @@ export default function LiveScoreEntry({
   className = '',
 }: LiveScoreEntryProps) {
   const { game, isLoading: isLoadingGame } = useGameControl(gameId)
-  const { submitScore, isSubmittingScore } = useGameScoring(gameId)
+  const { submitScore } = useGameScoring(gameId)
   // Only used in individual mode; the hook no-ops on an empty session id.
   const { data: players = [] } = useSessionPlayers(game?.sessionId ?? '')
   const [scoreInputs, setScoreInputs] = useState<Record<string, string>>({})
+  // Which entrant's score is mid-submit — so only that row is disabled, not all.
+  const [submittingId, setSubmittingId] = useState<string | null>(null)
 
   if (isLoadingGame) {
     return (
@@ -89,15 +91,22 @@ export default function LiveScoreEntry({
     const points = parseInt(scoreValue, 10)
     if (isNaN(points)) return
 
-    submitScore({
-      gameId,
-      ...(isIndividual ? { playerId: entrantId } : { teamId: entrantId }),
-      score: points,
-      roundNumber: game.currentRound,
-    })
-
-    // Clear the input after submission
-    setScoreInputs((prev) => ({ ...prev, [entrantId]: '' }))
+    setSubmittingId(entrantId)
+    submitScore(
+      {
+        gameId,
+        ...(isIndividual ? { playerId: entrantId } : { teamId: entrantId }),
+        score: points,
+        roundNumber: game.currentRound,
+      },
+      {
+        // Only clear the typed value once the score actually lands, so a failed
+        // submit keeps the number for a retry rather than silently losing it.
+        onSuccess: () =>
+          setScoreInputs((prev) => ({ ...prev, [entrantId]: '' })),
+        onSettled: () => setSubmittingId(null),
+      },
+    )
   }
 
   const handleKeyPress = (entrantId: string, e: React.KeyboardEvent) => {
@@ -172,21 +181,21 @@ export default function LiveScoreEntry({
                     onChange={(e) =>
                       handleScoreChange(entrant.id, e.target.value)
                     }
-                    onKeyPress={(e) => handleKeyPress(entrant.id, e)}
+                    onKeyDown={(e) => handleKeyPress(entrant.id, e)}
                     placeholder="0"
                     aria-label={`Score for ${entrant.name}`}
                     className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isSubmittingScore}
+                    disabled={submittingId === entrant.id}
                   />
 
                   {/* Submit Button */}
                   <button
                     onClick={() => handleSubmitScore(entrant.id)}
-                    disabled={!hasValue || isSubmittingScore}
+                    disabled={!hasValue || submittingId === entrant.id}
                     aria-label={`Submit score for ${entrant.name}`}
                     className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
                   >
-                    {isSubmittingScore ? '...' : '✓'}
+                    {submittingId === entrant.id ? '...' : '✓'}
                   </button>
                 </div>
               </div>

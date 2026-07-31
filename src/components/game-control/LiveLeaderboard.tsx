@@ -176,7 +176,9 @@ export default function LiveLeaderboard({
               <div className="font-bold text-gray-900">
                 {leaderboard.length}
               </div>
-              <div className="text-gray-600 text-xs">Teams</div>
+              <div className="text-gray-600 text-xs">
+                {game?.scoreMode === 'individual' ? 'Players' : 'Teams'}
+              </div>
             </div>
           </div>
         </div>

@@ -13,6 +13,8 @@ export default function RoundScorecard({
 }: RoundScorecardProps) {
   const { game, isLoading: isLoadingGame } = useGameControl(gameId)
   const { teamScores, isLoading: isLoadingScores } = useGameScoring(gameId)
+  const isIndividual = game?.scoreMode === 'individual'
+  const EntrantLabel = isIndividual ? 'Player' : 'Team'
 
   // Render teams highest-total-first; badge the leader only when it's unique.
   const rankedTeams = [...teamScores].sort(
@@ -55,7 +57,7 @@ export default function RoundScorecard({
           📊 Round Scorecard
         </h3>
         <p className="text-sm text-gray-600">
-          Round-by-round breakdown for all teams
+          Round-by-round breakdown for all {isIndividual ? 'players' : 'teams'}
         </p>
       </div>
 
@@ -70,7 +72,7 @@ export default function RoundScorecard({
             <thead>
               <tr className="border-b-2 border-gray-300">
                 <th className="text-left p-3 font-bold text-gray-900 sticky left-0 bg-white z-10">
-                  Team
+                  {EntrantLabel}
                 </th>
                 {rounds.map((round) => (
                   <th
@@ -173,7 +175,7 @@ export default function RoundScorecard({
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-yellow-50 border border-yellow-200 rounded"></div>
-            <span>Leading Team</span>
+            <span>Leading {EntrantLabel}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-green-600 font-medium">+X</span>
