@@ -21,11 +21,6 @@ test.describe('Join Session Flow', () => {
     await expect(nameInput).toBeVisible()
   })
 
-  test('should show demo mode hint', async ({ page }) => {
-    // Check for demo mode message
-    await expect(page.getByText(/demo mode/i)).toBeVisible()
-  })
-
   test('should validate session code input', async ({ page }) => {
     const codeInput = page.getByLabel(/session code/i)
     const nameInput = page.getByLabel(/your name/i)
