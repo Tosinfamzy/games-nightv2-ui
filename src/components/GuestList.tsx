@@ -184,6 +184,7 @@ export function GuestList({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Guest name"
+          aria-label="Guest name"
           maxLength={80}
           className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -192,6 +193,7 @@ export function GuestList({
           onChange={(e) => setEmail(e.target.value)}
           type="email"
           placeholder="Email (optional)"
+          aria-label="Guest email (optional)"
           className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
