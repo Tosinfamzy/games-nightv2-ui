@@ -13,7 +13,7 @@ import type { PaginationParams } from '../types/common'
  * still update without a manual refresh.
  */
 const LOBBY_POLL_MS = 15000
-function useLobbyRefetchInterval(): number | false {
+export function useLobbyRefetchInterval(): number | false {
   const { sessionsConnected } = useSocketContext()
   return sessionsConnected ? false : LOBBY_POLL_MS
 }

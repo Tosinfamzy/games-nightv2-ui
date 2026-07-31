@@ -6,7 +6,11 @@ import {
   sessionManagementService,
   sessionService,
 } from '../../lib/api/services'
-import { sessionKeys, useSessionFull } from '../../lib/api/hooks/use-session'
+import {
+  sessionKeys,
+  useLobbyRefetchInterval,
+  useSessionFull,
+} from '../../lib/api/hooks/use-session'
 import { useSessionSocket } from '../../lib/socket'
 import { usePlayer } from '../../contexts/PlayerContext'
 import { useCurrentGm } from '../../lib/api/hooks/use-current-gm'
@@ -48,6 +52,16 @@ type SessionTab =
   | 'teams'
   | 'chat'
   | 'history'
+
+// Tabs that reveal host-only data (the guest list with emails, player admin,
+// game setup, history). Non-hosts must never render their content — not even by
+// deep-linking ?tab=guests — so this list gates both the tab and its content.
+const HOST_ONLY_TABS: Array<SessionTab> = [
+  'players',
+  'guests',
+  'games',
+  'history',
+]
 
 const SESSION_TABS: Array<SessionTab> = [
   'overview',
@@ -100,8 +114,23 @@ function SessionDetailsPage() {
 
   // Check if current user is the Games Master/host (the signed-in Clerk GM
   // whose id matches this session's host).
-  const { data: currentGm } = useCurrentGm()
+  const { data: currentGm, isLoading: isGmLoading } = useCurrentGm()
   const isHost = Boolean(currentGm?.id && currentGm.id === session?.host.id)
+
+  // Privacy guard: if a non-host lands on a host-only tab (e.g. via a shared
+  // ?tab=guests deep-link), bounce them to Overview once we've confirmed
+  // they're not the host — don't act while the host lookup is still loading, or
+  // a real host deep-linking would flash away from their tab.
+  useEffect(() => {
+    if (
+      session &&
+      !isGmLoading &&
+      !isHost &&
+      HOST_ONLY_TABS.includes(activeTab)
+    ) {
+      setActiveTab('overview')
+    }
+  }, [session, isGmLoading, isHost, activeTab])
 
   // A Clerk-only host with no player token here gets no live lobby updates —
   // mint a host token so the session sockets connect.
@@ -122,11 +151,13 @@ function SessionDetailsPage() {
   const uiGamesWithTeamSize = transformGames(games, true) // Include recommended team size
   const uiTeams = enrichTeamsWithPlayers(teams, players)
 
-  // Fetch session readiness for celebration trigger
+  // Fetch session readiness for celebration trigger. Real-time events keep this
+  // fresh while the socket is up; when it drops, fall back to polling so the
+  // Start gating / readiness don't freeze exactly when that hurts most.
   const { data: readiness } = useQuery({
     queryKey: ['session-readiness', id],
     queryFn: () => sessionManagementService.getSessionReadiness(id),
-    staleTime: Infinity,
+    refetchInterval: useLobbyRefetchInterval(),
     refetchOnMount: true,
     enabled: !!session,
   })
@@ -505,6 +536,22 @@ function SessionDetailsPage() {
           )}
         </div>
 
+        {/* Live-game jump-in — visible to everyone (host and players) so a
+            joined player isn't stranded on the lobby once the host starts. */}
+        {session.status === 'IN_PROGRESS' && activeGame && (
+          <Link
+            to="/sessions/$id/game"
+            params={{ id }}
+            search={{ gameId: activeGame.id }}
+            className="mb-4 sm:mb-6 flex items-center justify-between gap-3 rounded-lg bg-indigo-600 px-4 py-3 text-white shadow-sm hover:bg-indigo-700 min-h-[44px]"
+          >
+            <span className="font-medium">
+              🎮 Game in progress — jump into the live game
+            </span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        )}
+
         {/* Tabs */}
         <div className="mb-4 sm:mb-6">
           <div className="border-b border-gray-200">
@@ -597,7 +644,7 @@ function SessionDetailsPage() {
             />
           )}
 
-          {activeTab === 'players' && (
+          {activeTab === 'players' && isHost && (
             <PlayersTab
               session={session}
               players={uiPlayers}
@@ -606,7 +653,7 @@ function SessionDetailsPage() {
             />
           )}
 
-          {activeTab === 'guests' && (
+          {activeTab === 'guests' && isHost && (
             <GuestList
               sessionId={id}
               sessionName={session.name}
@@ -615,7 +662,7 @@ function SessionDetailsPage() {
             />
           )}
 
-          {activeTab === 'games' && (
+          {activeTab === 'games' && isHost && (
             <EnhancedGamesTab
               sessionId={id}
               sessionGames={uiGames}
@@ -776,7 +823,7 @@ function SessionDetailsPage() {
             </div>
           )}
 
-          {activeTab === 'history' && (
+          {activeTab === 'history' && isHost && (
             <div className="max-w-4xl mx-auto">
               <h2 className="text-xl font-semibold mb-4">Session History</h2>
               <GameHistoryList sessionId={id} />
@@ -1127,10 +1174,12 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
     },
   })
 
-  // Check if session can start (now updates via WebSocket)
+  // Check if session can start. Updates via WebSocket while connected; polls as
+  // a fallback when the socket is down so the reasons don't go stale.
   const { data: canStart } = useQuery({
     queryKey: ['session-can-start', session.id],
     queryFn: () => sessionManagementService.checkSessionCanStart(session.id),
+    refetchInterval: useLobbyRefetchInterval(),
   }) as {
     data:
       | {
