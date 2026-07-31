@@ -166,6 +166,21 @@ function PublicRsvpPage() {
                 Bookmark this to change your response later
               </a>
             </div>
+          ) : event.status !== 'SCHEDULED' ? (
+            /* RSVP is closed once the event is live, finished, or cancelled. */
+            <div
+              className={`rounded-lg border p-4 text-center text-sm ${
+                event.status === 'IN_PROGRESS'
+                  ? 'bg-amber-50 border-amber-200 text-amber-800'
+                  : 'bg-gray-50 border-gray-200 text-gray-600'
+              }`}
+            >
+              {event.status === 'IN_PROGRESS'
+                ? '🔴 This game night has already started — ask the host to let you in.'
+                : event.status === 'CANCELLED'
+                  ? 'This game night has been cancelled.'
+                  : 'This game night has ended.'}
+            </div>
           ) : (
             <>
               <div>
