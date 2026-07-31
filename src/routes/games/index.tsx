@@ -75,8 +75,10 @@ function GamesCatalogPage() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['game-library', 'active'],
-    queryFn: gameLibraryService.getActive,
+    queryKey: ['game-library'],
+    // getAll hits GET /game-library, which already returns active-only games.
+    // (There is no /game-library/active route — getActive 400s as a bad UUID.)
+    queryFn: gameLibraryService.getAll,
   })
 
   const renderContent = () => {

@@ -20,14 +20,12 @@ export interface GameLibraryItem {
 // the API (create/update/activate/deactivate/delete were removed backend-side,
 // as no per-tenant ownership exists), so only read methods live here.
 export const gameLibraryService = {
-  // Get all games in library
+  // Get all (active) games in the library. GET /game-library already filters to
+  // active games server-side. NOTE: there is no /game-library/active route — it
+  // matches @Get(':id') and 400s ("uuid is expected"), so don't add a getActive
+  // that calls it.
   getAll: (): Promise<Array<GameLibraryItem>> => {
     return fetchAPI<Array<GameLibraryItem>>('/game-library')
-  },
-
-  // Get active games only
-  getActive: (): Promise<Array<GameLibraryItem>> => {
-    return fetchAPI<Array<GameLibraryItem>>('/game-library/active')
   },
 
   // Get a specific game
