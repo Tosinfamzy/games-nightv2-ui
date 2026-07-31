@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { debugLog } from '../debug-log'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
 import { sessionKeys } from '../api/hooks/use-session'
@@ -28,13 +29,13 @@ export const useSessionSocket = (sessionId: string | undefined) => {
       return
     }
 
-    console.log(`Joining session room: ${sessionId}`)
+    debugLog(`Joining session room: ${sessionId}`)
     sessionsSocket.emit('join-session', sessionId)
     hasJoinedRef.current = true
 
     return () => {
       if (sessionsSocket && sessionId) {
-        console.log(`Leaving session room: ${sessionId}`)
+        debugLog(`Leaving session room: ${sessionId}`)
         sessionsSocket.emit('leave-session', sessionId)
         hasJoinedRef.current = false
       }
@@ -47,7 +48,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handlePlayerJoined = (data: any) => {
       try {
-        console.log('Player joined:', data)
+        debugLog('Player joined:', data)
 
         if (!data?.playerId && !data?.player?.id) {
           console.warn(
@@ -110,7 +111,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handlePlayerLeft = (data: any) => {
       try {
-        console.log('Player left:', data)
+        debugLog('Player left:', data)
 
         if (!data?.playerId) {
           throw new Error('Invalid player left event: missing playerId')
@@ -149,7 +150,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handlePlayerReadyChanged = (data: any) => {
       try {
-        console.log('Player readiness changed:', data)
+        debugLog('Player readiness changed:', data)
 
         if (!data?.playerId) {
           throw new Error('Invalid player ready event: missing playerId')
@@ -191,7 +192,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handleReadinessChanged = (data: any) => {
       try {
-        console.log('Session readiness changed:', data)
+        debugLog('Session readiness changed:', data)
 
         if (!data?.readiness) {
           throw new Error('Invalid readiness event: missing readiness data')
@@ -225,7 +226,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handleStatusChanged = (data: any) => {
       try {
-        console.log('Session status changed:', data)
+        debugLog('Session status changed:', data)
 
         if (!data?.status) {
           throw new Error('Invalid status change event: missing status')
@@ -253,7 +254,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handleTeamCreated = (data: any) => {
       try {
-        console.log('Team created:', data)
+        debugLog('Team created:', data)
         queryClient.invalidateQueries({
           queryKey: sessionKeys.teams(sessionId),
         })
@@ -270,7 +271,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handleTeamUpdated = (data: any) => {
       try {
-        console.log('Team updated:', data)
+        debugLog('Team updated:', data)
         queryClient.invalidateQueries({
           queryKey: sessionKeys.teams(sessionId),
         })
@@ -282,7 +283,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handleTeamDeleted = (data: any) => {
       try {
-        console.log('Team deleted:', data)
+        debugLog('Team deleted:', data)
         queryClient.invalidateQueries({
           queryKey: sessionKeys.teams(sessionId),
         })
@@ -294,7 +295,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handlePlayerAssigned = (data: any) => {
       try {
-        console.log('Player assigned to team:', data)
+        debugLog('Player assigned to team:', data)
         queryClient.invalidateQueries({
           queryKey: sessionKeys.teams(sessionId),
         })
@@ -329,7 +330,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handleCanStartChanged = (data: any) => {
       try {
-        console.log('Can start changed:', data)
+        debugLog('Can start changed:', data)
         queryClient.invalidateQueries({
           queryKey: ['session-can-start', sessionId],
         })
@@ -352,7 +353,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handlePlayerOnline = (data: any) => {
       try {
-        console.log('Player online:', data)
+        debugLog('Player online:', data)
 
         if (!data?.playerId) {
           throw new Error('Invalid player online event: missing playerId')
@@ -380,7 +381,7 @@ export const useSessionSocket = (sessionId: string | undefined) => {
 
     const handlePlayerOffline = (data: any) => {
       try {
-        console.log('Player offline:', data)
+        debugLog('Player offline:', data)
 
         if (!data?.playerId) {
           throw new Error('Invalid player offline event: missing playerId')

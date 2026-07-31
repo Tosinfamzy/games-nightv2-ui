@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { debugLog } from '../debug-log'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useSocketContext } from './socket-context'
@@ -58,13 +59,13 @@ export const useChatSocket = (
       return
     }
 
-    console.log(`Joining chat for session: ${sessionId}`)
+    debugLog(`Joining chat for session: ${sessionId}`)
     chatSocket.emit('join-chat', { sessionId, playerId })
     hasJoinedRef.current = true
 
     return () => {
       if (chatSocket && sessionId && playerId) {
-        console.log(`Leaving chat for session: ${sessionId}`)
+        debugLog(`Leaving chat for session: ${sessionId}`)
         chatSocket.emit('leave-chat', { sessionId, playerId })
         hasJoinedRef.current = false
       }
@@ -77,7 +78,7 @@ export const useChatSocket = (
 
     const handleMessageSent = (data: ChatMessageEvent) => {
       try {
-        console.log('New message received:', data)
+        debugLog('New message received:', data)
 
         if (!data?.message?.id || !data?.message?.content) {
           throw new Error('Invalid message event: missing required fields')
@@ -113,7 +114,7 @@ export const useChatSocket = (
 
     const handleHistoryLoaded = (data: ChatHistoryEvent) => {
       try {
-        console.log('Chat history loaded:', data)
+        debugLog('Chat history loaded:', data)
 
         if (!data?.messages || !Array.isArray(data.messages)) {
           throw new Error('Invalid history data: messages must be an array')

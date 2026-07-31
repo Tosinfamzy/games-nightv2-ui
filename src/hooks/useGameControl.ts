@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { debugLog } from '../lib/debug-log'
 import { useSocketContext } from '../lib/socket/socket-context'
 import { gameService } from '../lib/api/services/game.service'
 import { showToast, toastHelpers } from '../lib/toast'
@@ -166,7 +167,7 @@ export const useGameControl = (gameId: UUID | undefined) => {
     if (!gamesSocket || !gameId) return
 
     const handleGameEvent = (data: any) => {
-      console.log('Game event received:', data)
+      debugLog('Game event received:', data)
       // Invalidate and refetch game data
       queryClient.invalidateQueries({ queryKey: ['game', gameId] })
     }
