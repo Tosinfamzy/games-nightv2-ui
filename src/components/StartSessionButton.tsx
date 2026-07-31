@@ -10,6 +10,12 @@ interface StartSessionButtonProps {
     teamsFormed: boolean
     gamesAvailable: boolean
   }
+  /**
+   * Human-readable reasons the session can't start yet, straight from the
+   * backend's can-start check. When present, these are shown instead of the
+   * client-side checklist so the button never disagrees with the server.
+   */
+  reasons?: Array<string>
 }
 
 export function StartSessionButton({
@@ -18,6 +24,7 @@ export function StartSessionButton({
   isReady,
   disabled = false,
   readyToStart,
+  reasons,
 }: StartSessionButtonProps) {
   const [showCelebration, setShowCelebration] = useState(false)
 
@@ -63,8 +70,21 @@ export function StartSessionButton({
         </div>
       </button>
 
-      {/* Ready status indicators */}
-      {!isReady && readyToStart && (
+      {/* Blockers straight from the backend — authoritative, so the button
+          never claims ready when the server would reject the start. */}
+      {!isReady && reasons && reasons.length > 0 && (
+        <div className="mt-3 space-y-1 text-sm">
+          {reasons.map((reason) => (
+            <div key={reason} className="flex items-center gap-2 text-gray-500">
+              <span>⏳</span>
+              <span>{reason}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Fallback client-side checklist when no backend reasons are provided. */}
+      {!isReady && (!reasons || reasons.length === 0) && readyToStart && (
         <div className="mt-3 space-y-1 text-sm">
           <div
             className={`flex items-center gap-2 ${
