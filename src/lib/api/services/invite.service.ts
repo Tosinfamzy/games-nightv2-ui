@@ -69,6 +69,8 @@ export interface RsvpDTO {
 export interface PublicRsvpView {
   sessionId: string
   sessionName: string
+  /** Session lifecycle status — the page only shows the RSVP form when SCHEDULED. */
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   date: string
   location?: string | null
   description?: string | null
