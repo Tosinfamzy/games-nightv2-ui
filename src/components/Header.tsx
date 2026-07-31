@@ -19,6 +19,8 @@ export default function Header() {
     { to: '/rejoin', label: 'Rejoin' },
     { to: '/sessions', label: 'Sessions', hostOnly: true },
     { to: '/games', label: 'Games', hostOnly: true },
+    { to: '/history', label: 'History', hostOnly: true },
+    { to: '/settings', label: 'Settings', hostOnly: true },
   ]
   const visibleLinks = navLinks.filter((link) => isSignedIn || !link.hostOnly)
 

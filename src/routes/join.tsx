@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { JoinSessionForm } from '../components/JoinSessionForm'
 import { sessionKeys } from '../lib/api/hooks/use-session'
@@ -28,13 +28,13 @@ function JoinSessionPage() {
 
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
-            Don't have a session code?{' '}
-            <a
-              href="/sessions"
+            Already joined before?{' '}
+            <Link
+              to="/rejoin"
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
-              Browse active sessions
-            </a>
+              Rejoin a session
+            </Link>
           </p>
         </div>
       </div>

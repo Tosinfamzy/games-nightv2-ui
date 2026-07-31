@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { JoinSessionForm } from '../components/JoinSessionForm'
@@ -110,12 +110,12 @@ function AutoJoinPage() {
             />
 
             <div className="text-center mt-6">
-              <a
-                href="/sessions"
+              <Link
+                to="/rejoin"
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Browse active sessions
-              </a>
+                Rejoin a session
+              </Link>
             </div>
           </div>
         </div>

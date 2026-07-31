@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { SignInButton, SignedIn, SignedOut } from '@clerk/clerk-react'
 import { useMySessions } from '../../lib/api/hooks/use-my-sessions'
 import { QueryErrorDisplay } from '../../components/QueryErrorDisplay'
@@ -38,6 +38,7 @@ function SignInPrompt() {
 }
 
 function MySessionsList() {
+  const navigate = useNavigate()
   const { data: sessions, isLoading, error } = useMySessions()
 
   const getStatusColor = (status: string) => {
@@ -96,7 +97,7 @@ function MySessionsList() {
           action={{
             label: 'Create Session',
             onClick: () => {
-              window.location.href = '/sessions/new'
+              navigate({ to: '/sessions/new' })
             },
           }}
         />
