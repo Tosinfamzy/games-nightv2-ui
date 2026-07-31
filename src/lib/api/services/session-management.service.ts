@@ -4,6 +4,18 @@ export interface AddGamesToSessionDTO {
   gameLibraryIds: Array<string>
 }
 
+/** Backend's authoritative "can this session start yet?" check. */
+export interface CanStartResult {
+  canStart: boolean
+  reasons: Array<string>
+  checks: {
+    hasGames: boolean
+    playersReady: boolean
+    playerCountValid: boolean
+    sessionScheduled: boolean
+  }
+}
+
 export interface RemoveGamesFromSessionDTO {
   gameId: string
 }
@@ -83,8 +95,8 @@ export const sessionManagementService = {
     }),
 
   // Session lifecycle
-  checkSessionCanStart: (sessionId: string) =>
-    fetchAPI(`/sessions/${sessionId}/can-start`),
+  checkSessionCanStart: (sessionId: string): Promise<CanStartResult> =>
+    fetchAPI<CanStartResult>(`/sessions/${sessionId}/can-start`),
 
   getSessionStats: (sessionId: string) =>
     fetchAPI(`/sessions/${sessionId}/stats`),

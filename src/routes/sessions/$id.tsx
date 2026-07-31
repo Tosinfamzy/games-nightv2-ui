@@ -162,6 +162,16 @@ function SessionDetailsPage() {
     enabled: !!session,
   })
 
+  // Authoritative can-start check from the backend — drives the Start button so
+  // it never enables when the server would reject the start, and surfaces the
+  // real blockers. Polls as a fallback when the socket is down.
+  const { data: canStartCheck } = useQuery({
+    queryKey: ['session-can-start', id],
+    queryFn: () => sessionManagementService.checkSessionCanStart(id),
+    refetchInterval: useLobbyRefetchInterval(),
+    enabled: !!session,
+  })
+
   // Trigger celebration when all players become ready
   useEffect(() => {
     if (readiness?.allReady && !previousReadyState) {
@@ -492,11 +502,8 @@ function SessionDetailsPage() {
                   <StartSessionButton
                     onStart={() => startSessionMutation.mutate(id)}
                     isLoading={startSessionMutation.isPending}
-                    isReady={
-                      (readiness?.allReady || false) &&
-                      teams.length > 0 &&
-                      games.length > 0
-                    }
+                    isReady={canStartCheck?.canStart ?? false}
+                    reasons={canStartCheck?.reasons}
                     readyToStart={{
                       playersReady: readiness?.allReady || false,
                       teamsFormed: teams.length > 0,
@@ -1180,20 +1187,7 @@ function PlayersTab({ session, players, setPlayerReadyMutation, isHost }: any) {
     queryKey: ['session-can-start', session.id],
     queryFn: () => sessionManagementService.checkSessionCanStart(session.id),
     refetchInterval: useLobbyRefetchInterval(),
-  }) as {
-    data:
-      | {
-          canStart: boolean
-          reasons: Array<string>
-          checks: {
-            hasGames: boolean
-            playersReady: boolean
-            playerCountValid: boolean
-            sessionScheduled: boolean
-          }
-        }
-      | undefined
-  }
+  })
 
   const handleToggleReady = (playerId: string, currentReady: boolean) => {
     setPlayerReadyMutation.mutate({
