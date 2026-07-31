@@ -123,7 +123,7 @@ function PublicRsvpPage() {
           )}
           {event.goingHeadcount > 0 && (
             <p className="text-blue-100 text-sm mt-2">
-              🎉 {event.goingHeadcount} going so far
+              🎉 {event.goingHeadcount} coming so far
             </p>
           )}
         </div>

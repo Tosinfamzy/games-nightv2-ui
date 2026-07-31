@@ -7,6 +7,7 @@ import {
 } from '../lib/api/hooks/use-invite'
 import { showToast, toastHelpers } from '../lib/toast'
 import { InviteShareCard } from './InviteShareCard'
+import { ConfirmDialog } from './ConfirmDialog'
 import type { Invite, RsvpStatus } from '../lib/api/services/invite.service'
 
 const STATUS_STYLES: Record<RsvpStatus, { label: string; className: string }> =
@@ -40,7 +41,7 @@ function GuestRow({
   removing,
 }: {
   invite: Invite
-  onRemove: (id: string) => void
+  onRemove: (invite: Invite) => void
   removing: boolean
 }) {
   const status = STATUS_STYLES[invite.rsvpStatus]
@@ -96,7 +97,7 @@ function GuestRow({
           Copy link
         </button>
         <button
-          onClick={() => onRemove(invite.id)}
+          onClick={() => onRemove(invite)}
           disabled={removing}
           className="text-red-500 hover:text-red-600 text-sm font-medium min-h-[44px] px-2 disabled:opacity-50"
         >
@@ -125,6 +126,10 @@ export function GuestList({
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [guestToRemove, setGuestToRemove] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
@@ -143,10 +148,12 @@ export function GuestList({
     )
   }
 
-  const handleRemove = (id: string) => {
-    removeInvite.mutate(id, {
+  const confirmRemove = () => {
+    if (!guestToRemove) return
+    removeInvite.mutate(guestToRemove.id, {
       onError: (error) => toastHelpers.operationError('remove guest', error),
     })
+    setGuestToRemove(null)
   }
 
   return (
@@ -218,7 +225,12 @@ export function GuestList({
                     <GuestRow
                       key={invite.id}
                       invite={invite}
-                      onRemove={handleRemove}
+                      onRemove={(inv) =>
+                        setGuestToRemove({
+                          id: inv.id,
+                          name: inv.name || 'this guest',
+                        })
+                      }
                       removing={removeInvite.isPending}
                     />
                   ))}
@@ -228,6 +240,16 @@ export function GuestList({
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={guestToRemove !== null}
+        title="Remove guest?"
+        message={`Remove ${guestToRemove?.name ?? 'this guest'} from the guest list? This deletes their invite and RSVP.`}
+        confirmText="Remove"
+        variant="danger"
+        onConfirm={confirmRemove}
+        onCancel={() => setGuestToRemove(null)}
+      />
     </div>
   )
 }
