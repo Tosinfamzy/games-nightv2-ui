@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { debugLog } from '../lib/debug-log'
 import { useSocketContext } from '../lib/socket/socket-context'
 import { gameService } from '../lib/api/services/game.service'
 import type {
@@ -75,7 +76,7 @@ export const useGameTimer = (gameId: string | undefined) => {
 
     const handleTurnStarted = (data: TurnStartedEvent) => {
       if (data.gameId === gameId) {
-        console.log('Turn started:', data)
+        debugLog('Turn started:', data)
         setTurnTimeLimit(data.turnTimeLimit)
         setTurnEndsAt(data.turnEndsAt)
         setCurrentTeamName(data.teamName)
@@ -98,7 +99,7 @@ export const useGameTimer = (gameId: string | undefined) => {
 
     const handleTurnAdvanced = (data: TurnAdvancedEvent) => {
       if (data.gameId === gameId) {
-        console.log('Turn advanced:', data)
+        debugLog('Turn advanced:', data)
         setTurnTimeLimit(data.turnTimeLimit)
         setTurnEndsAt(data.turnEndsAt)
         setCurrentTeamName(data.nextTeamName)
@@ -121,7 +122,7 @@ export const useGameTimer = (gameId: string | undefined) => {
 
     const handleTimerExpired = (data: TimerExpiredEvent) => {
       if (data.gameId === gameId) {
-        console.log('Timer expired:', data)
+        debugLog('Timer expired:', data)
         setTimeRemaining(0)
         setIsExpired(true)
       }

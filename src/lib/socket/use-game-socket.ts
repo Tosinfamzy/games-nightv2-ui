@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { debugLog } from '../debug-log'
 import { showToast } from '../toast'
 import { useNotifications } from '../../hooks/useNotifications'
 import { useSocketContext } from './socket-context'
@@ -31,13 +32,13 @@ export const useGameSocket = (
       return
     }
 
-    console.log(`Joining game room: ${gameId}`)
+    debugLog(`Joining game room: ${gameId}`)
     gamesSocket.emit('join-game', gameId)
     hasJoinedRef.current = true
 
     return () => {
       if (gamesSocket && gameId) {
-        console.log(`Leaving game room: ${gameId}`)
+        debugLog(`Leaving game room: ${gameId}`)
         gamesSocket.emit('leave-game', gameId)
         hasJoinedRef.current = false
       }
@@ -50,7 +51,7 @@ export const useGameSocket = (
 
     const handleScoreSubmitted = (data: any) => {
       try {
-        console.log('Score submitted:', data)
+        debugLog('Score submitted:', data)
 
         if (!data?.scoreId && !data?.teamId) {
           throw new Error(
@@ -79,7 +80,7 @@ export const useGameSocket = (
 
     const handleScoreUpdated = (data: any) => {
       try {
-        console.log('Score updated:', data)
+        debugLog('Score updated:', data)
 
         if (!data?.scoreId) {
           throw new Error('Invalid score updated event: missing scoreId')
@@ -106,7 +107,7 @@ export const useGameSocket = (
 
     const handleGameStarted = (data: any) => {
       try {
-        console.log('Game started:', data)
+        debugLog('Game started:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify about game starting
@@ -132,7 +133,7 @@ export const useGameSocket = (
 
     const handleGamePaused = (data: any) => {
       try {
-        console.log('Game paused:', data)
+        debugLog('Game paused:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling game paused event:', error)
@@ -153,7 +154,7 @@ export const useGameSocket = (
 
     const handleGameResumed = (data: any) => {
       try {
-        console.log('Game resumed:', data)
+        debugLog('Game resumed:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling game resumed event:', error)
@@ -174,7 +175,7 @@ export const useGameSocket = (
 
     const handleGameCompleted = (data: any) => {
       try {
-        console.log('Game completed:', data)
+        debugLog('Game completed:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify about game completion
@@ -200,7 +201,7 @@ export const useGameSocket = (
 
     const handleRoundStarted = (data: any) => {
       try {
-        console.log('Round started:', data)
+        debugLog('Round started:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // Notify about new round
@@ -226,7 +227,7 @@ export const useGameSocket = (
 
     const handleRoundEnded = (data: any) => {
       try {
-        console.log('Round ended:', data)
+        debugLog('Round ended:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling round ended event:', error)
@@ -247,7 +248,7 @@ export const useGameSocket = (
 
     const handleStateChanged = (data: any) => {
       try {
-        console.log('Game state changed:', data)
+        debugLog('Game state changed:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling game state change:', error)
@@ -268,7 +269,7 @@ export const useGameSocket = (
 
     const handleLeaderboardUpdate = (data: any) => {
       try {
-        console.log('Leaderboard updated:', data)
+        debugLog('Leaderboard updated:', data)
 
         if (!data?.leaderboard) {
           throw new Error(
@@ -296,7 +297,7 @@ export const useGameSocket = (
 
     const handleTurnStarted = (data: any) => {
       try {
-        console.log('Turn started:', data)
+        debugLog('Turn started:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
 
         // BE payload is { teamId, teamName } (not { team: { name } }).
@@ -341,7 +342,7 @@ export const useGameSocket = (
 
     const handleTurnAdvanced = (data: any) => {
       try {
-        console.log('Turn advanced:', data)
+        debugLog('Turn advanced:', data)
         queryClient.invalidateQueries({ queryKey: ['game', gameId] })
       } catch (error) {
         console.error('Error handling turn advanced event:', error)

@@ -10,6 +10,7 @@ import { PlayerProvider } from './contexts'
 import { getErrorMessage, showToast } from './lib/toast'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { ClerkTokenBridge } from './components/ClerkTokenBridge'
+import { NotFound } from './components/NotFound'
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
@@ -56,6 +57,7 @@ const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
+  defaultNotFoundComponent: NotFound,
 })
 
 // Register the router instance for type safety

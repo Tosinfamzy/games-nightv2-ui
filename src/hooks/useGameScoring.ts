@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { debugLog } from '../lib/debug-log'
 import { useSocketContext } from '../lib/socket/socket-context'
 import { scoreService } from '../lib/api/services/score.service'
 import { showToast, toastHelpers } from '../lib/toast'
@@ -83,7 +84,7 @@ export const useGameScoring = (gameId: UUID | undefined) => {
     if (!gamesSocket || !gameId) return
 
     const handleScoreEvent = (data: any) => {
-      console.log('Score event received:', data)
+      debugLog('Score event received:', data)
       // Invalidate and refetch scores
       queryClient.invalidateQueries({ queryKey: ['game-scores', gameId] })
       queryClient.invalidateQueries({ queryKey: ['game', gameId] })
