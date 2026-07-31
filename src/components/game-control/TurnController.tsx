@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useGameControl } from '../../hooks/useGameControl'
 import { isRoundLive } from '../../lib/game-status'
 import type { UUID } from '../../lib/api/types'
@@ -12,6 +13,32 @@ export default function TurnController({
   className = '',
 }: TurnControllerProps) {
   const { game, isLoading, nextTurn, isAdvancingTurn } = useGameControl(gameId)
+
+  // Keyboard shortcut: press N to advance the turn (the on-screen hint below
+  // promises this). Only while a round is live with 2+ teams, and never while
+  // typing in a field or when a turn is already advancing.
+  useEffect(() => {
+    const live = game ? isRoundLive(game.status) : false
+    const multiTeam = (game?.teams?.length ?? 0) > 1
+    if (!live || !multiTeam) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'n' && e.key !== 'N') return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      if (
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.isContentEditable
+      ) {
+        return
+      }
+      if (isAdvancingTurn) return
+      e.preventDefault()
+      nextTurn()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [game?.status, game?.teams?.length, isAdvancingTurn, nextTurn])
 
   if (isLoading) {
     return (
