@@ -11,6 +11,7 @@ import {
   prettyStatus,
 } from '../../lib/game-status'
 import { GameStatus } from '../../lib/api/types'
+import { GameResultsPanel } from './GameResultsPanel'
 import type { UUID } from '../../lib/api/types'
 
 interface GameControlPanelProps {
@@ -202,11 +203,7 @@ export default function GameControlPanel({
       )}
 
       {game.status === GameStatus.COMPLETED && (
-        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-800 text-sm font-medium">
-            🎉 Game completed! Check the results to see who won.
-          </p>
-        </div>
+        <GameResultsPanel gameId={gameId} />
       )}
 
       {game.status === GameStatus.CANCELLED && (
