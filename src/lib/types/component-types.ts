@@ -41,6 +41,8 @@ export interface UIGame {
   maxPlayers: number
   status: 'scheduled' | 'in_progress' | 'completed'
   recommendedTeamSize?: number
+  /** Category tags, sourced from the game's library template. */
+  categories?: Array<string>
 }
 
 // Extended UI Game with additional metadata (for game library/selection)

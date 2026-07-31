@@ -89,6 +89,8 @@ export function transformGame(
       | 'scheduled'
       | 'in_progress'
       | 'completed',
+    categories:
+      (game as any).categories ?? (game as any).gameLibrary?.categories,
   }
 
   // Add recommendedTeamSize if requested

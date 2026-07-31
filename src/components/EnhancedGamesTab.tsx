@@ -29,7 +29,7 @@ interface Game {
   maxPlayers: number
   estimatedDuration?: number
   difficulty?: 'easy' | 'medium' | 'hard'
-  category?: string
+  categories?: Array<string>
   status: 'scheduled' | 'in_progress' | 'completed'
   /** The library template this session-game was created from. */
   gameLibrary?: { id: string }
@@ -198,7 +198,7 @@ export function EnhancedGamesTab({
       (game.description &&
         game.description.toLowerCase().includes(gameFilter.toLowerCase()))
     const matchesCategory =
-      !categoryFilter || (game as any).category === categoryFilter
+      !categoryFilter || (game.categories ?? []).includes(categoryFilter)
     // `game.id` is a GameLibrary id; `sg.id` is the session-Game id — those
     // never match. Compare against the session game's library reference (with a
     // name fallback), so already-added games are actually hidden.
@@ -210,9 +210,7 @@ export function EnhancedGamesTab({
   })
 
   const categories = [
-    ...new Set(
-      availableGames.map((game) => (game as any).category).filter(Boolean),
-    ),
+    ...new Set(availableGames.flatMap((game) => game.categories ?? [])),
   ]
 
   const gameStats = {
@@ -299,10 +297,17 @@ export function EnhancedGamesTab({
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h4 className="font-semibold text-gray-900">{game.name}</h4>
-                    {game.category && (
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                        {game.category}
-                      </span>
+                    {game.categories && game.categories.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {game.categories.map((category) => (
+                          <span
+                            key={category}
+                            className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
