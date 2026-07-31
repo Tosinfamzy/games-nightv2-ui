@@ -47,7 +47,9 @@ export interface UpdateScoreDTO {
 }
 
 export interface SubmitGameScoreDTO {
-  teamId: string
+  /** Team-mode games score a team; individual-mode games score a player. */
+  teamId?: string
+  playerId?: string
   score: number
   roundNumber?: number
 }
@@ -86,7 +88,11 @@ export const scoreService = {
   ): Promise<Score> => {
     return fetchAPI<Score>(`/scores/games/${gameId}/submit`, {
       method: 'POST',
-      body: JSON.stringify({ teamId: data.teamId, score: data.score }),
+      body: JSON.stringify({
+        teamId: data.teamId,
+        playerId: data.playerId,
+        score: data.score,
+      }),
     })
   },
 

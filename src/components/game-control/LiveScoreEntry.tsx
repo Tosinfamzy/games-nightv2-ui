@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useGameControl } from '../../hooks/useGameControl'
 import { useGameScoring } from '../../hooks/useGameScoring'
+import { useSessionPlayers } from '../../lib/api/hooks/use-session'
 import { isRoundLive } from '../../lib/game-status'
 import type { UUID } from '../../lib/api/types'
 
@@ -9,12 +10,20 @@ interface LiveScoreEntryProps {
   className?: string
 }
 
+interface Entrant {
+  id: string
+  name: string
+  subtitle?: string
+}
+
 export default function LiveScoreEntry({
   gameId,
   className = '',
 }: LiveScoreEntryProps) {
   const { game, isLoading: isLoadingGame } = useGameControl(gameId)
   const { submitScore, isSubmittingScore } = useGameScoring(gameId)
+  // Only used in individual mode; the hook no-ops on an empty session id.
+  const { data: players = [] } = useSessionPlayers(game?.sessionId ?? '')
   const [scoreInputs, setScoreInputs] = useState<Record<string, string>>({})
 
   if (isLoadingGame) {
@@ -54,15 +63,27 @@ export default function LiveScoreEntry({
     )
   }
 
-  const handleScoreChange = (teamId: string, value: string) => {
+  const isIndividual = game.scoreMode === 'individual'
+
+  const entrants: Array<Entrant> = isIndividual
+    ? players.map((player) => ({ id: player.id, name: player.name }))
+    : (game.teams ?? []).map((team) => ({
+        id: team.id,
+        name: team.name,
+        subtitle: `${team.playerIds.length} player${
+          team.playerIds.length !== 1 ? 's' : ''
+        }`,
+      }))
+
+  const handleScoreChange = (entrantId: string, value: string) => {
     // Allow only numbers and negative sign
     if (value === '' || value === '-' || /^-?\d+$/.test(value)) {
-      setScoreInputs((prev) => ({ ...prev, [teamId]: value }))
+      setScoreInputs((prev) => ({ ...prev, [entrantId]: value }))
     }
   }
 
-  const handleSubmitScore = (teamId: string) => {
-    const scoreValue = scoreInputs[teamId]
+  const handleSubmitScore = (entrantId: string) => {
+    const scoreValue = scoreInputs[entrantId]
     if (!scoreValue || scoreValue === '-') return
 
     const points = parseInt(scoreValue, 10)
@@ -70,23 +91,22 @@ export default function LiveScoreEntry({
 
     submitScore({
       gameId,
-      teamId,
+      ...(isIndividual ? { playerId: entrantId } : { teamId: entrantId }),
       score: points,
       roundNumber: game.currentRound,
     })
 
     // Clear the input after submission
-    setScoreInputs((prev) => ({ ...prev, [teamId]: '' }))
+    setScoreInputs((prev) => ({ ...prev, [entrantId]: '' }))
   }
 
-  const handleKeyPress = (teamId: string, e: React.KeyboardEvent) => {
+  const handleKeyPress = (entrantId: string, e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmitScore(teamId)
+      handleSubmitScore(entrantId)
     }
   }
 
-  const teams = game.teams ?? []
-  if (teams.length === 0) {
+  if (entrants.length === 0) {
     return (
       <div
         className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
@@ -95,8 +115,12 @@ export default function LiveScoreEntry({
           📝 Quick Score Entry
         </h3>
         <div className="text-center py-8 text-gray-500">
-          <p>No teams found</p>
-          <p className="text-sm mt-1">Add teams to start scoring</p>
+          <p>{isIndividual ? 'No players found' : 'No teams found'}</p>
+          <p className="text-sm mt-1">
+            {isIndividual
+              ? 'Add players to the session to start scoring'
+              : 'Add teams to start scoring'}
+          </p>
         </div>
       </div>
     )
@@ -112,29 +136,31 @@ export default function LiveScoreEntry({
           📝 Quick Score Entry
         </h3>
         <p className="text-sm text-gray-600">
-          Round {game.currentRound} of {game.maxRounds}
+          {isIndividual ? 'Scoring by player' : 'Scoring by team'} · Round{' '}
+          {game.currentRound} of {game.maxRounds}
         </p>
       </div>
 
-      {/* Score Input for Each Team */}
+      {/* Score Input for Each Entrant */}
       <div className="space-y-3">
-        {teams.map((team) => {
-          const inputValue = scoreInputs[team.id] || ''
+        {entrants.map((entrant) => {
+          const inputValue = scoreInputs[entrant.id] || ''
           const hasValue = inputValue && inputValue !== '-'
 
           return (
             <div
-              key={team.id}
+              key={entrant.id}
               className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
             >
               <div className="flex items-center gap-3">
-                {/* Team Info */}
+                {/* Entrant Info */}
                 <div className="flex-1">
-                  <div className="font-bold text-gray-900">{team.name}</div>
-                  <div className="text-xs text-gray-600">
-                    {team.playerIds.length} player
-                    {team.playerIds.length !== 1 ? 's' : ''}
-                  </div>
+                  <div className="font-bold text-gray-900">{entrant.name}</div>
+                  {entrant.subtitle && (
+                    <div className="text-xs text-gray-600">
+                      {entrant.subtitle}
+                    </div>
+                  )}
                 </div>
 
                 {/* Score Input */}
@@ -143,17 +169,21 @@ export default function LiveScoreEntry({
                     type="text"
                     inputMode="numeric"
                     value={inputValue}
-                    onChange={(e) => handleScoreChange(team.id, e.target.value)}
-                    onKeyPress={(e) => handleKeyPress(team.id, e)}
+                    onChange={(e) =>
+                      handleScoreChange(entrant.id, e.target.value)
+                    }
+                    onKeyPress={(e) => handleKeyPress(entrant.id, e)}
                     placeholder="0"
+                    aria-label={`Score for ${entrant.name}`}
                     className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={isSubmittingScore}
                   />
 
                   {/* Submit Button */}
                   <button
-                    onClick={() => handleSubmitScore(team.id)}
+                    onClick={() => handleSubmitScore(entrant.id)}
                     disabled={!hasValue || isSubmittingScore}
+                    aria-label={`Submit score for ${entrant.name}`}
                     className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
                   >
                     {isSubmittingScore ? '...' : '✓'}
