@@ -126,9 +126,12 @@ export const useGameScoring = (gameId: UUID | undefined) => {
     isLoading,
     error,
     refetch,
-    // Score actions
-    submitScore: (data: SubmitGameScoreDTO & { gameId: UUID }) =>
-      submitScoreMutation.mutate(data),
+    // Score actions. Options (onSuccess/onSettled) pass through so callers can
+    // react per-submission (e.g. only clear the input once the score lands).
+    submitScore: (
+      data: SubmitGameScoreDTO & { gameId: UUID },
+      options?: Parameters<typeof submitScoreMutation.mutate>[1],
+    ) => submitScoreMutation.mutate(data, options),
     updateScore: (scoreId: UUID, points: number) =>
       updateScoreMutation.mutate({ scoreId, points }),
     deleteScore: (scoreId: UUID) => deleteScoreMutation.mutate(scoreId),

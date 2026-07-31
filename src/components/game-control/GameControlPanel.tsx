@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useGameControl } from '../../hooks/useGameControl'
-import { useSessionTeams } from '../../lib/api/hooks/use-session'
+import {
+  useSessionPlayers,
+  useSessionTeams,
+} from '../../lib/api/hooks/use-session'
 import { gameService } from '../../lib/api/services/game.service'
 import { toastHelpers } from '../../lib/toast'
 import { ConfirmDialog } from '../ConfirmDialog'
@@ -43,6 +46,7 @@ export default function GameControlPanel({
     isCompleting,
   } = useGameControl(gameId)
   const { data: sessionTeams = [] } = useSessionTeams(sessionId)
+  const { data: sessionPlayers = [] } = useSessionPlayers(sessionId)
   const queryClient = useQueryClient()
 
   const scoreModeMutation = useMutation({
@@ -135,13 +139,19 @@ export default function GameControlPanel({
           </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="text-sm text-gray-600 mb-1">Teams</div>
-          <div className="text-2xl font-bold text-gray-900">{teams.length}</div>
+          <div className="text-sm text-gray-600 mb-1">
+            {isIndividual ? 'Scoring' : 'Teams'}
+          </div>
+          <div className="text-2xl font-bold text-gray-900">
+            {isIndividual ? 'By player' : teams.length}
+          </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-sm text-gray-600 mb-1">Players</div>
           <div className="text-2xl font-bold text-gray-900">
-            {teams.reduce((total, team) => total + team.playerIds.length, 0)}
+            {isIndividual
+              ? sessionPlayers.length
+              : teams.reduce((total, team) => total + team.playerIds.length, 0)}
           </div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
