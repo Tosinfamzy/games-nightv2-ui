@@ -1,4 +1,6 @@
 import { useGameScoring } from '../../hooks/useGameScoring'
+import { useGameControl } from '../../hooks/useGameControl'
+import { GameStatus } from '../../lib/api/types'
 import type { UUID } from '../../lib/api/types'
 
 interface LiveLeaderboardProps {
@@ -13,6 +15,8 @@ export default function LiveLeaderboard({
   showRoundBreakdown = false,
 }: LiveLeaderboardProps) {
   const { leaderboard, winner, isLoading } = useGameScoring(gameId)
+  const { game } = useGameControl(gameId)
+  const isComplete = game?.status === GameStatus.COMPLETED
 
   if (isLoading) {
     return (
@@ -58,7 +62,7 @@ export default function LiveLeaderboard({
         <h3 className="text-lg font-bold text-gray-900 mb-1">🏆 Leaderboard</h3>
         {winner && (
           <p className="text-sm text-green-600 font-medium">
-            Leading: {winner.teamName}
+            {isComplete ? '🏆 Winner' : 'Leading'}: {winner.teamName}
           </p>
         )}
       </div>
