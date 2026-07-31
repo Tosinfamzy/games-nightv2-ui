@@ -59,6 +59,8 @@ export interface Game {
   endTime?: string
   /** Team whose turn it currently is (turn-based games). */
   currentTurnTeamId?: string | null
+  /** Whether the game is scored by team (default) or by individual player. */
+  scoreMode?: 'team' | 'individual'
   sessionId: UUID
   scores: Array<Score>
   teams: Array<Team>

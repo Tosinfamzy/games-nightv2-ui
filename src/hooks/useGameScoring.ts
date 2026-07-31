@@ -38,6 +38,7 @@ export const useGameScoring = (gameId: UUID | undefined) => {
     mutationFn: (data: SubmitGameScoreDTO & { gameId: UUID }) => {
       return scoreService.submitGameScore(data.gameId, {
         teamId: data.teamId,
+        playerId: data.playerId,
         score: data.score,
         roundNumber: data.roundNumber,
       })

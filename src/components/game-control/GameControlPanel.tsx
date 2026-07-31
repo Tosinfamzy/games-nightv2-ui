@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useGameControl } from '../../hooks/useGameControl'
 import { useSessionTeams } from '../../lib/api/hooks/use-session'
+import { gameService } from '../../lib/api/services/game.service'
+import { toastHelpers } from '../../lib/toast'
 import { ConfirmDialog } from '../ConfirmDialog'
 import {
   canComplete as canCompleteGame,
@@ -40,6 +43,17 @@ export default function GameControlPanel({
     isCompleting,
   } = useGameControl(gameId)
   const { data: sessionTeams = [] } = useSessionTeams(sessionId)
+  const queryClient = useQueryClient()
+
+  const scoreModeMutation = useMutation({
+    mutationFn: (scoreMode: 'team' | 'individual') =>
+      gameService.update(gameId, { scoreMode }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['game', gameId] })
+    },
+    onError: (error) =>
+      toastHelpers.operationError('change scoring mode', error),
+  })
 
   if (isLoading) {
     return (
@@ -87,7 +101,9 @@ export default function GameControlPanel({
   const showPause = canPauseGame(game)
   const showResume = canResumeGame(game)
   const showComplete = canCompleteGame(game)
-  const enoughTeams = sessionTeams.length >= 2
+  const isIndividual = game.scoreMode === 'individual'
+  // Team games need ≥2 teams; individual games score players directly.
+  const canStartNow = isIndividual || sessionTeams.length >= 2
 
   return (
     <div
@@ -139,13 +155,36 @@ export default function GameControlPanel({
         </div>
       </div>
 
+      {/* Scoring mode — only changeable before the game starts. */}
+      {isNotStarted(game.status) && (
+        <div className="mb-4 flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700">Scoring:</span>
+          <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
+            {(['team', 'individual'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => scoreModeMutation.mutate(mode)}
+                disabled={scoreModeMutation.isPending}
+                className={`px-3 py-1.5 text-sm font-medium capitalize disabled:opacity-50 ${
+                  (game.scoreMode ?? 'team') === mode
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {mode === 'team' ? 'By team' : 'By player'}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Control Buttons */}
       <div className="flex flex-wrap gap-3">
         {showStart && (
           <button
             onClick={() => startGame(sessionTeams.map((t) => t.id))}
-            disabled={isStarting || !enoughTeams}
-            title={enoughTeams ? undefined : 'Form at least two teams to start'}
+            disabled={isStarting || !canStartNow}
+            title={canStartNow ? undefined : 'Form at least two teams to start'}
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition-colors font-medium"
           >
             {isStarting ? 'Starting…' : '🎮 Start Game'}
@@ -187,7 +226,7 @@ export default function GameControlPanel({
       {isNotStarted(game.status) && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-800 text-sm">
-            {enoughTeams
+            {canStartNow
               ? 'ℹ️ Ready to go. Start the game, then start round 1 below.'
               : '⚠️ Form at least two teams in the session before starting this game.'}
           </p>
