@@ -35,6 +35,8 @@ export interface Invite {
   inviteToken: string
   rsvpStatus: RsvpStatus
   plusOnes: number
+  /** Names of the plus-ones, in order (may contain blanks for unnamed +1s). */
+  plusOneNames?: Array<string>
   note?: string | null
   playerId?: string | null
   respondedAt?: string | null
@@ -62,6 +64,8 @@ export interface RsvpDTO {
   status: RsvpResponse
   name?: string
   plusOnes?: number
+  /** Names of the plus-ones; length sets the count. Blanks allowed. */
+  plusOneNames?: Array<string>
   note?: string
 }
 
@@ -86,6 +90,8 @@ export interface PublicRsvpDTO {
   status: RsvpResponse
   email: string
   plusOnes?: number
+  /** Names of the plus-ones; length sets the count. Blanks allowed. */
+  plusOneNames?: Array<string>
   note?: string
 }
 

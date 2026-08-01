@@ -4,6 +4,7 @@ import { usePublicRsvpView, useSelfRsvp } from '../lib/api/hooks/use-invite'
 import { showToast, toastHelpers } from '../lib/toast'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import { AddToCalendar } from '../components/AddToCalendar'
+import { PlusOnesInput } from '../components/PlusOnesInput'
 import { OpenInBrowserHint } from '../components/OpenInBrowserHint'
 import type { Invite, RsvpResponse } from '../lib/api/services/invite.service'
 
@@ -48,7 +49,7 @@ function PublicRsvpPage() {
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [plusOnes, setPlusOnes] = useState(0)
+  const [plusOneNames, setPlusOneNames] = useState<Array<string>>([])
   const [note, setNote] = useState('')
   const [result, setResult] = useState<Invite | null>(null)
 
@@ -87,7 +88,7 @@ function PublicRsvpPage() {
         name: trimmed,
         status,
         email: trimmedEmail,
-        plusOnes: status === 'GOING' ? plusOnes : 0,
+        plusOneNames: status === 'GOING' ? plusOneNames : [],
         note: note.trim() || undefined,
       },
       {
@@ -264,23 +265,7 @@ function PublicRsvpPage() {
                 </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bringing anyone? (optional)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={10}
-                  value={plusOnes}
-                  onChange={(e) =>
-                    setPlusOnes(
-                      Math.max(0, Math.min(10, Number(e.target.value))),
-                    )
-                  }
-                  className="w-24 rounded-lg border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <PlusOnesInput value={plusOneNames} onChange={setPlusOneNames} />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
