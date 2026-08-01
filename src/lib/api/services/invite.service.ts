@@ -112,6 +112,20 @@ export const inviteService = {
     })
   },
 
+  /**
+   * Host-side check-in: add the guest (and one player per plus-one) as live
+   * players, without them needing a device. Returns how many players were added.
+   */
+  checkIn: (
+    sessionId: string,
+    inviteId: string,
+  ): Promise<{ invite: Invite; playersAdded: number }> => {
+    return fetchAPI<{ invite: Invite; playersAdded: number }>(
+      `/sessions/${sessionId}/invites/${inviteId}/check-in`,
+      { method: 'POST' },
+    )
+  },
+
   // ----- Public RSVP (token-based) -----
   getByToken: (token: string): Promise<Invite> => {
     return fetchAPI<Invite>(`/invites/${token}`)

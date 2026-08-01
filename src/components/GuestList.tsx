@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   useAddInvite,
+  useCheckInGuest,
   useInviteSummary,
   useRemoveInvite,
   useSessionInvites,
@@ -39,12 +40,18 @@ function GuestRow({
   invite,
   onRemove,
   removing,
+  onCheckIn,
+  checkingIn,
 }: {
   invite: Invite
   onRemove: (invite: Invite) => void
   removing: boolean
+  onCheckIn: (invite: Invite) => void
+  checkingIn: boolean
 }) {
   const status = STATUS_STYLES[invite.rsvpStatus]
+  // Already a live player? Then they're checked in — show the ✓, no button.
+  const checkedIn = Boolean(invite.playerId)
 
   const copyLink = async () => {
     const url = `${window.location.origin}/invite/${invite.inviteToken}`
@@ -89,6 +96,16 @@ function GuestRow({
         >
           {status.label}
         </span>
+        {!checkedIn && (
+          <button
+            onClick={() => onCheckIn(invite)}
+            disabled={checkingIn}
+            className="text-green-700 hover:text-green-800 text-sm font-medium min-h-[44px] px-2 disabled:opacity-50"
+            title="Add this guest (and any plus-ones) as players"
+          >
+            {invite.plusOnes > 0 ? `Check in +${invite.plusOnes}` : 'Check in'}
+          </button>
+        )}
         <button
           onClick={copyLink}
           className="text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px] px-2"
@@ -123,6 +140,7 @@ export function GuestList({
   const { data: summary } = useInviteSummary(sessionId)
   const addInvite = useAddInvite(sessionId)
   const removeInvite = useRemoveInvite(sessionId)
+  const checkInGuest = useCheckInGuest(sessionId)
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -234,6 +252,26 @@ export function GuestList({
                         })
                       }
                       removing={removeInvite.isPending}
+                      onCheckIn={(inv) =>
+                        checkInGuest.mutate(inv.id, {
+                          onSuccess: (res) => {
+                            const extra = res.playersAdded - 1
+                            showToast.success(
+                              `Checked in ${inv.name || 'guest'}${
+                                extra > 0
+                                  ? ` + ${extra} guest${extra > 1 ? 's' : ''}`
+                                  : ''
+                              }`,
+                            )
+                          },
+                          onError: (e) =>
+                            toastHelpers.operationError(
+                              'check in the guest',
+                              e,
+                            ),
+                        })
+                      }
+                      checkingIn={checkInGuest.isPending}
                     />
                   ))}
                 </ul>
