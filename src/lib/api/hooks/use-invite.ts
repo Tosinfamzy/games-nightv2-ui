@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { inviteService } from '../services/invite.service'
+import { sessionKeys } from './use-session'
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import type {
   CreateInviteDTO,
@@ -87,6 +88,28 @@ export const useRemoveInvite = (
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: inviteKeys.session(sessionId) })
       queryClient.invalidateQueries({ queryKey: inviteKeys.summary(sessionId) })
+    },
+  })
+}
+
+export const useCheckInGuest = (
+  sessionId: string,
+): UseMutationResult<
+  { invite: Invite; playersAdded: number },
+  Error,
+  string
+> => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (inviteId) => inviteService.checkIn(sessionId, inviteId),
+    onSuccess: () => {
+      // Refresh the guest list (✓ appears) and the session's players (the
+      // checked-in guest + plus-ones now show up as players).
+      queryClient.invalidateQueries({ queryKey: inviteKeys.session(sessionId) })
+      queryClient.invalidateQueries({ queryKey: inviteKeys.summary(sessionId) })
+      queryClient.invalidateQueries({
+        queryKey: sessionKeys.players(sessionId),
+      })
     },
   })
 }

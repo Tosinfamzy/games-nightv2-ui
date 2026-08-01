@@ -7,6 +7,7 @@ import { usePlayer } from '../contexts/PlayerContext'
 import { showToast, toastHelpers } from '../lib/toast'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import { AddToCalendar } from '../components/AddToCalendar'
+import { OpenInBrowserHint } from '../components/OpenInBrowserHint'
 import type { RsvpResponse } from '../lib/api/services/invite.service'
 
 export const Route = createFileRoute('/invite/$token')({
@@ -152,6 +153,7 @@ function InviteRsvpPage() {
         </div>
 
         <div className="p-6 space-y-4">
+          <OpenInBrowserHint />
           {/* Games-night day: jump straight into the live session. */}
           {session?.status === 'SCHEDULED' && (
             <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-4">

@@ -9,6 +9,29 @@ import type { Player } from '../lib/api/types'
  */
 export const HOST_TOKEN_MARKER = 'gn_host_minted'
 
+/**
+ * Storage that never throws. Some in-app browsers (Instagram/Facebook) and
+ * Safari Private Mode block or throw on localStorage — an unguarded write there
+ * would crash the join flow (the token would never get set → no real-time). We
+ * persist when we can and degrade to in-memory-only (this session) when we can't.
+ */
+const safeStore = {
+  set: (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value)
+    } catch {
+      /* storage blocked — keep going with in-memory state */
+    }
+  },
+  remove: (key: string) => {
+    try {
+      localStorage.removeItem(key)
+    } catch {
+      /* ignore */
+    }
+  },
+}
+
 interface PlayerContextValue {
   player: Player | null
   playerToken: string | null
@@ -64,13 +87,13 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
 
   const setPlayer = (p: Player, token?: string) => {
     setPlayerState(p)
-    localStorage.setItem('gn_player', JSON.stringify(p))
+    safeStore.set('gn_player', JSON.stringify(p))
     // A real player record — no longer a bare host-minted token.
-    localStorage.removeItem(HOST_TOKEN_MARKER)
+    safeStore.remove(HOST_TOKEN_MARKER)
 
     if (token) {
       setPlayerTokenState(token)
-      localStorage.setItem('gn_player_token', token)
+      safeStore.set('gn_player_token', token)
     }
   }
 
@@ -79,16 +102,16 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
   // wipe it on a failed rejoin.
   const setPlayerToken = (token: string) => {
     setPlayerTokenState(token)
-    localStorage.setItem('gn_player_token', token)
-    localStorage.setItem(HOST_TOKEN_MARKER, '1')
+    safeStore.set('gn_player_token', token)
+    safeStore.set(HOST_TOKEN_MARKER, '1')
   }
 
   const clearPlayer = () => {
     setPlayerState(null)
     setPlayerTokenState(null)
-    localStorage.removeItem('gn_player')
-    localStorage.removeItem('gn_player_token')
-    localStorage.removeItem(HOST_TOKEN_MARKER)
+    safeStore.remove('gn_player')
+    safeStore.remove('gn_player_token')
+    safeStore.remove(HOST_TOKEN_MARKER)
   }
 
   return (

@@ -4,6 +4,7 @@ import { usePublicRsvpView, useSelfRsvp } from '../lib/api/hooks/use-invite'
 import { showToast, toastHelpers } from '../lib/toast'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import { AddToCalendar } from '../components/AddToCalendar'
+import { OpenInBrowserHint } from '../components/OpenInBrowserHint'
 import type { Invite, RsvpResponse } from '../lib/api/services/invite.service'
 
 export const Route = createFileRoute('/rsvp/$token')({
@@ -130,6 +131,7 @@ function PublicRsvpPage() {
         </div>
 
         <div className="p-6 space-y-4">
+          <OpenInBrowserHint />
           {event.inviteMessage && !result && (
             <blockquote className="rounded-lg bg-indigo-50 border-l-4 border-indigo-400 px-4 py-3 text-gray-700 text-sm whitespace-pre-wrap">
               {event.inviteMessage}
