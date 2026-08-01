@@ -103,14 +103,27 @@ export const useGameScoring = (gameId: UUID | undefined) => {
     }
   }, [gamesSocket, gameId, queryClient])
 
-  // Calculate leaderboard rankings
-  const leaderboard = [...teamScores]
-    .sort((a, b) => b.totalPoints - a.totalPoints)
-    .map((team, index, arr) => ({
-      ...team,
-      rank: index + 1,
-      isTied: index > 0 && arr[index - 1].totalPoints === team.totalPoints,
-    }))
+  // Calculate leaderboard rankings. Standard competition ranking: equal
+  // scores share a rank and the next distinct score skips ahead (1, 1, 3).
+  // A team is tied iff another team shares its rank — so BOTH members of a
+  // two-way tie are flagged, not just the second one. Mirrors the backend's
+  // getRankedGameScores so the live board matches the final results screen.
+  const sorted = [...teamScores].sort((a, b) => b.totalPoints - a.totalPoints)
+  let rank = 1
+  const ranked = sorted.map((team, index) => {
+    if (index > 0 && sorted[index - 1].totalPoints !== team.totalPoints) {
+      rank = index + 1
+    }
+    return { ...team, rank }
+  })
+  const countByRank = new Map<number, number>()
+  for (const team of ranked) {
+    countByRank.set(team.rank, (countByRank.get(team.rank) ?? 0) + 1)
+  }
+  const leaderboard = ranked.map((team) => ({
+    ...team,
+    isTied: (countByRank.get(team.rank) ?? 0) > 1,
+  }))
 
   // Get winner (only if there's a clear winner)
   const winner =
