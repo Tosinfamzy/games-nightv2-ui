@@ -217,6 +217,9 @@ function InviteRsvpPage() {
                     description: session.host?.name
                       ? `Games night hosted by ${session.host.name}.`
                       : 'Games night',
+                    // This page is the guest's personal join page — put it in the
+                    // calendar so the reminder is a one-tap way in on the night.
+                    url: `${window.location.origin}/invite/${token}`,
                     uid: token,
                   }}
                 />

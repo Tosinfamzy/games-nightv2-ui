@@ -160,25 +160,54 @@ function PublicRsvpPage() {
                     }.`
                   : ''}
               </p>
-              {result.rsvpStatus === 'GOING' && (
-                <AddToCalendar
-                  event={{
-                    title: event.sessionName,
-                    start: event.date,
-                    location: event.location,
-                    description: event.hostName
-                      ? `Games night hosted by ${event.hostName}.`
-                      : 'Games night',
-                    uid: token,
-                  }}
-                />
-              )}
-              {result.inviteToken ? (
+              {result.rsvpStatus === 'GOING' ? (
+                <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-4 text-left space-y-3">
+                  <p className="text-sm font-semibold text-indigo-900">
+                    🎮 On games night
+                  </p>
+                  {result.inviteToken ? (
+                    <>
+                      <p className="text-sm text-indigo-800">
+                        This is your link — tap it on the night to jump straight
+                        in, no code needed.
+                      </p>
+                      <a
+                        href={`/invite/${result.inviteToken}`}
+                        className="block w-full text-center rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 min-h-[48px]"
+                      >
+                        Open my join page →
+                      </a>
+                    </>
+                  ) : (
+                    <p className="text-sm text-indigo-800">
+                      Come back to this link on the night to join.
+                    </p>
+                  )}
+                  <AddToCalendar
+                    event={{
+                      title: event.sessionName,
+                      start: event.date,
+                      location: event.location,
+                      description: event.hostName
+                        ? `Games night hosted by ${event.hostName}.`
+                        : 'Games night',
+                      url: result.inviteToken
+                        ? `${window.location.origin}/invite/${result.inviteToken}`
+                        : window.location.href,
+                      uid: token,
+                    }}
+                  />
+                  <p className="text-xs text-indigo-700/80">
+                    Add it to your calendar — the reminder brings you right
+                    back.
+                  </p>
+                </div>
+              ) : result.inviteToken ? (
                 <a
                   href={`/invite/${result.inviteToken}`}
                   className="inline-block text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px]"
                 >
-                  Bookmark this to change your response or join on the day →
+                  Change your response →
                 </a>
               ) : (
                 <p className="text-gray-400 text-xs">
