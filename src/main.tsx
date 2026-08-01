@@ -8,6 +8,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { SocketProvider } from './lib/socket'
 import { PlayerProvider } from './contexts'
 import { getErrorMessage, showToast } from './lib/toast'
+import { APIError } from './lib/api/client'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { ClerkTokenBridge } from './components/ClerkTokenBridge'
 import { NotFound } from './components/NotFound'
@@ -40,6 +41,15 @@ const queryClient = new QueryClient({
     },
     mutations: {
       networkMode: 'online', // Only execute mutations when online
+      // Retry ONLY pure network failures — a fetch that rejects (TypeError)
+      // before any response, so the request most likely never reached the
+      // server. Never retry once the server responded (APIError, any status):
+      // retrying a mutation the server already processed could double-apply a
+      // non-idempotent action like a score submit or next-turn. This covers the
+      // common "wifi blip as the host taps" case without risking double writes.
+      retry: (failureCount, error) =>
+        !(error instanceof APIError) && failureCount < 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 4000),
       // Global error handler for all mutations
       onError: (error) => {
         const message = getErrorMessage(error)
