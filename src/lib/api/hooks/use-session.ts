@@ -27,6 +27,11 @@ export interface CreateSessionDTO {
   date: string
   location?: string
   /**
+   * Custom map link for the location (e.g. a Google Maps pin). When set, the
+   * displayed address links here. Omit to leave unchanged; empty string clears.
+   */
+  locationUrl?: string
+  /**
    * Host-authored invite message (max 500 chars). Omit to leave unchanged on
    * update; send an empty string to clear it.
    */

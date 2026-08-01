@@ -22,6 +22,8 @@ export interface InviteSession {
   date: string
   description?: string | null
   location?: string | null
+  /** Custom map link for the location (e.g. a Google Maps pin). */
+  locationUrl?: string | null
   status: string
   joinCode?: string
   host?: { name: string } | null
@@ -77,6 +79,8 @@ export interface PublicRsvpView {
   status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   date: string
   location?: string | null
+  /** Custom map link for the location (e.g. a Google Maps pin). */
+  locationUrl?: string | null
   description?: string | null
   /** The host's invite message, shown as a greeting on the RSVP page. */
   inviteMessage?: string | null
