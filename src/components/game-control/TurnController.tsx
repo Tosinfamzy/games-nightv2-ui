@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useGameControl } from '../../hooks/useGameControl'
+import { useSessionPlayers } from '../../lib/api/hooks/use-session'
 import { isRoundLive } from '../../lib/game-status'
 import type { UUID } from '../../lib/api/types'
 
@@ -8,19 +9,35 @@ interface TurnControllerProps {
   className?: string
 }
 
+interface Entrant {
+  id: string
+  name: string
+  subtitle?: string
+}
+
 export default function TurnController({
   gameId,
   className = '',
 }: TurnControllerProps) {
   const { game, isLoading, nextTurn, isAdvancingTurn } = useGameControl(gameId)
+  // Only used in individual mode; the hook no-ops on an empty session id.
+  const { data: players = [] } = useSessionPlayers(game?.sessionId ?? '')
 
-  // Keyboard shortcut: press N to advance the turn (the on-screen hint below
-  // promises this). Only while a round is live with 2+ teams, and never while
-  // typing in a field or when a turn is already advancing.
+  const isIndividual = game?.scoreMode === 'individual'
+
+  // Competitors in individual mode = active guests (the host runs the night and
+  // is excluded), stable-sorted by id to match the backend's rotation order.
+  const guestPlayers = players
+    .filter((p) => p.isGuest && p.status !== 'disconnected')
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id))
+
+  // Keyboard shortcut: press N to advance the turn while a round is live with
+  // 2+ entrants — never while typing in a field or mid-advance.
   useEffect(() => {
-    const live = game ? isRoundLive(game.status) : false
-    const multiTeam = (game?.teams?.length ?? 0) > 1
-    if (!live || !multiTeam) return
+    if (!game || !isRoundLive(game.status)) return
+    const count = isIndividual ? guestPlayers.length : (game.teams?.length ?? 0)
+    if (count < 2) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'n' && e.key !== 'N') return
       if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -38,7 +55,7 @@ export default function TurnController({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [game?.status, game?.teams?.length, isAdvancingTurn, nextTurn])
+  }, [game, isIndividual, guestPlayers.length, isAdvancingTurn, nextTurn])
 
   if (isLoading) {
     return (
@@ -57,30 +74,41 @@ export default function TurnController({
     return null
   }
 
-  const teams = game.teams ?? []
-  // Turns are only taken while a round is actively being played.
+  const noun = isIndividual ? 'player' : 'team'
+
+  const entrants: Array<Entrant> = isIndividual
+    ? guestPlayers.map((p) => ({ id: p.id, name: p.name }))
+    : (game.teams ?? []).map((t) => ({
+        id: t.id,
+        name: t.name,
+        subtitle: `${t.playerIds.length} player${
+          t.playerIds.length !== 1 ? 's' : ''
+        }`,
+      }))
+
+  const currentEntrantId = isIndividual
+    ? game.currentTurnPlayerId
+    : game.currentTurnTeamId
+
   const isInProgress = isRoundLive(game.status)
-  const currentTeamIndex = Math.max(
+  const currentIndex = Math.max(
     0,
-    teams.findIndex((t) => t.id === game.currentTurnTeamId),
+    entrants.findIndex((e) => e.id === currentEntrantId),
   )
-  const currentTeam = teams[currentTeamIndex]
-  const nextTeamIndex =
-    teams.length > 0 ? (currentTeamIndex + 1) % teams.length : 0
-  const nextTeamName = teams[nextTeamIndex]?.name
+  const current = entrants[currentIndex]
+  const nextIndex =
+    entrants.length > 0 ? (currentIndex + 1) % entrants.length : 0
+  const nextName = entrants[nextIndex]?.name
 
-  // Check if game uses turn-based mechanics
-  const hasTurnBasedMechanics = teams.length > 1
-
-  if (!hasTurnBasedMechanics) {
-    return null // Don't show turn controller for single-team or non-turn-based games
+  // Turn-based only makes sense with 2+ entrants.
+  if (entrants.length <= 1) {
+    return null
   }
 
   return (
     <div
       className={`bg-white border border-gray-200 rounded-lg p-6 ${className}`}
     >
-      {/* Header */}
       <div className="mb-4">
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           Turn Management
@@ -88,7 +116,7 @@ export default function TurnController({
 
         {isInProgress ? (
           <div>
-            {/* Current Turn Display */}
+            {/* Current turn */}
             <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="text-sm text-blue-600 font-medium mb-1">
                 CURRENT TURN
@@ -96,49 +124,50 @@ export default function TurnController({
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-blue-900">
-                    {currentTeam?.name || 'No team'}
+                    {current?.name || `No ${noun}`}
                   </div>
-                  <div className="text-sm text-blue-700 mt-1">
-                    {currentTeam?.playerIds.length || 0} player
-                    {currentTeam?.playerIds.length !== 1 ? 's' : ''}
-                  </div>
+                  {current?.subtitle && (
+                    <div className="text-sm text-blue-700 mt-1">
+                      {current.subtitle}
+                    </div>
+                  )}
                 </div>
                 <div className="text-4xl">🎯</div>
               </div>
             </div>
 
-            {/* Next Team Preview */}
-            {nextTeamName && (
+            {/* Next up */}
+            {nextName && (
               <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="text-xs text-gray-600 mb-1">NEXT UP</div>
                 <div className="text-lg font-medium text-gray-900">
-                  {nextTeamName}
+                  {nextName}
                 </div>
               </div>
             )}
 
-            {/* Team Order Display */}
+            {/* Turn order */}
             <div className="mb-4">
               <div className="text-xs text-gray-600 mb-2">TURN ORDER</div>
               <div className="flex flex-wrap gap-2">
-                {teams.map((team, index) => (
+                {entrants.map((e, index) => (
                   <div
-                    key={team.id}
+                    key={e.id}
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      index === currentTeamIndex
+                      index === currentIndex
                         ? 'bg-blue-500 text-white'
-                        : index === nextTeamIndex
+                        : index === nextIndex
                           ? 'bg-blue-100 text-blue-800 border border-blue-300'
                           : 'bg-gray-100 text-gray-700'
                     }`}
                   >
-                    {team.name}
+                    {e.name}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Next Turn Button */}
+            {/* Next turn button */}
             <button
               onClick={() => nextTurn()}
               disabled={isAdvancingTurn}
@@ -146,10 +175,9 @@ export default function TurnController({
             >
               {isAdvancingTurn
                 ? 'Advancing Turn...'
-                : `➡️ Next Turn (${nextTeamName})`}
+                : `➡️ Next Turn (${nextName})`}
             </button>
 
-            {/* Keyboard Shortcut Hint */}
             <div className="mt-3 text-center text-xs text-gray-500">
               Tip: Press{' '}
               <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded">
@@ -167,24 +195,14 @@ export default function TurnController({
         )}
       </div>
 
-      {/* Stats */}
       {isInProgress && (
         <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                {teams.length}
-              </div>
-              <div className="text-xs text-gray-600">Total Teams</div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900">
+              {entrants.length}
             </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">
-                {teams.reduce(
-                  (total, team) => total + team.playerIds.length,
-                  0,
-                )}
-              </div>
-              <div className="text-xs text-gray-600">Total Players</div>
+            <div className="text-xs text-gray-600">
+              {isIndividual ? 'Players in rotation' : 'Total teams'}
             </div>
           </div>
         </div>
