@@ -348,6 +348,21 @@ export const useGameSocket = (
     }
   }, [gamesSocket])
 
+  // Backfill on (re)connect — same rationale as the sessions hook. The per-event
+  // handlers only fire while connected, so a score, turn advance, or game
+  // completion broadcast during a phone-lock/wifi drop is missed and the board
+  // would sit stale (a finished game never self-heals — no further event fires).
+  // Re-invalidate game/scores/leaderboard on the disconnect→reconnect edge.
+  const wasConnectedRef = useRef(false)
+  useEffect(() => {
+    if (isConnected && !wasConnectedRef.current && gameId) {
+      queryClient.invalidateQueries({ queryKey: ['game', gameId] })
+      queryClient.invalidateQueries({ queryKey: ['game-scores', gameId] })
+      queryClient.invalidateQueries({ queryKey: ['leaderboard', gameId] })
+    }
+    wasConnectedRef.current = isConnected
+  }, [isConnected, gameId, queryClient])
+
   return {
     isConnected,
     socket: gamesSocket,

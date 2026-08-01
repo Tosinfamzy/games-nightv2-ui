@@ -441,6 +441,26 @@ export const useSessionSocket = (sessionId: string | undefined) => {
     }
   }, [sessionsSocket])
 
+  // On socket (re)connect, backfill session state. The per-event handlers above
+  // only fire for events received while connected, so anything broadcast during
+  // a transient drop (phone lock, wifi/cellular handoff) is missed and the UI
+  // would sit on stale data until a later event happens to fire. Re-invalidate
+  // the session's queries on the disconnect→reconnect edge (mirrors the chat
+  // history reload). detail(id) is a prefix, so this also covers games/teams/
+  // players/leaderboard.
+  const wasConnectedRef = useRef(false)
+  useEffect(() => {
+    if (isConnected && !wasConnectedRef.current && sessionId) {
+      queryClient.invalidateQueries({ queryKey: sessionKeys.detail(sessionId) })
+      queryClient.invalidateQueries({
+        queryKey: ['session-readiness', sessionId],
+      })
+      queryClient.invalidateQueries({ queryKey: inviteKeys.session(sessionId) })
+      queryClient.invalidateQueries({ queryKey: inviteKeys.summary(sessionId) })
+    }
+    wasConnectedRef.current = isConnected
+  }, [isConnected, sessionId, queryClient])
+
   return {
     isConnected,
     socket: sessionsSocket,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { debugLog } from '../lib/debug-log'
 import { useSocketContext } from '../lib/socket/socket-context'
 import { gameService } from '../lib/api/services/game.service'
@@ -13,7 +13,7 @@ import type {
  * Hook to manage game timer state from WebSocket events
  */
 export const useGameTimer = (gameId: string | undefined) => {
-  const { gamesSocket, isConnected } = useSocketContext()
+  const { gamesSocket, isConnected, gamesConnected } = useSocketContext()
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [turnTimeLimit, setTurnTimeLimit] = useState<number | null>(null)
   const [turnEndsAt, setTurnEndsAt] = useState<string | null>(null)
@@ -51,6 +51,51 @@ export const useGameTimer = (gameId: string | undefined) => {
       cancelled = true
     }
   }, [gameId])
+
+  // Re-seed authoritatively when the /games socket reconnects. Ticks, turn
+  // changes, and expiry fired during a drop are lost, leaving the local timer
+  // stale (wrong remaining time / wrong active entrant). Unlike the mount seed,
+  // this OVERWRITES — on reconnect the server's timer is the source of truth.
+  const wasConnectedRef = useRef(false)
+  useEffect(() => {
+    if (!gameId) return
+    if (!gamesConnected) {
+      wasConnectedRef.current = false
+      return
+    }
+    if (wasConnectedRef.current) return
+    wasConnectedRef.current = true
+    let cancelled = false
+    gameService
+      .getTimer(gameId)
+      .then((t) => {
+        if (cancelled) return
+        if (!t || !t.turnTimeLimit || !t.turnStartedAt) {
+          // No active timer server-side — clear any stale local countdown.
+          setTurnTimeLimit(null)
+          setTimeRemaining(null)
+          setTurnEndsAt(null)
+          setIsExpired(false)
+          return
+        }
+        setTurnTimeLimit(t.turnTimeLimit)
+        setTimeRemaining(t.remainingSeconds)
+        setCurrentTeamName(t.currentTurnTeamName || '')
+        setIsExpired(Boolean(t.isExpired))
+        setTurnEndsAt(
+          new Date(
+            new Date(t.turnStartedAt as string).getTime() +
+              (t.turnTimeLimit as number) * 1000,
+          ).toISOString(),
+        )
+      })
+      .catch(() => {
+        /* best-effort resync; socket events still drive updates */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [gamesConnected, gameId])
 
   // Listen for timer tick events
   useEffect(() => {

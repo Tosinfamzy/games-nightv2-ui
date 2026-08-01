@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
 interface RouteErrorBoundaryProps {
@@ -39,9 +40,11 @@ class RouteErrorBoundaryClass extends Component<
   }
 
   resetError = () => {
+    // Soft reset: clear the error and re-render the children. For a transient
+    // error (e.g. a momentarily-undefined field from a socket update) this
+    // recovers without a full reload; if the error is genuinely persistent it
+    // simply re-catches, same as before.
     this.setState({ hasError: false, error: null })
-    // Optionally reload the route
-    window.location.reload()
   }
 
   render() {
@@ -140,5 +143,14 @@ function RouteErrorFallback({
  * Wrapper component to use RouteErrorBoundary with router hooks
  */
 export function RouteErrorBoundary({ children }: RouteErrorBoundaryProps) {
-  return <RouteErrorBoundaryClass>{children}</RouteErrorBoundaryClass>
+  const location = useLocation()
+  // Key the boundary to the current path so navigating to a different route
+  // remounts it and clears a stale error — otherwise a transient render error
+  // traps the user on "Page Error" and the nav links do nothing until a full
+  // page reload.
+  return (
+    <RouteErrorBoundaryClass key={location.pathname}>
+      {children}
+    </RouteErrorBoundaryClass>
+  )
 }

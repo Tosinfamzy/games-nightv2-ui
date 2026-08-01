@@ -4,6 +4,8 @@ import { useMutation } from '@tanstack/react-query'
 import { sessionService } from '../lib/api/services'
 import { HOST_TOKEN_MARKER, usePlayer } from '../contexts/PlayerContext'
 import { showToast } from '../lib/toast'
+import { APIError } from '../lib/api/client'
+import { isAuthError } from '../lib/errors/error-codes'
 
 /**
  * Automatic rejoin hook
@@ -17,6 +19,20 @@ export function useAutoRejoin() {
 
   const rejoinMutation = useMutation({
     mutationFn: (token: string) => sessionService.rejoinSession(token),
+    // A transient network blip or 5xx must not cost the host their session.
+    // Retry those a couple of times; never retry a real auth rejection or a
+    // 4xx (those won't succeed on a retry).
+    retry: (failureCount, error) => {
+      if (isAuthError(error)) return false
+      if (
+        error instanceof APIError &&
+        error.status >= 400 &&
+        error.status < 500
+      )
+        return false
+      return failureCount < 2
+    },
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 4000),
     onSuccess: (response) => {
       // Create player object from response
       const playerData = {
@@ -37,14 +53,18 @@ export function useAutoRejoin() {
         navigate({ to: '/sessions/$id', params: { id: response.session.id } })
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.warn('Auto-rejoin failed:', error)
 
-      // Clear invalid token silently
-      clearPlayer()
+      // Only wipe the stored credentials on a genuine auth rejection (expired
+      // or invalid token). A network failure or 5xx must NOT clear the token —
+      // that would lock the host out of their own session with no recovery.
+      // Keep it so the host can retry (or a later reconnect can re-attempt).
+      if (isAuthError(error)) {
+        clearPlayer()
+      }
 
-      // Don't show error toast for auto-rejoin failures
-      // User can manually rejoin if needed
+      // No error toast for auto-rejoin: the user can manually rejoin if needed.
     },
   })
 
