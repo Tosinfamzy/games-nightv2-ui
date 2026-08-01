@@ -227,7 +227,7 @@ function PublicRsvpPage() {
               }`}
             >
               {event.status === 'IN_PROGRESS'
-                ? '🔴 This game night has already started — ask the host to let you in.'
+                ? "🔴 The night's already live — open your personal link (check your email or calendar) to jump in, or ask the host for the join code."
                 : event.status === 'CANCELLED'
                   ? 'This game night has been cancelled.'
                   : 'This game night has ended.'}
