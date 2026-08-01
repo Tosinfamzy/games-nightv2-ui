@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Games Night">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="liveGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(354 158) scale(78)">
+      <stop stop-color="#FBBF24" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FBBF24" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Die body: the gradient square is the die -->
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="116" fill="url(#sheen)"/>
+
+  <!-- Live glow behind the accent pip -->
+  <circle cx="354" cy="158" r="78" fill="url(#liveGlow)"/>
+
+  <!-- Die-5 pips -->
+  <g fill="#FFFFFF">
+    <circle cx="158" cy="158" r="42"/>
+    <circle cx="256" cy="256" r="42"/>
+    <circle cx="158" cy="354" r="42"/>
+    <circle cx="354" cy="354" r="42"/>
+  </g>
+
+  <!-- Top-right pip = live accent -->
+  <circle cx="354" cy="158" r="45" fill="#FBBF24"/>
+</svg>

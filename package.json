@@ -16,7 +16,8 @@
     "test:e2e:report": "playwright show-report",
     "lint": "eslint",
     "format": "prettier",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "generate:icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.3",
@@ -50,8 +51,10 @@
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^26.0.0",
     "msw": "^2.12.10",
+    "png-to-ico": "^3.0.2",
     "prettier": "^3.5.3",
     "rollup-plugin-visualizer": "^6.0.5",
+    "sharp": "^0.35.3",
     "typescript": "^5.7.2",
     "vite": "^6.1.0",
     "vitest": "^3.0.5",
