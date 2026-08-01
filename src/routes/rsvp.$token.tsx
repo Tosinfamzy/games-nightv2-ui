@@ -159,12 +159,18 @@ function PublicRsvpPage() {
                     }.`
                   : ''}
               </p>
-              <a
-                href={`/invite/${result.inviteToken}`}
-                className="inline-block text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px]"
-              >
-                Bookmark this to change your response later
-              </a>
+              {result.inviteToken ? (
+                <a
+                  href={`/invite/${result.inviteToken}`}
+                  className="inline-block text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px]"
+                >
+                  Bookmark this to change your response or join on the day →
+                </a>
+              ) : (
+                <p className="text-gray-400 text-xs">
+                  Come back to this link and RSVP again to change your response.
+                </p>
+              )}
             </div>
           ) : event.status !== 'SCHEDULED' ? (
             /* RSVP is closed once the event is live, finished, or cancelled. */
