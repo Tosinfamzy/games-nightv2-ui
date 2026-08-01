@@ -31,7 +31,7 @@ function RootComponent() {
           </PageTransition>
         </RouteErrorBoundary>
       </main>
-      <TanStackRouterDevtools />
+      {import.meta.env.DEV && <TanStackRouterDevtools />}
     </>
   )
 }

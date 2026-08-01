@@ -93,7 +93,9 @@ if (rootElement && !rootElement.innerHTML) {
             <PlayerProvider>
               <SocketProvider>
                 <RouterProvider router={router} />
-                <ReactQueryDevtools initialIsOpen={false} />
+                {import.meta.env.DEV && (
+                  <ReactQueryDevtools initialIsOpen={false} />
+                )}
                 <Toaster position="top-right" richColors closeButton />
               </SocketProvider>
             </PlayerProvider>
