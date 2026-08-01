@@ -20,6 +20,8 @@ export interface Session {
   publicRsvpToken?: string
   /** Host-authored invite message: default share text + public RSVP greeting. */
   inviteMessage?: string | null
+  /** Host info shown to guests once they've joined (WiFi, house rules, etc.). */
+  hostMessage?: string | null
   host: {
     id: string
     name: string

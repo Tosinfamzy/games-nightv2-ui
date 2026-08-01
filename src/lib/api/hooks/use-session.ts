@@ -31,6 +31,12 @@ export interface CreateSessionDTO {
    * update; send an empty string to clear it.
    */
   inviteMessage?: string
+  /**
+   * Host info shown to guests once they've joined — WiFi, house rules, etc.
+   * (max 1000 chars). Omit to leave unchanged on update; send an empty string
+   * to clear it.
+   */
+  hostMessage?: string
 }
 
 export interface UpdateSessionDTO extends Partial<CreateSessionDTO> {

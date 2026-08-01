@@ -26,6 +26,7 @@ import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
 import { ManualTeamCreator } from '../../components/ManualTeamCreator'
 import SessionChat from '../../components/SessionChat'
 import { GuestList } from '../../components/GuestList'
+import { HostMessage } from '../../components/HostMessage'
 import GameHistoryList from '../../components/GameHistoryList'
 import PlayerStatusBadge from '../../components/PlayerStatusBadge'
 import OnlinePlayerCount from '../../components/OnlinePlayerCount'
@@ -542,6 +543,14 @@ function SessionDetailsPage() {
             </div>
           )}
         </div>
+
+        {/* Host info (WiFi, house rules…) — what a guest reaches for on arrival.
+            Shown to everyone; the host gets inline add/edit. */}
+        <HostMessage
+          sessionId={id}
+          hostMessage={session.hostMessage}
+          isHost={isHost}
+        />
 
         {/* Live-session banner — visible to everyone (host and players) so a
             joined player isn't stranded on the lobby once the host starts.
