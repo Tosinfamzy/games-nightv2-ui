@@ -37,7 +37,10 @@ const queryClient = new QueryClient({
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff: 1s, 2s, 4s, max 30s
       networkMode: 'offlineFirst', // Use cached data when offline
       refetchOnReconnect: true, // Refetch when connection restored
-      refetchOnWindowFocus: 'always', // Always refetch on focus
+      // Refetch on focus but respect staleTime — 'always' ignored staleTime and
+      // caused refetch storms as guests tab in/out on congested party wifi.
+      // Reconnect + the live sockets already keep data fresh.
+      refetchOnWindowFocus: true,
     },
     mutations: {
       networkMode: 'online', // Only execute mutations when online

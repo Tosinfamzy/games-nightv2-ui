@@ -180,6 +180,23 @@ export const useGameTimer = (gameId: string | undefined) => {
     }
   }, [gamesSocket, gameId])
 
+  // Local per-second countdown, driven off the authoritative turnEndsAt. The
+  // server only broadcasts a tick every few seconds (and not at all during a
+  // socket gap), so without this the displayed timer jumps in 5s steps and
+  // freezes on a drop. Socket ticks / turn events still correct it.
+  useEffect(() => {
+    if (!turnEndsAt || isExpired) return
+    const endMs = new Date(turnEndsAt).getTime()
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((endMs - Date.now()) / 1000))
+      setTimeRemaining(remaining)
+      if (remaining <= 0) setIsExpired(true)
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [turnEndsAt, isExpired])
+
   // Format time for display (MM:SS)
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '--:--'
