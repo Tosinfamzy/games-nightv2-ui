@@ -97,6 +97,12 @@ function attachHandlers(
 
 const SOCKET_OPTIONS = {
   transports: ['websocket', 'polling'],
+  // Without this, socket.io-client 4.8 only ever retries the leading transport
+  // (websocket) — it never actually falls back to the polling that's listed. A
+  // guest on a restrictive cellular / captive-portal network that blocks raw WS
+  // upgrades would then never connect. tryAllTransports keeps the fast
+  // websocket-first path but falls back to polling when the upgrade fails.
+  tryAllTransports: true,
   reconnection: true,
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,

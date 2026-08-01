@@ -14,10 +14,12 @@ export const showToast = {
   },
 
   /**
-   * Show error toast
+   * Show error toast. Keyed by message so an identical error surfaced by two
+   * layers at once — the global mutation onError plus a per-mutation onError —
+   * collapses into a single toast instead of stacking duplicates.
    */
   error: (message: string, duration = 5000) => {
-    toast.error(message, { duration })
+    toast.error(message, { duration, id: `err:${message}` })
   },
 
   /**
