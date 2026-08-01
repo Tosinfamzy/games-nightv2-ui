@@ -14,6 +14,8 @@ export interface Session {
   description?: string
   date: string
   location?: string
+  /** Custom map link for the location (e.g. a Google Maps pin). */
+  locationUrl?: string | null
   status: SessionStatus
   joinCode: string
   /** Token for the single shareable RSVP link (host-facing). */

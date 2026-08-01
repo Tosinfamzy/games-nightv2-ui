@@ -6,6 +6,7 @@ import LoadingSkeleton from '../components/LoadingSkeleton'
 import { AddToCalendar } from '../components/AddToCalendar'
 import { PlusOnesInput } from '../components/PlusOnesInput'
 import { OpenInBrowserHint } from '../components/OpenInBrowserHint'
+import { mapLinkHref } from '../lib/maps'
 import type { Invite, RsvpResponse } from '../lib/api/services/invite.service'
 
 export const Route = createFileRoute('/rsvp/$token')({
@@ -115,7 +116,7 @@ function PublicRsvpPage() {
           )}
           {event.location && (
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+              href={mapLinkHref(event.location, event.locationUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-100 text-sm mt-1 inline-flex items-center gap-1 underline decoration-blue-200/60 hover:decoration-blue-100"
