@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest'
-import { buildIcs, icsDataUrl, googleCalendarUrl } from './calendar'
+import { describe, expect, it } from 'vitest'
+import { buildIcs, googleCalendarUrl, icsDataUrl } from './calendar'
 
 const event = {
   title: 'Live Pass',
   start: '2026-08-16T12:13:00Z',
   location: 'Halo Tower',
   description: 'Games night hosted by Tosin.',
+  url: 'https://thegamesnight.com/invite/abc-123',
   uid: 'abc-123',
 }
 
@@ -21,6 +22,10 @@ describe('calendar', () => {
     expect(ics).toContain('DTEND:20260816T151300Z')
     expect(ics).toContain('SUMMARY:Live Pass')
     expect(ics).toContain('LOCATION:Halo Tower')
+    // The join link is included as a URL property and folded into the
+    // description (so calendar apps that only render the description show it).
+    expect(ics).toContain('URL:https://thegamesnight.com/invite/abc-123')
+    expect(ics).toContain('Join: https://thegamesnight.com/invite/abc-123')
     // CRLF line endings per the iCal spec.
     expect(ics.includes('\r\n')).toBe(true)
   })

@@ -12,6 +12,9 @@ export interface CalendarEvent {
   location?: string | null
   /** Free-text description (optional). */
   description?: string | null
+  /** A link to open on the day (e.g. the guest's personal join page). Added to
+   *  the event so their calendar reminder is a one-tap way back in. */
+  url?: string | null
   /** Stable id used for the .ics UID (e.g. the RSVP/invite token). */
   uid?: string
 }
@@ -61,9 +64,13 @@ export function buildIcs(event: CalendarEvent): string {
     `SUMMARY:${escapeIcs(event.title)}`,
   ]
   if (event.location) lines.push(`LOCATION:${escapeIcs(event.location)}`)
-  if (event.description) {
-    lines.push(`DESCRIPTION:${escapeIcs(event.description)}`)
-  }
+  // Fold the join link into the description too — many calendar apps don't
+  // surface the URL property but do render (and linkify) the description.
+  const description = [event.description, event.url && `Join: ${event.url}`]
+    .filter(Boolean)
+    .join('\n\n')
+  if (description) lines.push(`DESCRIPTION:${escapeIcs(description)}`)
+  if (event.url) lines.push(`URL:${event.url}`)
   lines.push('END:VEVENT', 'END:VCALENDAR')
   // iCal requires CRLF line endings.
   return lines.join('\r\n')
@@ -86,6 +93,9 @@ export function googleCalendarUrl(event: CalendarEvent): string {
     dates: `${toIcsUtc(start)}/${toIcsUtc(end)}`,
   })
   if (event.location) params.set('location', event.location)
-  if (event.description) params.set('details', event.description)
+  const details = [event.description, event.url && `Join: ${event.url}`]
+    .filter(Boolean)
+    .join('\n\n')
+  if (details) params.set('details', details)
   return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
