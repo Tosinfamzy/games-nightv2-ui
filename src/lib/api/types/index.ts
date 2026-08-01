@@ -59,6 +59,8 @@ export interface Game {
   endTime?: string
   /** Team whose turn it currently is (turn-based games). */
   currentTurnTeamId?: string | null
+  /** Player whose turn it currently is (individual-mode turn-based games). */
+  currentTurnPlayerId?: string | null
   /** Whether the game is scored by team (default) or by individual player. */
   scoreMode?: 'team' | 'individual'
   sessionId: UUID
@@ -107,6 +109,8 @@ export interface Player {
   email: string
   status: 'joined' | 'ready' | 'playing' | 'disconnected'
   isOnline: boolean
+  /** False for the host (games master); true for code-joiners. */
+  isGuest?: boolean
   teams: Array<Team>
   teamId?: string // Legacy compatibility
 }
