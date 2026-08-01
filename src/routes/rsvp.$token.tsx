@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { usePublicRsvpView, useSelfRsvp } from '../lib/api/hooks/use-invite'
 import { showToast, toastHelpers } from '../lib/toast'
 import LoadingSkeleton from '../components/LoadingSkeleton'
+import { AddToCalendar } from '../components/AddToCalendar'
 import type { Invite, RsvpResponse } from '../lib/api/services/invite.service'
 
 export const Route = createFileRoute('/rsvp/$token')({
@@ -159,6 +160,19 @@ function PublicRsvpPage() {
                     }.`
                   : ''}
               </p>
+              {result.rsvpStatus === 'GOING' && (
+                <AddToCalendar
+                  event={{
+                    title: event.sessionName,
+                    start: event.date,
+                    location: event.location,
+                    description: event.hostName
+                      ? `Games night hosted by ${event.hostName}.`
+                      : 'Games night',
+                    uid: token,
+                  }}
+                />
+              )}
               {result.inviteToken ? (
                 <a
                   href={`/invite/${result.inviteToken}`}
