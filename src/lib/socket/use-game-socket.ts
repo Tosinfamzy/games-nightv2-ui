@@ -242,55 +242,6 @@ export const useGameSocket = (
     }
   }, [gamesSocket, gameId, queryClient])
 
-  // Listen for game state changed
-  useEffect(() => {
-    if (!gamesSocket || !gameId) return
-
-    const handleStateChanged = (data: any) => {
-      try {
-        debugLog('Game state changed:', data)
-        queryClient.invalidateQueries({ queryKey: ['game', gameId] })
-      } catch (error) {
-        console.error('Error handling game state change:', error)
-        showToast.error('Failed to update game state. Please refresh.')
-      }
-    }
-
-    gamesSocket.on('game:state-changed', handleStateChanged)
-
-    return () => {
-      gamesSocket.off('game:state-changed', handleStateChanged)
-    }
-  }, [gamesSocket, gameId, queryClient])
-
-  // Listen for leaderboard updates
-  useEffect(() => {
-    if (!gamesSocket || !gameId) return
-
-    const handleLeaderboardUpdate = (data: any) => {
-      try {
-        debugLog('Leaderboard updated:', data)
-
-        if (!data?.leaderboard) {
-          throw new Error(
-            'Invalid leaderboard update: missing leaderboard data',
-          )
-        }
-
-        queryClient.setQueryData(['leaderboard', gameId], data.leaderboard)
-      } catch (error) {
-        console.error('Error handling leaderboard update:', error)
-        showToast.error('Failed to update leaderboard. Please refresh.')
-      }
-    }
-
-    gamesSocket.on('game:leaderboard-updated', handleLeaderboardUpdate)
-
-    return () => {
-      gamesSocket.off('game:leaderboard-updated', handleLeaderboardUpdate)
-    }
-  }, [gamesSocket, gameId, queryClient])
-
   // Listen for turn started events (timer)
   useEffect(() => {
     if (!gamesSocket || !gameId) return

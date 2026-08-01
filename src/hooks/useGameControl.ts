@@ -181,7 +181,6 @@ export const useGameControl = (gameId: UUID | undefined) => {
     gamesSocket.on('game:round-started', handleGameEvent)
     gamesSocket.on('game:round-ended', handleGameEvent)
     gamesSocket.on('game:turn-advanced', handleGameEvent)
-    gamesSocket.on('game:status-changed', handleGameEvent)
 
     return () => {
       gamesSocket.off('game:started', handleGameEvent)
@@ -192,7 +191,6 @@ export const useGameControl = (gameId: UUID | undefined) => {
       gamesSocket.off('game:round-started', handleGameEvent)
       gamesSocket.off('game:round-ended', handleGameEvent)
       gamesSocket.off('game:turn-advanced', handleGameEvent)
-      gamesSocket.off('game:status-changed', handleGameEvent)
     }
   }, [gamesSocket, gameId, queryClient])
 
