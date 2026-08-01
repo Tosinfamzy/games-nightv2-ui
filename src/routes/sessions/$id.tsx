@@ -543,21 +543,32 @@ function SessionDetailsPage() {
           )}
         </div>
 
-        {/* Live-game jump-in — visible to everyone (host and players) so a
-            joined player isn't stranded on the lobby once the host starts. */}
-        {session.status === 'IN_PROGRESS' && activeGame && (
-          <Link
-            to="/sessions/$id/game"
-            params={{ id }}
-            search={{ gameId: activeGame.id }}
-            className="mb-4 sm:mb-6 flex items-center justify-between gap-3 rounded-lg bg-indigo-600 px-4 py-3 text-white shadow-sm hover:bg-indigo-700 min-h-[44px]"
-          >
-            <span className="font-medium">
-              🎮 Game in progress — jump into the live game
-            </span>
-            <span aria-hidden="true">→</span>
-          </Link>
-        )}
+        {/* Live-session banner — visible to everyone (host and players) so a
+            joined player isn't stranded on the lobby once the host starts.
+            When a game is live, it's a jump-in link; when the night has started
+            but no game is running yet, it's a "hang tight" cue so players know
+            it's live and stay on the page (the socket flips them in). */}
+        {session.status === 'IN_PROGRESS' &&
+          (activeGame ? (
+            <Link
+              to="/sessions/$id/game"
+              params={{ id }}
+              search={{ gameId: activeGame.id }}
+              className="mb-4 sm:mb-6 flex items-center justify-between gap-3 rounded-lg bg-indigo-600 px-4 py-3 text-white shadow-sm hover:bg-indigo-700 min-h-[44px]"
+            >
+              <span className="font-medium">
+                🎮 Game in progress — jump into the live game
+              </span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          ) : (
+            <div className="mb-4 sm:mb-6 rounded-lg bg-indigo-50 border border-indigo-200 px-4 py-3 text-indigo-800 text-sm">
+              🎉 The night has started!{' '}
+              {isHost
+                ? 'Head to the Games tab to start a game.'
+                : 'Hang tight — the host is about to start a game.'}
+            </div>
+          ))}
 
         {/* Tabs */}
         <div className="mb-4 sm:mb-6">

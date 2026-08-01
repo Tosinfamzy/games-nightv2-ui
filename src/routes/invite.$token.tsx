@@ -6,6 +6,7 @@ import { inviteService } from '../lib/api/services/invite.service'
 import { usePlayer } from '../contexts/PlayerContext'
 import { showToast, toastHelpers } from '../lib/toast'
 import LoadingSkeleton from '../components/LoadingSkeleton'
+import { AddToCalendar } from '../components/AddToCalendar'
 import type { RsvpResponse } from '../lib/api/services/invite.service'
 
 export const Route = createFileRoute('/invite/$token')({
@@ -207,6 +208,19 @@ function InviteRsvpPage() {
                     }.`
                   : ''}
               </p>
+              {invite.rsvpStatus === 'GOING' && session?.date && (
+                <AddToCalendar
+                  event={{
+                    title: session.name ?? 'Games Night',
+                    start: session.date,
+                    location: session.location,
+                    description: session.host?.name
+                      ? `Games night hosted by ${session.host.name}.`
+                      : 'Games night',
+                    uid: token,
+                  }}
+                />
+              )}
               <button
                 onClick={() => setEditing(true)}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium min-h-[44px]"
