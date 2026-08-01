@@ -154,25 +154,27 @@ function InviteRsvpPage() {
 
         <div className="p-6 space-y-4">
           <OpenInBrowserHint />
-          {/* Games-night day: jump straight into the live session. */}
-          {session?.status === 'SCHEDULED' && (
+          {/* Jump into the session — before it starts or as a walk-in once
+              it's live. Walk-ins are the norm at a games night. */}
+          {(session?.status === 'SCHEDULED' ||
+            session?.status === 'IN_PROGRESS') && (
             <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-4">
               <button
                 onClick={() => join.mutate()}
                 disabled={join.isPending}
                 className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 min-h-[48px] disabled:opacity-50"
               >
-                {join.isPending ? 'Joining…' : '🎮 Join the game night'}
+                {join.isPending
+                  ? 'Joining…'
+                  : session.status === 'IN_PROGRESS'
+                    ? "🔴 It's live — jump in!"
+                    : '🎮 Join the game night'}
               </button>
               <p className="text-xs text-indigo-700 text-center mt-2">
-                Jump straight in — no code needed. Or RSVP below.
+                {session.status === 'IN_PROGRESS'
+                  ? 'The night has started — no code needed, just tap in.'
+                  : 'Jump straight in — no code needed. Or RSVP below.'}
               </p>
-            </div>
-          )}
-          {session?.status === 'IN_PROGRESS' && (
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 text-center">
-              🔴 The game night has already started — ask the host to let you
-              in.
             </div>
           )}
           {(session?.status === 'COMPLETED' ||
