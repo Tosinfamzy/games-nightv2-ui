@@ -8,6 +8,8 @@ export interface AddGamesToSessionDTO {
 export interface CanStartResult {
   canStart: boolean
   reasons: Array<string>
+  /** Non-blocking advisories (e.g. a game short on players) — shown, not enforced. */
+  warnings?: Array<string>
   checks: {
     hasGames: boolean
     playersReady: boolean

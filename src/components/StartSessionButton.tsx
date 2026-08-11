@@ -16,6 +16,12 @@ interface StartSessionButtonProps {
    * client-side checklist so the button never disagrees with the server.
    */
   reasons?: Array<string>
+  /**
+   * Non-blocking advisories from the backend (e.g. a game short on players).
+   * Shown even when the session CAN start — people arrive over the night, so
+   * these are flagged, not enforced.
+   */
+  warnings?: Array<string>
 }
 
 export function StartSessionButton({
@@ -25,6 +31,7 @@ export function StartSessionButton({
   disabled = false,
   readyToStart,
   reasons,
+  warnings,
 }: StartSessionButtonProps) {
   const [showCelebration, setShowCelebration] = useState(false)
 
@@ -110,6 +117,25 @@ export function StartSessionButton({
             <span>{readyToStart.gamesAvailable ? '✅' : '⏳'}</span>
             <span>Games available</span>
           </div>
+        </div>
+      )}
+
+      {/* Non-blocking warnings — you can still start; these just flag that a
+          game is short-handed for now (more guests may arrive). */}
+      {warnings && warnings.length > 0 && (
+        <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-3 space-y-1 text-sm">
+          <p className="font-medium text-amber-800">
+            ⚠️ Heads-up (won't stop you starting):
+          </p>
+          {warnings.map((warning) => (
+            <div
+              key={warning}
+              className="flex items-start gap-2 text-amber-700"
+            >
+              <span>•</span>
+              <span>{warning}</span>
+            </div>
+          ))}
         </div>
       )}
 
