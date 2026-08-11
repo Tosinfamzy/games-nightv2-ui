@@ -12,13 +12,14 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isSignedIn } = useAuth()
 
-  // Players (signed out) only need to join/rejoin. The management views are
-  // host-only, so they're hidden until a games master signs in.
+  // Players (signed out) can join/rejoin and browse the Games catalogue (a
+  // public rules reference). The management views stay host-only, hidden until
+  // a games master signs in.
   const navLinks = [
     { to: '/join', label: 'Join Session' },
     { to: '/rejoin', label: 'Rejoin' },
+    { to: '/games', label: 'Games' },
     { to: '/sessions', label: 'Sessions', hostOnly: true },
-    { to: '/games', label: 'Games', hostOnly: true },
     { to: '/history', label: 'History', hostOnly: true },
     { to: '/settings', label: 'Settings', hostOnly: true },
   ]

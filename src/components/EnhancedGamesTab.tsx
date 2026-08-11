@@ -25,6 +25,8 @@ interface Game {
   id: string
   name: string
   description?: string
+  /** How-to-play rules from the game library. */
+  rules?: string | null
   minPlayers: number
   maxPlayers: number
   estimatedDuration?: number
@@ -423,6 +425,18 @@ export function EnhancedGamesTab({
                       {game.description}
                     </p>
                   </div>
+                )}
+
+                {/* How to play — the full rules, so guests can read them mid-game */}
+                {game.rules && (
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-medium text-indigo-600 hover:text-indigo-700">
+                      How to play
+                    </summary>
+                    <p className="mt-1 whitespace-pre-wrap text-gray-600">
+                      {game.rules}
+                    </p>
+                  </details>
                 )}
               </div>
             )

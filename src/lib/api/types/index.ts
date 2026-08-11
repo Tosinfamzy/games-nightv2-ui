@@ -54,6 +54,8 @@ export interface Game {
   id: UUID
   name: string
   description: string
+  /** How-to-play rules from the game library (for the in-session "How to play"). */
+  rules?: string | null
   status: GameStatus
   currentRound: number
   maxRounds: number
