@@ -505,6 +505,7 @@ function SessionDetailsPage() {
                     isLoading={startSessionMutation.isPending}
                     isReady={canStartCheck?.canStart ?? false}
                     reasons={canStartCheck?.reasons}
+                    warnings={canStartCheck?.warnings}
                     readyToStart={{
                       playersReady: readiness?.allReady || false,
                       teamsFormed: teams.length > 0,
