@@ -108,7 +108,9 @@ describe('JoinCodeQR', () => {
       const QRCode = await import('qrcode')
       const { showToast } = await import('../lib/toast')
 
-      ;(QRCode.default.toCanvas as any).mockImplementation(
+      // Once-only, so this error impl doesn't leak into later tests that rely
+      // on the default (successful) toCanvas mock.
+      ;(QRCode.default.toCanvas as any).mockImplementationOnce(
         (
           _canvas: unknown,
           _url: string,
