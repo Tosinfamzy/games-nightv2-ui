@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { GameFormat } from '../../lib/api/types/night-plan'
 import {
   formatLabel,
   formatMinutes,
@@ -6,7 +7,6 @@ import {
   segmentMinutes,
   splitEvenly,
 } from './planning'
-import { GameFormat } from '../../lib/api/types/night-plan'
 
 describe('splitEvenly', () => {
   it('splits evenly when divisible', () => {
