@@ -23,6 +23,7 @@ import { TeamDisplay } from '../../components/TeamDisplay'
 import { EnhancedTeamManagement } from '../../components/EnhancedTeamManagement'
 import { SessionReadinessDashboard } from '../../components/SessionReadinessDashboard'
 import { EnhancedGamesTab } from '../../components/EnhancedGamesTab'
+import { SessionRunOfShow } from '../../components/night-builder/SessionRunOfShow'
 import { ManualTeamCreator } from '../../components/ManualTeamCreator'
 import SessionChat from '../../components/SessionChat'
 import { GuestList } from '../../components/GuestList'
@@ -691,13 +692,20 @@ function SessionDetailsPage() {
           )}
 
           {activeTab === 'games' && isHost && (
-            <EnhancedGamesTab
-              sessionId={id}
-              sessionGames={uiGames}
-              players={uiPlayers}
-              teams={uiTeams}
-              sessionStatus={session.status}
-            />
+            <div className="space-y-6">
+              <SessionRunOfShow
+                sessionId={id}
+                startAt={session.date ? new Date(session.date) : null}
+                canEdit={session.status === 'SCHEDULED'}
+              />
+              <EnhancedGamesTab
+                sessionId={id}
+                sessionGames={uiGames}
+                players={uiPlayers}
+                teams={uiTeams}
+                sessionStatus={session.status}
+              />
+            </div>
           )}
 
           {activeTab === 'teams' && (
@@ -1087,6 +1095,26 @@ function OverviewTab({
               </p>
             </div>
           </button>
+          {isHost && session.status === 'SCHEDULED' && (
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: '/sessions/$id/builder',
+                  params: { id: session.id },
+                })
+              }
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+            >
+              <div className="text-center">
+                <span className="text-2xl mb-2 block">🎲</span>
+                <h4 className="font-medium">Plan the Night</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  Games, rounds, teams & run-of-show
+                </p>
+              </div>
+            </button>
+          )}
           {isHost && (
             <button
               type="button"

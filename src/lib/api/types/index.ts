@@ -59,6 +59,10 @@ export interface Game {
   status: GameStatus
   currentRound: number
   maxRounds: number
+  /** Position in the night's run-of-show (ascending); set by the Night Builder. */
+  orderIndex: number
+  /** Library template this game was created from (for run-of-show metadata). */
+  gameLibraryId: string | null
   minPlayers: number
   maxPlayers: number
   startTime?: string

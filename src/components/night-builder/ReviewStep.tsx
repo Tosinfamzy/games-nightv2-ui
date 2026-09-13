@@ -1,10 +1,8 @@
-import {
-  formatLabel,
-  formatMinutes,
-  scoringLabel,
-  segmentMinutes,
-  splitEvenly,
-} from './planning'
+import { useState } from 'react'
+import { formatMinutes, splitEvenly } from './planning'
+import { lineupFromSelected } from './lineup'
+import { RunOfShow } from './RunOfShow'
+import { CheatSheet } from './CheatSheet'
 import type { LibraryById, SelectedGame } from './types'
 
 interface ReviewStepProps {
@@ -18,9 +16,8 @@ interface ReviewStepProps {
 }
 
 /**
- * Step 5 — the run-of-show summary. Games in order with rounds, timing and
- * scoring, the team split, and any advisories. Applying pushes it into the
- * session. (FE-PR4 replaces this with the polished run-of-show + cheat sheet.)
+ * Step 5 — the run-of-show summary with an optional caller cheat sheet. Applying
+ * pushes the plan into the session.
  */
 export function ReviewStep({
   selected,
@@ -31,18 +28,9 @@ export function ReviewStep({
   applying,
   onApply,
 }: ReviewStepProps) {
-  let cumulative = 0
-  const rows = selected.map((s) => {
-    const lib = libraryById.get(s.id)
-    const minutes = segmentMinutes(
-      lib?.estimatedDuration,
-      s.rounds,
-      lib?.recommendedRounds ?? 1,
-    )
-    const startOffset = cumulative
-    cumulative += minutes
-    return { selected: s, lib, minutes, startOffset }
-  })
+  const [showCheatSheet, setShowCheatSheet] = useState(false)
+  const items = lineupFromSelected(selected, libraryById)
+  const totalMinutes = items.reduce((sum, i) => sum + i.minutes, 0)
   const sizes = splitEvenly(playerCount, teamCount)
 
   return (
@@ -50,7 +38,7 @@ export function ReviewStep({
       <div>
         <h2 className="text-xl font-bold text-gray-900">Review the night</h2>
         <p className="mt-1 text-sm text-gray-600">
-          {selected.length} games · ~{formatMinutes(cumulative)} · {teamCount}{' '}
+          {items.length} games · ~{formatMinutes(totalMinutes)} · {teamCount}{' '}
           teams
         </p>
       </div>
@@ -63,32 +51,22 @@ export function ReviewStep({
         </ul>
       )}
 
-      <ol className="overflow-hidden rounded-xl border border-gray-200">
-        {rows.map(({ selected: s, lib, minutes, startOffset }, index) => {
-          if (!lib) return null
-          return (
-            <li
-              key={s.id}
-              className="flex items-start gap-3 border-b border-gray-100 bg-white p-3 last:border-b-0"
-            >
-              <span className="w-12 shrink-0 text-sm font-semibold tabular-nums text-blue-600">
-                +{formatMinutes(startOffset)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-gray-900">
-                  {index + 1}. {lib.name}
-                </div>
-                <div className="mt-0.5 text-xs text-gray-500">
-                  {formatLabel(lib.format)} · {s.rounds}{' '}
-                  {s.rounds === 1 ? 'round' : 'rounds'} · ~
-                  {formatMinutes(minutes)} ·{' '}
-                  {scoringLabel(lib.winnerBonusPoints)}
-                </div>
-              </div>
-            </li>
-          )
-        })}
-      </ol>
+      <RunOfShow items={items} />
+
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowCheatSheet((v) => !v)}
+          className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+        >
+          {showCheatSheet ? 'Hide' : 'Show'} caller cheat sheet
+        </button>
+        {showCheatSheet && (
+          <div className="mt-3">
+            <CheatSheet items={items} />
+          </div>
+        )}
+      </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-4">
         <p className="text-sm font-medium text-gray-700">Teams</p>
