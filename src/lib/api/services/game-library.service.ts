@@ -1,4 +1,5 @@
 import { fetchAPI } from '../client'
+import type { GameFormat } from '../types/night-plan'
 
 export interface GameLibraryItem {
   id: string
@@ -14,6 +15,12 @@ export interface GameLibraryItem {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  // Night Builder planning metadata (see backend game-library).
+  format: GameFormat
+  recommendedRounds: number
+  playersPerRound?: number | null
+  minTeams?: number | null
+  winnerBonusPoints?: number | null
 }
 
 // The game library is a shared, server-managed catalog. It is read-only over

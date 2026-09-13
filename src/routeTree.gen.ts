@@ -25,6 +25,7 @@ import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as GamesIdRouteImport } from './routes/games/$id'
 import { Route as SessionsIdTvRouteImport } from './routes/sessions/$id_.tv'
 import { Route as SessionsIdGameRouteImport } from './routes/sessions/$id_.game'
+import { Route as SessionsIdBuilderRouteImport } from './routes/sessions/$id_.builder'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -106,6 +107,11 @@ const SessionsIdGameRoute = SessionsIdGameRouteImport.update({
   path: '/$id/game',
   getParentRoute: () => SessionsRoute,
 } as any)
+const SessionsIdBuilderRoute = SessionsIdBuilderRouteImport.update({
+  id: '/$id_/builder',
+  path: '/$id/builder',
+  getParentRoute: () => SessionsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/sessions/new': typeof SessionsNewRoute
   '/games': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
+  '/sessions/$id/builder': typeof SessionsIdBuilderRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
   '/sessions/$id/tv': typeof SessionsIdTvRoute
 }
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/sessions/new': typeof SessionsNewRoute
   '/games': typeof GamesIndexRoute
   '/sessions': typeof SessionsIndexRoute
+  '/sessions/$id/builder': typeof SessionsIdBuilderRoute
   '/sessions/$id/game': typeof SessionsIdGameRoute
   '/sessions/$id/tv': typeof SessionsIdTvRoute
 }
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/sessions/new': typeof SessionsNewRoute
   '/games/': typeof GamesIndexRoute
   '/sessions/': typeof SessionsIndexRoute
+  '/sessions/$id_/builder': typeof SessionsIdBuilderRoute
   '/sessions/$id_/game': typeof SessionsIdGameRoute
   '/sessions/$id_/tv': typeof SessionsIdTvRoute
 }
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/sessions/new'
     | '/games'
     | '/sessions/'
+    | '/sessions/$id/builder'
     | '/sessions/$id/game'
     | '/sessions/$id/tv'
   fileRoutesByTo: FileRoutesByTo
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/sessions/new'
     | '/games'
     | '/sessions'
+    | '/sessions/$id/builder'
     | '/sessions/$id/game'
     | '/sessions/$id/tv'
   id:
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/sessions/new'
     | '/games/'
     | '/sessions/'
+    | '/sessions/$id_/builder'
     | '/sessions/$id_/game'
     | '/sessions/$id_/tv'
   fileRoutesById: FileRoutesById
@@ -345,6 +357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SessionsIdGameRouteImport
       parentRoute: typeof SessionsRoute
     }
+    '/sessions/$id_/builder': {
+      id: '/sessions/$id_/builder'
+      path: '/$id/builder'
+      fullPath: '/sessions/$id/builder'
+      preLoaderRoute: typeof SessionsIdBuilderRouteImport
+      parentRoute: typeof SessionsRoute
+    }
   }
 }
 
@@ -352,6 +371,7 @@ interface SessionsRouteChildren {
   SessionsIdRoute: typeof SessionsIdRoute
   SessionsNewRoute: typeof SessionsNewRoute
   SessionsIndexRoute: typeof SessionsIndexRoute
+  SessionsIdBuilderRoute: typeof SessionsIdBuilderRoute
   SessionsIdGameRoute: typeof SessionsIdGameRoute
   SessionsIdTvRoute: typeof SessionsIdTvRoute
 }
@@ -360,6 +380,7 @@ const SessionsRouteChildren: SessionsRouteChildren = {
   SessionsIdRoute: SessionsIdRoute,
   SessionsNewRoute: SessionsNewRoute,
   SessionsIndexRoute: SessionsIndexRoute,
+  SessionsIdBuilderRoute: SessionsIdBuilderRoute,
   SessionsIdGameRoute: SessionsIdGameRoute,
   SessionsIdTvRoute: SessionsIdTvRoute,
 }
